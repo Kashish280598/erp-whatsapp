@@ -55,20 +55,7 @@ const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
                             )}
                         </Field>
                     </div>
-                    <div>
-                        <Field name="description">
-                            {({ field }: any) => (
-                                <Input
-                                    {...field}
-                                    id="description"
-                                    type="text"
-                                    label="Description"
-                                    placeholder="Enter category description"
-                                    error={touched.description && errors.description}
-                                />
-                            )}
-                        </Field>
-                    </div>
+
                     <div className="flex justify-center gap-4">
                         <Button
                             type="button"

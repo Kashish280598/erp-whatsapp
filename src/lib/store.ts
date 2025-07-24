@@ -2,6 +2,7 @@ import { usersApi } from '@/lib/api/users-api';
 import { configureStore } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
+import { categoriesApi } from './api/categories-api';
 import appReducer from './features/app/appSlice';
 import authReducer from './features/auth/authSlice';
 import breadcrumbReducer from './features/breadcrumb/breadcrumbSlice';
@@ -16,11 +17,15 @@ export const store = configureStore({
     settings: settingsReducer,
     discovery: discoveryReducer,
     [usersApi.reducerPath]: usersApi.reducer,
+    [categoriesApi.reducerPath]: categoriesApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+    }).concat([
+      usersApi.middleware,
+      categoriesApi.middleware,
+    ]),
   devTools: true,
 });
 

@@ -2,7 +2,7 @@ import axios, { type AxiosRequestConfig } from 'axios'
 
 const axiosBaseQuery = async (config: AxiosRequestConfig) => {
 	try {
-		const response = await axios(config)
+		const response = await axios({ ...config, baseURL: 'https://whatsapp-erp.vercel.app' })
 		if (axios.isAxiosError(response)) {
 			throw new Error(response?.response?.data?.message)
 		}
