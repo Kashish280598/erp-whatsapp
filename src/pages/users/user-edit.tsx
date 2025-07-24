@@ -2,7 +2,7 @@ import { UserForm } from "@/components/users"
 
 const UserEdit = () => {
     return (
-        <div><UserForm /></div>
+        <div className='pb-5 w-full'><UserForm /></div>
     )
 }
 

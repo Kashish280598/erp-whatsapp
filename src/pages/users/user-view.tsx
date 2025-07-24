@@ -1,7 +1,7 @@
 
 const UserView = () => {
     return (
-        <div>UserView</div>
+        <div className='pb-5 w-full'>UserView</div>
     )
 }
 

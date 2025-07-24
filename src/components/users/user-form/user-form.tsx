@@ -41,7 +41,7 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
             onSubmit={onSubmit}
             enableReinitialize>
             {({ errors, touched, isSubmitting, handleSubmit }) => (
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 max-w-[500px] mx-auto">
                     <div>
                         <Field name="name">
                             {({ field }: any) => (
@@ -50,7 +50,7 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
                                     id="name"
                                     type="text"
                                     label="Name"
-                                    placeholder="Enter your name"
+                                    placeholder="Enter name"
                                     error={touched.name && errors.name}
                                 />
                             )}
@@ -64,7 +64,7 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
                                     id="email"
                                     type="email"
                                     label="Email"
-                                    placeholder="Enter your email address"
+                                    placeholder="Enter email address"
                                     error={touched.email && errors.email}
                                 />
                             )}
@@ -78,20 +78,28 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
                                     id="role"
                                     type="text"
                                     label="Role"
-                                    placeholder="Enter your role"
+                                    placeholder="Enter role"
                                     error={touched.role && errors.role}
                                 />
                             )}
                         </Field>
                     </div>
-                    <div>
+                    <div className="flex justify-center gap-4">
+                        <Button
+                            type="button"
+                            onClick={() => navigate('/users')}
+                            variant="outline"
+                        >
+                            Cancel
+                        </Button>
                         <Button
                             type="submit"
                             onClick={() => handleSubmit()}
                             disabled={isSubmitting}
-                            className="w-full disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+
+
                         >
-                            {isSubmitting ? 'Signing in...' : 'Continue'}
+                            {isSubmitting ? 'Saving...' : 'Save'}
                         </Button>
                     </div>
                 </div>
