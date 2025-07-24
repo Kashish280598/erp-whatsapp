@@ -42,6 +42,13 @@ export const authApi = createApi({
 			}),
 			providesTags: ['Auth'],
 		}),
+		forgotPassword: builder.mutation({
+			query: (payload) => ({
+				url: API_ENDPOINTS.auth.forgotPasswordRequest,
+				method: 'POST',
+				data: payload,
+			}),
+		}),
 	}),
 })
 
@@ -50,6 +57,7 @@ export const {
 	useLogoutMutation,
 	useRegisterMutation,
 	useLazyGetCurrentUserQuery,
+	useForgotPasswordMutation,
 } = authApi 
 
 // Utility to store token in localStorage

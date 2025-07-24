@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ const LoginSchema = Yup.object().shape({
 
 const LoginForm = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { isLoading } = useLoading(API_ENDPOINTS.auth.login);
   const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
@@ -39,7 +40,7 @@ const LoginForm = () => {
       if (result?.data?.token) {
         storeAuthToken(result.data.token);
         dispatch(setCredentials({ user: null, isAuthenticated: true }));
-        // Optionally, fetch user profile here
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast.error(error?.data?.message || 'Login failed');

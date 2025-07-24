@@ -46,7 +46,7 @@ export const API_ENDPOINTS = {
     login: '/api/auth/login',
     validateInvitationToken: '/api/invitations/validate?token=',
     register: '/api/auth/signup',
-    forgotPasswordRequest: '/api/password-reset/request',
+    forgotPasswordRequest: '/api/auth/request-password-reset',
     validateResetPasswordToken: '/api/password-reset/validate-token',
     resetPassword: '/api/password-reset/confirm',
     logout: '/api/auth/logout',
