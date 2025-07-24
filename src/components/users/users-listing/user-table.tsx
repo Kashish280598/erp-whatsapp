@@ -3,11 +3,15 @@ import { DataTableColumnHeader } from "@/components/custom/table/data-table/data
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useDeleteUserMutation } from "@/lib/api/users-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
-import { IconDotsVertical } from "@tabler/icons-react";
+import { IconEye, IconPencil, IconTrash } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQueryParams) => void, isLoading: boolean }) => {
+    const navigate = useNavigate()
+    const [deleteUser] = useDeleteUserMutation()
 
     const tableToolbar: TableToolbar = {
         enableSearch: true,
@@ -60,6 +64,10 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
             status: 'active',
         },
     ], [])
+
+    const onDelete = (id: any) => {
+        deleteUser(id).unwrap()
+    }
 
     return (
         <DataTable
@@ -138,10 +146,18 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
                     id: 'actions',
                     header: 'Actions',
                     accessorKey: 'actions',
-                    cell: () => (
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <IconDotsVertical className="h-4 w-4 text-gray-500" />
-                        </Button>
+                    cell: ({ row }) => (
+                        <div className="flex gap-2">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}`)}>
+                                <IconEye className="h-4 w-4 text-gray-500" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}/edit`)}>
+                                <IconPencil className="h-4 w-4 text-gray-500" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
+                            </Button>
+                        </div>
                     )
                 }
             ]}

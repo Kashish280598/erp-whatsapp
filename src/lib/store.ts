@@ -1,4 +1,4 @@
-import { usersApi } from '@/components/users/users-api';
+import { usersApi } from '@/lib/api/users-api';
 import { configureStore } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
