@@ -9,9 +9,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+    const isLoading = false;
     // const { isLoading } = useLoading(API_ENDPOINTS.users.profile);
-    // const { isLoading } = useLoading(API_ENDPOINTS.users.profile);
-  const isLoading = false;
     const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
     if (isLoading) {
