@@ -47,7 +47,7 @@ export function DataTableColumnHeader<TData, TValue>({
         onClick={handleToggleSorting}
         variant="ghost"
         size="sm"
-        className="cursor-pointer -ml-3 h-8 data-[state=open]:bg-accent text-neutral-500 text-[12px] leading-4 font-inter font-[600] flex justify-between flex-1 !pr-0 hover:bg-transparent !ring-0"
+        className="cursor-pointer -ml-3 h-8 data-[state=open]:bg-accent text-neutral-500 dark:text-neutral-200 text-[12px] leading-4 font-inter font-[600] flex justify-between flex-1 !pr-0 hover:bg-transparent !ring-0"
       >
         <span>{title}</span>
         <div className="cursor-pointer flex items-center flex-col relative h-2.5 w-2.5 mr-0.5">

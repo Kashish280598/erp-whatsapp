@@ -70,6 +70,7 @@ interface NavLinkProps extends SidebarLink {
 function NavLinkIcon(props: NavLinkProps) {
   const { title, icon, href, sidebarIdentifier } = props;
   const { checkActiveNav } = useCheckActiveNav();
+
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
@@ -90,10 +91,13 @@ function NavLinkIcon(props: NavLinkProps) {
           <span className={`menu-title ${checkActiveNav(href) && 'active-menu-title'}`}>{title}</span>
         </Link>
       </HoverCardTrigger>
-      {sidebarIdentifier && <HoverCardContent portalClassName="layout-sidebar-container" className="collapsible-sidebar w-[250px] z-49">
-        <div className="font-[600] text-[16px] leading-[24px] text-neutral mb-5">{title}</div>
-        <DynamicSidebar {...props} />
-      </HoverCardContent>}
+      {/* Only show DynamicSidebar for non-settings links */}
+      {sidebarIdentifier && sidebarIdentifier !== 'settings' && (
+        <HoverCardContent portalClassName="layout-sidebar-container" className="collapsible-sidebar w-[250px] z-49">
+          <div className="font-[600] text-[16px] leading-[24px] text-neutral mb-5">{title}</div>
+          <DynamicSidebar {...props} />
+        </HoverCardContent>
+      )}
     </HoverCard>
   );
 }

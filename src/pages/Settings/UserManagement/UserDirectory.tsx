@@ -42,16 +42,6 @@ export default function UserDirectory() {
                     { label: 'In-Active', value: false },
                 ],
             },
-            {
-                field: 'authMethod',
-                title: 'Auth Type',
-                options: [
-                    { label: 'Google', value: 'Google' },
-                    { label: 'MicrosoftEntraID', value: 'MicrosoftEntraID' },
-                    { label: 'Okta', value: 'Okta' },
-                    { label: 'Password', value: 'Password' },
-                ],
-            },
         ],
     };
 

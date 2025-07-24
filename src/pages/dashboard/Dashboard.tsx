@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
 import { DialogType } from '@/components/custom/Dialog';
+
 const Dialog = React.lazy(() => import('@/components/custom/Dialog').then(m => ({ default: m.Dialog })));
 const SideDrawer = React.lazy(() => import('@/components/custom/SideDrawer').then(m => ({ default: m.SideDrawer })));
 const IntegrationCard = React.lazy(() => import('@/components/custom/IntegrationCard').then(m => ({ default: m.IntegrationCard })));
