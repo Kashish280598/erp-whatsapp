@@ -3,7 +3,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { API_ENDPOINTS } from '@/lib/api/config'
 import axiosBaseQuery from '@/lib/axios-base-query'
 
-const API_URL = API_ENDPOINTS.users
+const API_URL = API_ENDPOINTS.users.all
 
 export const usersApi = createApi({
 	reducerPath: 'Users',

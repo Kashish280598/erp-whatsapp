@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://devapi.ashva.io',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://whatsapp-erp.vercel.app/api/',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
@@ -55,5 +55,16 @@ export const API_ENDPOINTS = {
     changePassword: '/api/auth/change-password',
     toggleDiscoveryAllSet: '/api/users/show-guide'
   },
-  users: '/api/users',
+  users: {
+    all: '/api/users',
+    profile: '/api/users/me',
+    allInvitations: '/api/invitations',
+    editUserById: '/api/users',
+    updateInvitationById: '/api/invitations',
+    inviteUsers: '/api/invitations/bulk',
+    resendInvitation:'/api/invitations/resend',
+    toggleActiveUser:'/api/users/toggle-active',
+    deleteUser:'/api/users',
+    resetPasswordForUser: '/api/password-reset/request-by-id',
+  },
 } as const; 
