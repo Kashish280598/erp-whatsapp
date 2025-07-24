@@ -103,7 +103,7 @@ export const CircularProgress = ({
                 style={{
                     fontSize: `${fontSize}px`,
                     fontWeight: 400,
-                    color: 'black'
+                    color: typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : 'black'
                 }}
             >
                 {Math.round(animatedValue)}%

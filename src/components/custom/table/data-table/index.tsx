@@ -196,7 +196,7 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow
                 key={headerGroup.id}
-                className={`${loading ? "opacity-40" : "opacity-100"} transition-all bg-white hover:bg-white`}
+                className={`${loading ? "opacity-40" : "opacity-100"} transition-all bg-white dark:bg-neutral-900 hover:bg-white dark:hover:bg-neutral-800`}
               >
                 {headerGroup.headers.map((header) => {
                   return (
@@ -232,10 +232,10 @@ export function DataTable<TData, TValue>({
                     key={`${row.id}-${i}`}
                     onClick={() => onRowClick?.(row)}
                     data-state={row.getIsSelected() && "selected"}
-                    className={`${loading ? "opacity-40" : "opacity-100"} transition-all ${i % 2 !== 0 ? "bg-white" : "bg-[#F9FAFF]"} border-0 hover:bg-[#d7d8dd78] hover:cursor-pointer ${onRowClick ? "cursor-pointer" : ""}`}
+                    className={`${loading ? "opacity-40" : "opacity-100"} transition-all ${i % 2 !== 0 ? "bg-white" : "bg-[#F9FAFF]"} border-0 hover:bg-primary/10 dark:hover:bg-primary/20 hover:cursor-pointer ${onRowClick ? "cursor-pointer" : ""}`}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
+                      <TableCell key={cell.id} className="dark:text-neutral-100">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

@@ -25,7 +25,7 @@ export default function ManageAccount() {
     return (
         <div className="h-full pb-10">
             {/* Hero Section */}
-            <div className="relative gap-5 bg-neutral-300 bg-opacity-50 rounded-[12px] h-21 mb-15 border-b-1 border-primary-100">
+            <div className="relative gap-5 bg-neutral-300 bg-opacity-50 rounded-[12px] h-21 mb-15 border-b-1 border-primary-100 dark:bg-neutral-800 dark:border-primary-700">
                 <Avatar className="absolute left-7 top-7 h-25 w-25 rounded-[8px] border-2 border-primary-100 p-0 bg-neutral-300 overflow-hidden">
                     <AvatarFallback className="rounded-[8px] text-primary text-[36px] font-[400] leading-[52px] bg-neutral-300">
                         {userInitials || 'U'}
@@ -38,10 +38,10 @@ export default function ManageAccount() {
 
             <div className="mt-5 px-7">
                 <div className="flex flex-col gap-2 mb-4">
-                    <h1 className="text-[24px] font-[600] leading-7.5 text-neutral font-inter">
+                    <h1 className="text-[24px] font-[600] leading-7.5 text-neutral dark:text-neutral-100 font-inter">
                         {user?.name || 'User Name'}
                     </h1>
-                    <Badge variant="secondary" className="bg-primary-100 text-primary text-[16px] leading-6 font-[400] px-4 py-1 rounded-[8px] m-0">
+                    <Badge variant="secondary" className="bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 px-4 py-1 rounded-[8px] m-0 border-none shadow-none">
                         {user?.role ? USERS_ENUMS[user?.role] : 'User Role'}
                     </Badge>
                 </div>
@@ -71,14 +71,14 @@ export default function ManageAccount() {
                         <div className="col-span-2 flex items-center">
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">First Name</label>
                         </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral font-inter">{firstName || '-'}</div>
+                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{firstName || '-'}</div>
                     </div>
 
                     <div className="grid grid-cols-6 gap-2">
                         <div className="col-span-2 flex items-center">
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Last Name</label>
                         </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral font-inter">{lastName || '-'}</div>
+                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{lastName || '-'}</div>
                     </div>
 
                     {user?.authMethod === AUTH_METHODS.Password && <div className="grid grid-cols-6 gap-2">
@@ -93,15 +93,15 @@ export default function ManageAccount() {
                         <div className="col-span-2 flex items-center">
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Email</label>
                         </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral font-inter">{user?.email || '-'}</div>
+                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{user?.email || '-'}</div>
                     </div>
 
                     <div className="grid grid-cols-6 gap-2">
                         <div className="col-span-2 flex items-center">
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Role</label>
                         </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral font-inter">
-                            <Badge variant="secondary" className="bg-[#F4F4F6] text-[13px] leading-5 font-[400] px-2 rounded-[8px] text-neutral">
+                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">
+                            <Badge variant="secondary" className="bg-[#F4F4F6] text-[13px] leading-5 font-[400] px-2 rounded-[8px] text-neutral dark:bg-neutral-900 dark:text-neutral-200">
                                 {user?.role ? USERS_ENUMS[user?.role] : 'User Role'}
                             </Badge></div>
                     </div>
@@ -119,14 +119,14 @@ export default function ManageAccount() {
                         <div className="col-span-2 flex items-center">
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Last Activity</label>
                         </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral font-inter">{user?.lastActivity ? moment(user.lastActivity).format('hh:mm A DD/MM/YYYY') : '-'}</div>
+                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{user?.lastActivity ? moment(user.lastActivity).format('hh:mm A DD/MM/YYYY') : '-'}</div>
                     </div>
 
                     <div className="grid grid-cols-6 gap-2">
                         <div className="col-span-2 flex items-center">
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Created On</label>
                         </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral font-inter">{user?.createdAt ? moment(user.createdAt).format('hh:mm A DD/MM/YYYY') : '-'}</div>
+                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{user?.createdAt ? moment(user.createdAt).format('hh:mm A DD/MM/YYYY') : '-'}</div>
                     </div>
                 </div>
             </div>
