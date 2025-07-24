@@ -1,17 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import useDebounce from "@/hooks/use-debounce";
-import { clearTableState, getTableState, setTableState } from "@/lib/table-storage";
-import { cn } from "@/lib/utils";
-import type { TableQueryParams, TableToolbar } from "@/types/table.types";
-import { IconLoader } from "@tabler/icons-react";
+import * as React from "react";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -28,9 +15,22 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import * as React from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { DataTablePagination } from "./data-table-pagination";
+import type { TableQueryParams, TableToolbar } from "@/types/table.types";
 import { DataTableToolbar } from "./data-table-toolbar";
+import { Skeleton } from "@/components/ui/skeleton";
+import useDebounce from "@/hooks/use-debounce";
+import { IconLoader } from "@tabler/icons-react";
+import { clearTableState, getTableState, setTableState } from "@/lib/table-storage";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
