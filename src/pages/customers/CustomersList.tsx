@@ -6,18 +6,31 @@ import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/custom/table/data-table";
 import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
 
-function getInitials(name) {
+interface POC {
+  name: string;
+  phone: string;
+  designation?: string;
+}
+interface Customer {
+  id: string;
+  companyName: string;
+  address: string;
+  gst: string;
+  pocs: POC[];
+}
+
+function getInitials(name: string) {
   return name
     .split(" ")
-    .map((n) => n[0])
+    .map((n: string) => n[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
 }
 
 const CustomersList = () => {
-  const [customers, setCustomers] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [columnFilters, setColumnFilters] = useState<{ id: string; value: string }[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +38,7 @@ const CustomersList = () => {
     if (localCustomers) {
       setCustomers(JSON.parse(localCustomers));
     } else {
-      setCustomers(customersData);
+      setCustomers(customersData as Customer[]);
     }
   }, []);
 
@@ -33,41 +46,41 @@ const CustomersList = () => {
     {
       id: "companyName",
       accessorKey: "companyName",
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Company Name</span>} className="!py-2 !px-2" />,
-      cell: ({ row }) => (
+      header: "Company Name",
+      cell: ({ row }: { row: any }) => (
         <button
           className="font-semibold text-blue-700 text-[14px] hover:text-blue-900 transition-colors focus:outline-none"
-          style={{ background: "none", border: "none", padding: 0 }}
+          style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
+          onClick={() => navigate(`/customers/chats/${row.original.id}`)}
         >
           {row.original.companyName}
         </button>
       ),
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
-      filterFn: "includesString",
     },
     {
       id: "address",
       accessorKey: "address",
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Address</span>} className="!py-2 !px-2" />,
-      cell: ({ row }) => <span className="text-[13px]">{row.original.address}</span>,
+      header: "Address",
+      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.address}</span>,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
     {
       id: "gst",
       accessorKey: "gst",
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>GST / Business ID</span>} className="!py-2 !px-2" />,
-      cell: ({ row }) => <span className="text-[13px]">{row.original.gst}</span>,
+      header: "GST / Business ID",
+      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.gst}</span>,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
     {
       id: "pocs",
-      header: ({ column }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>POCs</span>} className="!py-2 !px-2" />,
-      cell: ({ row }) => {
-        const pocs = row.original.pocs || [];
-        const initials = pocs.slice(0, 2).map((poc, idx) => (
+      header: "POCs",
+      cell: ({ row }: { row: any }) => {
+        const pocs: POC[] = row.original.pocs || [];
+        const initials = pocs.slice(0, 2).map((poc: POC, idx: number) => (
           <span
             key={poc.name}
             className="inline-flex items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold text-xs w-7 h-7 mr-1 border border-blue-200"
@@ -93,8 +106,9 @@ const CustomersList = () => {
     },
     {
       id: "actions",
-      header: <span style={{ fontSize: 13 }}>Actions</span>,
-      cell: ({ row }) => (
+      accessorKey: "actions", // Fix: add accessorKey for display-only column
+      header: "Actions",
+      cell: ({ row }: { row: any }) => (
         <div className="flex gap-1">
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/company/${encodeURIComponent(row.original.companyName)}`)}>
             <Info size={16} />
@@ -110,8 +124,8 @@ const CustomersList = () => {
     enableSearch: true,
     searchPlaceholder: "Search by company name...",
     enableFilter: false,
-    searchTerm: columnFilters.find(f => f.id === "companyName")?.value || "",
-    setSearchTerm: (val) => setColumnFilters([{ id: "companyName", value: val }]),
+    searchTerm: columnFilters.find((f) => f.id === "companyName")?.value || "",
+    setSearchTerm: (val: string) => setColumnFilters([{ id: "companyName", value: val }]),
   };
 
   return (
@@ -138,8 +152,6 @@ const CustomersList = () => {
         className="!text-[13px]"
         headerClassName="!py-2 !px-2"
         tableMainContainerClassName="!rounded-lg"
-        columnFilters={columnFilters}
-        setColumnFilters={setColumnFilters}
       />
     </div>
   );

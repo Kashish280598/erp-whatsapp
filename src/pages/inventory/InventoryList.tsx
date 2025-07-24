@@ -3,9 +3,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import productsData from "./dummy-products.json";
 import { Button } from "../../components/ui/button";
 import { Plus, Edit, Info, TrendingDown } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/custom/table/data-table";
-import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
 import "./InventoryList.css";
 
@@ -40,12 +38,10 @@ const InventoryList = () => {
   const [columnFilters, setColumnFilters] = useState<any[]>([]);
   const [showAddEditModal, setShowAddEditModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [detailProduct, setDetailProduct] = useState<Product | null>(null);
   const [form, setForm] = useState<Product>(initialForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isEdit, setIsEdit] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const localProducts = localStorage.getItem("erp_products");
@@ -67,12 +63,10 @@ const InventoryList = () => {
     setForm(product);
     setFormErrors({});
     setIsEdit(true);
-    setEditProduct(product);
     setShowAddEditModal(true);
   };
   const closeAddEditModal = () => {
     setShowAddEditModal(false);
-    setEditProduct(null);
   };
   // Details Modal logic
   const openDetailModal = (product: Product) => {
@@ -115,7 +109,6 @@ const InventoryList = () => {
     setProducts(updatedProducts);
     localStorage.setItem("erp_products", JSON.stringify(updatedProducts));
     setShowAddEditModal(false);
-    setEditProduct(null);
   };
 
   const isLowStock = (product: Product) => getAvailableStock(product) <= product.lowStockThreshold;
@@ -124,16 +117,15 @@ const InventoryList = () => {
     {
       id: "name",
       accessorKey: "name",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Product</span>} className="!py-2 !px-2" />) as any,
+      header: "Product",
       cell: (({ row }: { row: any }) => <span className="font-semibold text-gray-900 text-[14px]">{row.original.name}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
-      filterFn: "includesString",
     },
     {
       id: "category",
       accessorKey: "category",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Category</span>} className="!py-2 !px-2" />) as any,
+      header: "Category",
       cell: (({ row }: { row: any }) => <span className="text-[13px]">{row.original.category}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
@@ -141,7 +133,7 @@ const InventoryList = () => {
     {
       id: "unitPrice",
       accessorKey: "unitPrice",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Unit Price</span>} className="!py-2 !px-2" />) as any,
+      header: "Unit Price",
       cell: (({ row }: { row: any }) => <span className="text-[13px]">₹{row.original.unitPrice}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
@@ -149,7 +141,7 @@ const InventoryList = () => {
     {
       id: "costPrice",
       accessorKey: "costPrice",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Cost Price</span>} className="!py-2 !px-2" />) as any,
+      header: "Cost Price",
       cell: (({ row }: { row: any }) => <span className="text-[13px]">₹{row.original.costPrice}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
@@ -157,7 +149,7 @@ const InventoryList = () => {
     {
       id: "currentStock",
       accessorKey: "currentStock",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Current</span>} className="!py-2 !px-2" />) as any,
+      header: "Current",
       cell: (({ row }: { row: any }) => <span className="text-[13px]">{row.original.currentStock}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
@@ -165,14 +157,14 @@ const InventoryList = () => {
     {
       id: "reservedStock",
       accessorKey: "reservedStock",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Reserved</span>} className="!py-2 !px-2" />) as any,
+      header: "Reserved",
       cell: (({ row }: { row: any }) => <span className="text-[13px]">{row.original.reservedStock}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
     {
       id: "availableStock",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Available</span>} className="!py-2 !px-2" />) as any,
+      header: "Available",
       cell: (({ row }: { row: any }) => {
         const available = getAvailableStock(row.original);
         return (
@@ -187,7 +179,7 @@ const InventoryList = () => {
     {
       id: "lowStockThreshold",
       accessorKey: "lowStockThreshold",
-      header: (({ column }: { column: any }) => <DataTableColumnHeader column={column} title={<span style={{ fontSize: 14 }}>Threshold</span>} className="!py-2 !px-2" />) as any,
+      header: "Threshold",
       cell: (({ row }: { row: any }) => (
         <span className="flex items-center gap-1 text-[13px]">
           {row.original.lowStockThreshold}
@@ -199,8 +191,9 @@ const InventoryList = () => {
     },
     {
       id: "actions",
-      header: (<span style={{ fontSize: 13 }}>Actions</span>) as any,
-      cell: (({ row }: { row: any }) => (
+      accessorKey: "actions", // Fix: add accessorKey for display-only column
+      header: "Actions",
+      cell: ({ row }: { row: any }) => (
         <div className="flex gap-1">
           <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditModal(row.original)}>
             <Edit size={16} />
@@ -209,7 +202,7 @@ const InventoryList = () => {
             <Info size={16} />
           </Button>
         </div>
-      )) as any,
+      ),
       enableSorting: false,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -261,8 +254,6 @@ const InventoryList = () => {
         className="!text-[13px]"
         headerClassName="!py-2 !px-2"
         tableMainContainerClassName="!rounded-lg"
-        columnFilters={columnFilters}
-        setColumnFilters={setColumnFilters}
       />
 
       {/* Add/Edit Product Modal */}

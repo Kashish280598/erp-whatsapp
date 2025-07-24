@@ -1,16 +1,35 @@
 import React, { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
 
-const StockAdjustModal = ({ product, onClose, onAdjust }) => {
-  const [qty, setQty] = useState(0);
-  const [reason, setReason] = useState("");
-  const [type, setType] = useState("damage");
-  const [error, setError] = useState("");
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  unitPrice: number;
+  costPrice: number;
+  currentStock: number;
+  reservedStock: number;
+  lowStockThreshold: number;
+  history: any[];
+}
 
-  const handleAdjust = (e) => {
+interface StockAdjustModalProps {
+  product: Product;
+  onClose: () => void;
+  onAdjust: (product: Product) => void;
+}
+
+const StockAdjustModal = ({ product, onClose, onAdjust }: StockAdjustModalProps) => {
+  const [qty, setQty] = useState<number>(0);
+  const [reason, setReason] = useState<string>("");
+  const [type, setType] = useState<string>("damage");
+  const [error, setError] = useState<string>("");
+
+  const handleAdjust = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!qty || qty <= 0) {
       setError("Enter a valid quantity");
@@ -53,7 +72,7 @@ const StockAdjustModal = ({ product, onClose, onAdjust }) => {
             name="qty"
             type="number"
             value={qty}
-            onChange={(e) => setQty(Number(e.target.value))}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setQty(Number(e.target.value))}
           />
         </div>
         <div>
@@ -61,7 +80,7 @@ const StockAdjustModal = ({ product, onClose, onAdjust }) => {
           <select
             name="type"
             value={type}
-            onChange={(e) => setType(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setType(e.target.value)}
             className="shadcn-select"
           >
             <option value="damage">Damage</option>
@@ -74,7 +93,7 @@ const StockAdjustModal = ({ product, onClose, onAdjust }) => {
           <Input
             name="reason"
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e: ChangeEvent<HTMLInputElement>) => setReason(e.target.value)}
           />
         </div>
       </div>

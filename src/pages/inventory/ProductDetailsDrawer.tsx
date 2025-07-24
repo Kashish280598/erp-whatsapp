@@ -4,7 +4,25 @@ import { Card } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Separator } from "../../components/ui/separator";
 
-const ProductDetailsDrawer = ({ open, product, onClose }) => {
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  unitPrice: number;
+  costPrice: number;
+  currentStock: number;
+  reservedStock: number;
+  lowStockThreshold: number;
+  history: { date: string; type: string; qty: number; cost?: number; reason?: string }[];
+}
+
+interface ProductDetailsDrawerProps {
+  open: boolean;
+  product: Product | null;
+  onClose: () => void;
+}
+
+const ProductDetailsDrawer = ({ open, product, onClose }: ProductDetailsDrawerProps) => {
   if (!product) return null;
   return (
     <Drawer open={open} onOpenChange={onClose}>
@@ -35,7 +53,7 @@ const ProductDetailsDrawer = ({ open, product, onClose }) => {
                 </tr>
               </thead>
               <tbody>
-                {product.history?.map((h, idx) => (
+                {product.history?.map((h: any, idx: number) => (
                   <tr key={idx}>
                     <td>{h.date}</td>
                     <td>{h.type}</td>

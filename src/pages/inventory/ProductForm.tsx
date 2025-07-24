@@ -1,12 +1,23 @@
 import React, { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
 import { useNavigate } from "react-router-dom";
 
-const initialState = {
-  id: "",
+interface Product {
+  name: string;
+  category: string;
+  unitPrice: number;
+  costPrice: number;
+  currentStock: number;
+  reservedStock: number;
+  lowStockThreshold: number;
+  history: any[];
+}
+
+const initialState: Product = {
   name: "",
   category: "",
   unitPrice: 0,
@@ -18,13 +29,12 @@ const initialState = {
 };
 
 const ProductForm = () => {
-  const [form, setForm] = useState(initialState);
-  const [errors, setErrors] = useState({});
+  const [form, setForm] = useState<Product>(initialState);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
 
   const validate = () => {
-    const errs = {};
-    if (!form.id) errs.id = "Product ID required";
+    const errs: Record<string, string> = {};
     if (!form.name) errs.name = "Name required";
     if (!form.category) errs.category = "Category required";
     if (form.unitPrice <= 0) errs.unitPrice = "Unit Price must be positive";
@@ -36,12 +46,12 @@ const ProductForm = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: name.includes("Price") || name.includes("Stock") || name === "lowStockThreshold" ? Number(value) : value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validate()) return;
     // Save to localStorage (simulate backend)
@@ -57,12 +67,7 @@ const ProductForm = () => {
         <h2 className="text-2xl font-bold mb-2 text-center text-blue-900">Add New Product</h2>
         <p className="text-gray-500 text-center mb-6">Fill in the details to add a new product to your inventory.</p>
         <Separator className="mb-4" />
-        <div className="form-grid grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <Label htmlFor="id">Product ID</Label>
-            <Input name="id" value={form.id} onChange={handleChange} placeholder="e.g. P016" />
-            {errors.id && <span className="error-text">{errors.id}</span>}
-          </div>
+        <div className="form-grid flex flex-col gap-4 mb-4">
           <div>
             <Label htmlFor="name">Name</Label>
             <Input name="name" value={form.name} onChange={handleChange} placeholder="Product Name" />
