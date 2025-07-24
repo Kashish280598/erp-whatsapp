@@ -346,29 +346,29 @@ export const validateResetPasswordToken = createAsyncThunk(API_ENDPOINTS.auth.va
   }
 );
 
-export const getProfile = createAsyncThunk(API_ENDPOINTS.users.profile,
-  async (_, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: true }));
-      const res = await userService.getProfile({ credentials: 'include' });
-      if (res.status === "success") {
-        dispatch(setCredentials({ user: res.data, isAuthenticated: true }));
-        dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: false }));
-      } else {
-        throw new Error(res.statusText);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: any) {
-      dispatch(setCredentials({ user: null, isAuthenticated: false }));
-      if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
-        localStorage.removeItem('isLoggedIn');
-      } else {
-        dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: false }));
-        toast.error(err?.data?.message || err?.message);
-      }
-    }
-  }
-);
+// export const getProfile = createAsyncThunk(API_ENDPOINTS.users.profile,
+//   async (_, { dispatch }) => {
+//     try {
+//       dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: true }));
+//       const res = await userService.getProfile({ credentials: 'include' });
+//       if (res.status === "success") {
+//         dispatch(setCredentials({ user: res.data, isAuthenticated: true }));
+//         dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: false }));
+//       } else {
+//         throw new Error(res.statusText);
+//       }
+//       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     } catch (err: any) {
+//       dispatch(setCredentials({ user: null, isAuthenticated: false }));
+//       if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
+//         localStorage.removeItem('isLoggedIn');
+//       } else {
+//         dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: false }));
+//         toast.error(err?.data?.message || err?.message);
+//       }
+//     }
+//   }
+// );
 
 export const verifyPassword = createAsyncThunk(API_ENDPOINTS.auth.verifyPassword,
   async (payload: VerifyPasswordPaylod, { dispatch }) => {

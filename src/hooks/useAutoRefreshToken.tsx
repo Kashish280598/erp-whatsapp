@@ -1,6 +1,6 @@
 import { useAppDispatch } from '@/lib/store';
 import { useEffect, useRef } from 'react';
-import { getProfile, logout, refreshToken as refreshTokenAction } from '@/lib/features/auth/authSlice';
+import { logout, refreshToken as refreshTokenAction } from '@/lib/features/auth/authSlice';
 import { isLoggedIn } from '@/lib/utils';
 
 export function useAutoRefreshToken() {
@@ -8,12 +8,12 @@ export function useAutoRefreshToken() {
     const logoutChannel = new BroadcastChannel('erp-auth-broadcast');
     const dispatch = useAppDispatch();
 
-    const fetchProfile = async () => {
-        const loggedIn = isLoggedIn();
-        if (loggedIn === 'true') {
-            dispatch(getProfile());
-        }
-    };
+    // const fetchProfile = async () => {
+    //     const loggedIn = isLoggedIn();
+    //     if (loggedIn === 'true') {
+    //         dispatch(getProfile());
+    //     }
+    // };
 
     const refreshToken = async () => {
         const loggedIn = isLoggedIn();
@@ -29,7 +29,7 @@ export function useAutoRefreshToken() {
     };
 
     useEffect(() => {
-        fetchProfile();
+        // fetchProfile();
         startRefreshInterval();
 
         logoutChannel.onmessage = (event) => {
