@@ -1,11 +1,12 @@
+import { usersApi } from '@/components/users/users-api';
 import { configureStore } from '@reduxjs/toolkit';
-import { useDispatch, useSelector } from 'react-redux';
 import type { TypedUseSelectorHook } from 'react-redux';
-import authReducer from './features/auth/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
 import appReducer from './features/app/appSlice';
+import authReducer from './features/auth/authSlice';
 import breadcrumbReducer from './features/breadcrumb/breadcrumbSlice';
-import settingsReducer from './features/settings/settingsSlice';
 import discoveryReducer from './features/discovery/discoverySlice';
+import settingsReducer from './features/settings/settingsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     breadcrumb: breadcrumbReducer,
     settings: settingsReducer,
     discovery: discoveryReducer,
+    [usersApi.reducerPath]: usersApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
