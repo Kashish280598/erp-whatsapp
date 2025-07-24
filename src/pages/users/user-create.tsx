@@ -1,7 +1,8 @@
+import { UserForm } from "@/components/users"
 
 const UserCreate = () => {
     return (
-        <div>UserCreate</div>
+        <div><UserForm /></div>
     )
 }
 

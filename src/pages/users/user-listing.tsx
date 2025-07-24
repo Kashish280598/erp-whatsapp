@@ -1,7 +1,10 @@
+import { UsersListingContainer } from "@/components/users"
 
 const UserListing = () => {
     return (
-        <div>UserListing</div>
+        <div>
+            <UsersListingContainer />
+        </div>
     )
 }
 
