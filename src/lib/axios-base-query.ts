@@ -1,8 +1,15 @@
 import axios, { type AxiosRequestConfig } from 'axios';
 import { API_CONFIG } from './api/config';
+import { store } from './store';
 
 const axiosBaseQuery = async (config: AxiosRequestConfig) => {
 	try {
+		const { auth } = store.getState()
+		if (auth?.token) {
+			// @ts-ignore
+			config.headers['Authorization'] = `Bearer ${auth?.token}`
+		}
+
 		let url = config.url || '';
 		// Prepend baseURL if url is relative
 		if (url && !url.startsWith('http')) {
