@@ -42,18 +42,10 @@ export const APP_CONFIG = {
 
 export const API_ENDPOINTS = {
   auth: {
-    verifyEmailForPasswordLogin: '/api/user-tenant-mappings/by-email/',
     login: '/api/auth/login',
-    validateInvitationToken: '/api/invitations/validate?token=',
-    register: '/api/auth/signup',
     forgotPasswordRequest: '/api/auth/request-password-reset',
-    validateResetPasswordToken: '/api/password-reset/validate-token',
-    resetPassword: '/api/password-reset/confirm',
+    resetPassword: '/api/auth/reset-password',
     logout: '/api/auth/logout',
-    refresh: '/api/auth/refresh-token',
-    verifyPassword: '/api/auth/verify-password',
-    changePassword: '/api/auth/change-password',
-    toggleDiscoveryAllSet: '/api/users/show-guide'
   },
   users: {
     all: '/api/users',

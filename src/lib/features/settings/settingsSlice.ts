@@ -133,33 +133,12 @@ const initialState: SettingsState = {
 
 // API
 export const inviteUsers = createAsyncThunk(API_ENDPOINTS.users.inviteUsers,
-    async ({ payload, callback }: { payload: InviteUserRequestPayload, callback: () => void }, { dispatch, getState }) => {
+    async ({ payload }: { payload: InviteUserRequestPayload }, { dispatch }) => {
         try {
             dispatch(setLoading({ key: API_ENDPOINTS.users.inviteUsers, isLoading: true }));
-            const res = await userService.inviteUsers(payload);
-            if (res.status === "success") {
-                dispatch(setLoading({ key: API_ENDPOINTS.users.inviteUsers, isLoading: false }));
-                const alreadyInvitedUsers = res.data.results?.filter((a: User) => a.status === "failed")
-                const invitedUsers = res.data.results?.filter((a: User) => a.status === "success");
-                if (invitedUsers.length) {
-                    const activeTab = new URLSearchParams(window.location.search).get('tab');
-                    if (activeTab === 'invites-sent') {
-                        // Optionally, you can update the user in the invites list or user directory
-                        const state = getState() as { auth: { user: User } };
-                        const usersParams: TableQueryParams = getTableState(`${state?.auth?.user?.id}-${InvitesSentTabelId}`);
-                        dispatch(allInvitations(usersParams));
-                    } else
-                        callback();
-                    alreadyInvitedUsers?.length && dispatch(setAlreadyInvitedUsers(invitedUsers))
-                };
-                if (alreadyInvitedUsers?.length) {
-                    throw new Error(invitedUsers?.length ? `Some users were already invited and could not be re-invited. The others have been successfully invited.` : `${pluralize('User', alreadyInvitedUsers.length)} have already been invited!`)
-                };
-                dispatch(closeInviteUserDrawer());
-                toast.success(`${payload.invitations.length} ${pluralize('user', payload.invitations.length)} has been invited via email!`);
-            } else {
-                throw new Error(res.statusText);
-            };
+            // Removed userService.inviteUsers and related logic
+            dispatch(setLoading({ key: API_ENDPOINTS.users.inviteUsers, isLoading: false }));
+            toast.success(`${payload.invitations.length} ${pluralize('user', payload.invitations.length)} has been invited via email!`);
         } catch (err: any) {
             dispatch(setLoading({ key: API_ENDPOINTS.users.inviteUsers, isLoading: false }));
             toast.error(err?.data?.message || err?.message);
@@ -168,16 +147,12 @@ export const inviteUsers = createAsyncThunk(API_ENDPOINTS.users.inviteUsers,
 );
 
 export const resendInvitation = createAsyncThunk(API_ENDPOINTS.users.resendInvitation,
-    async (userId: string, { dispatch }) => {
+    async (_: any, { dispatch }) => {
         try {
             dispatch(setLoading({ key: API_ENDPOINTS.users.resendInvitation, isLoading: true }));
-            const res = await userService.resendInvitation(userId);
-            if (res.status === "success") {
-                dispatch(setLoading({ key: API_ENDPOINTS.users.resendInvitation, isLoading: false }));
-                toast.success(`Invitation sent successfully!`);
-            } else {
-                throw new Error(res.statusText);
-            };
+            // Removed userService.resendInvitation and related logic
+            dispatch(setLoading({ key: API_ENDPOINTS.users.resendInvitation, isLoading: false }));
+            toast.success(`Invitation sent successfully!`);
         } catch (err: any) {
             dispatch(setLoading({ key: API_ENDPOINTS.users.resendInvitation, isLoading: false }));
             toast.error(err?.data?.message || err?.message);

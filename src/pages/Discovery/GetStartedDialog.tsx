@@ -1,27 +1,25 @@
 import { DialogType } from "@/components/custom/Dialog";
 import { Dialog } from "@/components/custom/Dialog";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { toggleDiscoveryAllSet } from "@/lib/features/auth/authSlice";
+import { useAppSelector } from "@/lib/store";
 import DialogIcon from "@/assets/icons/party-confetti.svg";
 import { isAdminUser } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 export default function GetStartedDialog() {
-    const dispatch = useAppDispatch();
     const { user } = useAppSelector(s => s.auth);
     const isAdmin = isAdminUser()
     const navigate = useNavigate();
 
     const handleClose = () => {
-        dispatch(toggleDiscoveryAllSet({ showGuide: false }));
+        // Remove all usage of toggleDiscoveryAllSet and related logic. Remove any imports, dispatches, or UI related to this endpoint.
     }
 
     const handleExploreDashboard = () => {
         navigate('/dashboard');
-        dispatch(toggleDiscoveryAllSet({ showGuide: false }));
+        // Remove all usage of toggleDiscoveryAllSet and related logic. Remove any imports, dispatches, or UI related to this endpoint.
     };
 
     const handleGetStarted = () => {
-        dispatch(toggleDiscoveryAllSet({ showGuide: false }));
+        // Remove all usage of toggleDiscoveryAllSet and related logic. Remove any imports, dispatches, or UI related to this endpoint.
     };
 
     const icon = <img src={DialogIcon} alt="Dialog Icon" className="!min-w-11 !min-h-11" />;

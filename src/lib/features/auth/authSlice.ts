@@ -4,10 +4,9 @@ import { setLoading } from '../app/appSlice';
 import userService from '@/lib/api/services/userService';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { toast } from 'sonner';
-import type { ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, VerifyPasswordPaylod, ChangePasswordPayload } from '@/types/user.type';
 import Cookies from "js-cookie";
 
-import { closeConfirmPasswordModal, closeSetPasswordModal, openSetPasswordModal, openSuccessModal } from '../settings/settingsSlice';
+
 interface User {
   id: string;
   email: string;
@@ -137,88 +136,8 @@ const initialState: AuthState = {
 };
 
 
-export const validateInvitationToken = createAsyncThunk(API_ENDPOINTS.auth.validateInvitationToken,
-  async (token: string, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.validateInvitationToken, isLoading: true }));
-      const res = await userService.validateInvitationToken(token, { skipAuth: true, skipRetry: true });
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.validateInvitationToken, isLoading: false }));
-        dispatch(setIsValidateInvitationTokenError(''));
-        dispatch(setIsExpiredLink(false));
-        dispatch(setRegistrationFormData({
-          email: res.data.email,
-          name: res.data.name,
-          role: res.data.role,
-          id: res.data.id,
-          token: res.data.token,
-        }));
-        return res;
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.validateInvitationToken, isLoading: false }));
-      if (err?.data?.message?.includes?.("Invalid or expired link")) {
-        dispatch(setIsExpiredLink(true));
-      } else {
-        dispatch(setIsValidateInvitationTokenError(err?.message || "Oops! Looks like we're having trouble connecting to the server. Please try again later."));
-      }
-      toast.error(err?.data?.message || "Oops! Looks like we're having trouble connecting to the server. Please try again later.");
-    }
-  }
-);
-
-export const signupUser = createAsyncThunk(API_ENDPOINTS.auth.register,
-  async ({ confirmPassword, ...payload }: any, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.register, isLoading: true }));
-      const res = await userService.signup({ password: payload.password, invitationToken: payload.invitationToken }, { skipAuth: true, skipRetry: true });
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.register, isLoading: false }));
-        dispatch(setRegistrationStep(2));
-        dispatch(setRegistrationFormData({
-          password: payload.password,
-          confirmPassword: confirmPassword,
-        }));
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.register, isLoading: false }));
-      toast.error(err?.data?.message);
-    }
-  }
-);
-
-export const verifyEmailForPasswordLogin = createAsyncThunk(API_ENDPOINTS.auth.verifyEmailForPasswordLogin,
-  async (email: string, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: true }));
-      const res = await userService.verifyEmailForPasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
-      if (res.status === "success") {
-        if (res.data.length && !res.data[0]?.active) {
-          throw new Error('Your account has been deactivated by the admin. Please contact support team.')
-        }
-        else if (!res.data.length)
-          throw new Error("The user is not registered.");
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: false }));
-        dispatch(setLoginType('password'));
-        dispatch(setLoginFormData({ email: email, password: '', session: '' }));
-        return res;
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: false }));
-      toast.error(err?.data?.message || err?.message);
-    }
-  }
-);
-
-
 export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
-  async ({ payload }: { payload: LoginPayload }, { dispatch }) => {
+  async ({ payload }: { payload: LoginFormData }, { dispatch }) => {
     try {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.login, isLoading: true }));
 
@@ -252,10 +171,10 @@ export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
 );
 
 export const forgotPasswordRequest = createAsyncThunk(API_ENDPOINTS.auth.forgotPasswordRequest,
-  async (payload: ForgotPasswordRequestPayload, { dispatch }) => {
+  async (payload: { email: string }, { dispatch }) => {
     try {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: true }));
-      const res = await userService.forgotPasswordRequest({ ...payload });
+      const res = await userService.forgotPasswordRequest({ email: payload.email });
       if (res.status === "success") {
         dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: false }));
         dispatch(setIsForgotPasswordRequestSent(true));
@@ -273,158 +192,6 @@ export const forgotPasswordRequest = createAsyncThunk(API_ENDPOINTS.auth.forgotP
   }
 );
 
-export const resetPassword = createAsyncThunk(API_ENDPOINTS.auth.resetPassword,
-  async ({ data }: { data: ResetPasswordPayload }, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.resetPassword, isLoading: true }));
-      const res = await userService.resetPassword(data, { skipAuth: true, skipRetry: true });
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.resetPassword, isLoading: false }));
-        toast.success("Your password has been successfully reset!");
-        dispatch(resetPasswordState());
-        return res;
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.resetPassword, isLoading: false }));
-      if (err?.data?.message?.includes?.("Invalid or expired")) {
-        dispatch(setResetPasswordLinkExpired(true));
-      } else if (!err?.data?.message?.includes('New password must be different')) {
-        dispatch(setIsValidateResetPasswordTokenError(err?.data?.message || err.message));
-      }
-      toast.error(err?.data?.message || 'Something went wrong');
-    }
-  }
-);
-
-// export const refreshToken = createAsyncThunk(API_ENDPOINTS.auth.refresh,
-//   async (_, { dispatch }) => {
-//     try {
-//       dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: true }));
-//       const res = await userService.refreshToken({ skipAuth: true, skipRetry: true, credentials: 'include' });
-//       if (res.status === "success") {
-//         dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: false }));
-//       } else {
-//         throw new Error(res.statusText);
-//       }
-//       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     } catch (err: any) {
-//       if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
-//         localStorage.removeItem('isLoggedIn');
-//       } else {
-//         dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: false }));
-//         toast.error(err?.data?.message || err?.message);
-//       }
-//     }
-//   }
-// );
-
-export const validateResetPasswordToken = createAsyncThunk(API_ENDPOINTS.auth.validateResetPasswordToken,
-  async (token: string, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.validateResetPasswordToken, isLoading: true }));
-      const res = await userService.validateResetPasswordToken(token, { skipAuth: true, skipRetry: true });
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.validateResetPasswordToken, isLoading: false }));
-        dispatch(setIsValidateResetPasswordTokenError(''));
-        dispatch(setResetPasswordLinkExpired(false));
-        dispatch(setResetPasswordData(res.data));
-        return res;
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.validateResetPasswordToken, isLoading: false }));
-      if (err?.data?.message?.includes?.("Invalid or expired")) {
-        dispatch(setResetPasswordLinkExpired(true));
-      } else {
-        dispatch(setIsValidateResetPasswordTokenError(err?.data?.message || err.message));
-      }
-      toast.error(err?.data?.message || 'Something went wrong');
-    }
-  }
-);
-
-// export const getProfile = createAsyncThunk(API_ENDPOINTS.users.profile,
-//   async (_, { dispatch }) => {
-//     try {
-//       dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: true }));
-//       const res = await userService.getProfile({ credentials: 'include' });
-//       if (res.status === "success") {
-//         dispatch(setCredentials({ user: res.data, isAuthenticated: true }));
-//         dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: false }));
-//       } else {
-//         throw new Error(res.statusText);
-//       }
-//       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     } catch (err: any) {
-//       dispatch(setCredentials({ user: null, isAuthenticated: false }));
-//       if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
-//         localStorage.removeItem('isLoggedIn');
-//       } else {
-//         dispatch(setLoading({ key: API_ENDPOINTS.users.profile, isLoading: false }));
-//         toast.error(err?.data?.message || err?.message);
-//       }
-//     }
-//   }
-// );
-
-export const verifyPassword = createAsyncThunk(API_ENDPOINTS.auth.verifyPassword,
-  async (payload: VerifyPasswordPaylod, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyPassword, isLoading: true }));
-      const res = await userService.verifyPassword(payload);
-      if (res.status === "success") {
-        dispatch(openSetPasswordModal());
-        dispatch(closeConfirmPasswordModal());
-        dispatch(setVerifiedPassword(payload.password));
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyPassword, isLoading: false }));
-      } else {
-        throw new Error(res.statusText);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyPassword, isLoading: false }));
-      toast.error(err?.data?.message || err?.message);
-    }
-  }
-);
-
-export const changePassword = createAsyncThunk(API_ENDPOINTS.auth.changePassword,
-  async (payload: ChangePasswordPayload, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.changePassword, isLoading: true }));
-      const res = await userService.changePassword(payload);
-      if (res.status === "success") {
-        dispatch(closeSetPasswordModal());
-        dispatch(openSuccessModal());
-        dispatch(setVerifiedPassword(''));
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.changePassword, isLoading: false }));
-      } else {
-        throw new Error(res.statusText);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.changePassword, isLoading: false }));
-      toast.error(err?.data?.message || err?.message);
-    }
-  }
-);
-
-export const toggleDiscoveryAllSet = createAsyncThunk(API_ENDPOINTS.auth.toggleDiscoveryAllSet,
-  async (payload: { showGuide: boolean; }, { dispatch }) => {
-    try {
-      dispatch(setIsShowAllSetDialog(false));
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.toggleDiscoveryAllSet, isLoading: true }));
-      await userService.toggleDiscoveryAllSet(payload);
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.toggleDiscoveryAllSet, isLoading: false }));
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.toggleDiscoveryAllSet, isLoading: false }));
-    }
-  }
-);
 
 export const authSlice = createSlice({
   name: 'auth',

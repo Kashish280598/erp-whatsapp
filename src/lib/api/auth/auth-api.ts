@@ -27,14 +27,6 @@ export const authApi = createApi({
 			}),
 			invalidatesTags: ['Auth'],
 		}),
-		register: builder.mutation({
-			query: (payload) => ({
-				url: API_ENDPOINTS.auth.register,
-				method: 'POST',
-				data: payload,
-			}),
-			invalidatesTags: ['Auth'],
-		}),
 		getCurrentUser: builder.query({
 			query: () => ({
 				url: API_ENDPOINTS.users.profile,
@@ -49,22 +41,25 @@ export const authApi = createApi({
 				data: payload,
 			}),
 		}),
+		resetPassword: builder.mutation({
+			query: (payload) => ({
+				url: API_ENDPOINTS.auth.resetPassword,
+				method: 'POST',
+				data: payload,
+			}),
+		}),
 	}),
 })
 
 export const {
 	useLoginMutation,
 	useLogoutMutation,
-	useRegisterMutation,
 	useLazyGetCurrentUserQuery,
 	useForgotPasswordMutation,
+	useResetPasswordMutation,
 } = authApi 
 
 // Utility to store token in localStorage
 export function storeAuthToken(token: string) {
     localStorage.setItem('auth_token', token);
 }
-
-// Example usage after login:
-// const [login, { data }] = useLoginMutation();
-// if (data?.data?.token) storeAuthToken(data.data.token); 

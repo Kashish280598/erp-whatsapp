@@ -16,7 +16,6 @@ import type { InviteUserRequestPayload } from '@/types/user.type';
 import { useLoading } from '@/hooks/useAppState';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { Loader2 } from "lucide-react";
-import { useSearchParams } from 'react-router-dom';
 
 const validationSchema = Yup.object({
     users: Yup.array().of(
@@ -47,8 +46,6 @@ export default function InviteUserSideDrawer() {
     const dispatch = useAppDispatch();
     const { isOpen } = useAppSelector((state) => state.settings.inviteUser);
     const { isLoading } = useLoading(API_ENDPOINTS.users.inviteUsers);
-    const user = useAppSelector((state) => state.auth.user);
-    const [_, setSearchParams] = useSearchParams();
     const { alreadyInvitedUsers } = useAppSelector(state => state.settings);
 
     const formik = useFormik({
@@ -64,10 +61,7 @@ export default function InviteUserSideDrawer() {
                     role: user.role,
                 }))
             };
-            const callback = () => {
-                setSearchParams({ tab: 'invites-sent' })
-            };
-            dispatch(inviteUsers({ payload, callback }));
+            dispatch(inviteUsers({ payload }));
         },
     });
 
@@ -181,9 +175,7 @@ export default function InviteUserSideDrawer() {
                                                     // @ts-ignore
                                                     error={formik.touched.users?.[index]?.email && formik.errors.users?.[index]?.email}
                                                 />
-
                                             </div>
-
                                             <div className="flex flex-col pt-1">
                                                 <label htmlFor={`users.${index}.role`} className="block text-[13px] font-[600] text-neutral-500 leading-4 mb-2">
                                                     Role
@@ -209,12 +201,10 @@ export default function InviteUserSideDrawer() {
                                                         {formik.errors.users?.[index]?.role}
                                                     </p>
                                                 )}
-
                                             </div>
                                         </div>
                                     </div>
                                 ))}
-
                                 {formik.values.users.length < 5 && (
                                     <Button
                                         type="button"
@@ -239,7 +229,6 @@ export default function InviteUserSideDrawer() {
                                 Cancel
                             </Button>
                         </DialogClose>
-
                         <Button
                             type="submit"
                             variant="default"

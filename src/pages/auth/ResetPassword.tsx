@@ -3,16 +3,18 @@ import PasswordStrengthChecker from "@/components/custom/PasswordStrengthChecker
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useAppSelector } from "@/lib/store";
+import { useSearchParams } from "react-router-dom";
 import type { RootState } from "@/lib/store";
-import { resetPassword, setIsExpiredLink, validateResetPasswordToken } from "@/lib/features/auth/authSlice";
 import * as Yup from "yup";
 import { Formik, Form, Field } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useLoading } from "@/hooks/useAppState";
 import { API_ENDPOINTS } from "@/lib/api/config";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useResetPasswordMutation } from '@/lib/api/auth/auth-api';
+
 // Validation Schema
 const ResetPasswordSchema = Yup.object().shape({
   password: Yup.string()
@@ -33,16 +35,14 @@ interface ResetPasswordFormValues {
 }
 
 const ResetPassword = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const resetToken = searchParams.get("token");
-  const { isLoading: isValidateResetPasswordTokenLoading } = useLoading(API_ENDPOINTS.auth.validateResetPasswordToken);
   const { isLoading: isResetPasswordLoading } = useLoading(API_ENDPOINTS.auth.resetPassword);
   const { user } = useAppSelector(state => state.auth);
+  const [resetPassword, { isLoading: isResetPasswordApiLoading }] = useResetPasswordMutation();
 
-  const { isExpiredLink, isValidateResetPasswordTokenError, isLoading, error, formData } = useAppSelector(
+  const { isLoading, error, formData } = useAppSelector(
     (state: RootState) => state.auth.resetPassword
   );
 
@@ -52,79 +52,28 @@ const ResetPassword = () => {
   };
 
   useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get('token');
-    const validateToken = () => {
-      if (!token) {
-        navigate('/404');
-        return;
-      }
-      setIsInitialLoading(false);
-      dispatch(validateResetPasswordToken(token));
-    };
-    validateToken();
-    return () => {
-      dispatch(setIsExpiredLink(false));
-    };
-  }, []);
-
-  useEffect(() => {
-    if (user && user.id && !isExpiredLink && !isValidateResetPasswordTokenError && !isValidateResetPasswordTokenLoading && !isInitialLoading) toast.error('You already have an active session. Kindly log out and try again.')
-  }, [user?.id, isExpiredLink, isValidateResetPasswordTokenError, isValidateResetPasswordTokenLoading, isInitialLoading]);
+    if (!resetToken) {
+      navigate('/404');
+    }
+  }, [resetToken, navigate]);
 
 
   const handleSubmit = async (values: ResetPasswordFormValues) => {
-    if (user?.id) return;
-    dispatch(resetPassword({
-      data: {
-        token: resetToken || '',
-        newPassword: values.password,
+    if (!resetToken) {
+      toast.error('Invalid reset password link');
+      return;
+    }
+    try {
+      const result = await resetPassword({ token: resetToken, newPassword: values.password }).unwrap();
+      if (result?.status === 200) {
+        toast.success('Your password has been successfully reset!');
+        navigate('/login');
+      } else {
+        toast.error(result?.message || 'Failed to reset password.');
       }
-    }));
-  };
-
-  const handleRequestNewLink = () => {
-    navigate("/forgot-password");
-  };
-
-  if (isExpiredLink || isValidateResetPasswordTokenError) {
-    return (
-      <div className={`custom-scrollbar h-screen pb-10 flex flex-col items-center bg-linear-270 from-[#FFFFFF] to-primary-200 relative overflow-auto`}>
-        {/* Background Shapes */}
-        <div className="fixed -top-5 -right-10 w-[296px] h-[296px] rounded-full opacity-10 rotate-[30deg] z-999">
-          <img src={logo} alt="logo" className="w-full h-full object-cover" />
-        </div>
-        <div className="fixed -bottom-15 -left-10 w-[296px] h-[296px] rounded-full opacity-10 -rotate-[30deg] z-999">
-          <img src={logo} alt="logo" className="w-full h-full object-cover" />
-        </div>
-        <div className="w-full max-w-md space-y-8 relative z-10 mt-32">
-          <h1 className="text-[36px] font-[600] text-neutral leading-10 text-center">
-            {isExpiredLink ? 'Reset Password Link Has Expired/Invallid!' : 'Oops! Something went wrong'}
-          </h1>
-          <p className="text-[13px] text-[#5E5F6E] leading-5 text-center">
-            {isExpiredLink ? 'The password reset link you used has expired. For security reasons, reset links are only valid for a limited time. Don\'t worry, you can request a new one to reset your password' : (
-              <>
-                Error: {isValidateResetPasswordTokenError}
-                <br />
-                Please try again later or contact support team.
-              </>
-            )}
-          </p>
-          {!user?.id && (<div className="space-y-5">
-            {isExpiredLink ? <Button
-              variant="default"
-              onClick={handleRequestNewLink}
-              className="cursor-pointer w-full"
-            >
-              Request a New Link
-            </Button> : null}
-
-            <p className="text-[13px] text-primary leading-5 text-center">
-              <Link to="/login" className="text-primary font-[600]">Contact Support Team</Link>
-            </p>
-          </div>)}
-        </div>
-      </div>
-    )
+    } catch (err: any) {
+      toast.error(err?.data?.message || err?.message || 'Failed to reset password.');
+    }
   };
 
   return (
@@ -145,7 +94,7 @@ const ResetPassword = () => {
             Set New Password
           </h1>
           <p className="text-[13px] text-[#5E5F6E] leading-5">
-            Make it a password no one can guess… not even your cat.
+            Make it a password no one can guess
           </p>
         </div>
 
@@ -206,19 +155,19 @@ const ResetPassword = () => {
               <Button
                 variant="default"
                 type="submit"
-                disabled={isSubmitting || !isValid || isLoading || Boolean(user?.id)}
+                disabled={isSubmitting || !isValid || isLoading || isResetPasswordApiLoading || Boolean(user?.id)}
                 className="cursor-pointer w-full mt-2"
               >
-                Set Password
+                {isResetPasswordApiLoading ? 'Setting...' : 'Set Password'}
               </Button>
             </Form>
           )}
         </Formik>
       </div>
-      {(isLoading || isInitialLoading || isValidateResetPasswordTokenLoading || isResetPasswordLoading) && <Loader
-        className={`fixed top-0 left-0 z-998 ${isInitialLoading ? "backdrop-blur-[10px]" : "backdrop-blur-[3px]"}`}
-        title={isInitialLoading ? 'Loading...' : isValidateResetPasswordTokenLoading ? "Verifying reset password link" : isResetPasswordLoading ? "Redirecting you to Sign-in" : "Loading..."}
-        description={isInitialLoading ? 'Please wait...' : isValidateResetPasswordTokenLoading ? "We're confirming your reset password link. This will just take a moment..." : isResetPasswordLoading ? "We'll update your password and re-direct you to sign-in your account." : "Please wait..."} />}
+      {(isLoading || isResetPasswordLoading || isResetPasswordApiLoading) && <Loader
+        className={`fixed top-0 left-0 z-998 backdrop-blur-[3px]`}
+        title={isResetPasswordLoading || isResetPasswordApiLoading ? "Redirecting you to Sign-in" : "Loading..."}
+        description={isResetPasswordLoading || isResetPasswordApiLoading ? "We'll update your password and re-direct you to sign-in your account." : "Please wait..."} />}
     </div>
   );
 };

@@ -6,7 +6,6 @@ import { useLoading } from '@/hooks/useAppState';
 import Loader from "@/components/Loader";
 
 const Login = () => {
-  const { isLoading: isLoadingForEmail } = useLoading(API_ENDPOINTS.auth.verifyEmailForPasswordLogin);
   const { isLoading: isLoadingForLogin } = useLoading(API_ENDPOINTS.auth.login);
   
   return (
@@ -31,10 +30,10 @@ const Login = () => {
       {/* <LoginRightSection /> */}
 
 
-      {(isLoadingForEmail || isLoadingForLogin) && <Loader
+      {isLoadingForLogin && <Loader
         className={`fixed top-0 left-0 z-998 "backdrop-blur-[3px]`}
-        title={isLoadingForEmail ? 'Verifying Your Email' : isLoadingForLogin ? 'Loading...' : 'Loading...'}
-        description={isLoadingForEmail ? 'We\'re confirming your email. This will just take a moment...' : isLoadingForLogin ? 'We\'re logging you in. This will just take a moment...' : 'This will just take a moment...'} />}
+        title={isLoadingForLogin ? 'Loading...' : 'Loading...'}
+        description={isLoadingForLogin ? 'We\'re logging you in. This will just take a moment...' : 'This will just take a moment...'} />}
     </div>
   );
 };

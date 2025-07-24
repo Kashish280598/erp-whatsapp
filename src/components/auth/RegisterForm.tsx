@@ -4,10 +4,6 @@ import * as Yup from "yup";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PasswordStrengthChecker from "@/components/custom/PasswordStrengthChecker";
-import { signupUser } from "@/lib/features/auth/authSlice";
-import { useLoading } from "@/hooks/useAppState";
-import { API_ENDPOINTS } from "@/lib/api/config";
-import { Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/store";
 import type { RootState } from "@/lib/store";
 // Custom password validation function to match PasswordStrengthChecker
@@ -54,7 +50,6 @@ interface RegisterFormValues {
 
 const RegisterForm = () => {
     const dispatch = useAppDispatch();
-    const { isLoading } = useLoading(API_ENDPOINTS.auth.register);
     const { formData } = useAppSelector((state: RootState) => state.auth.registration);
     const { user } = useAppSelector(state => state.auth);
 
@@ -68,7 +63,7 @@ const RegisterForm = () => {
     const handleSubmit = async (values: RegisterFormValues) => {
         if (user?.id) return;
         // Save form data to Redux store
-        dispatch(signupUser({ ...values, invitationToken: formData.token }));
+        dispatch({ type: 'auth/signupUser', payload: { ...values, invitationToken: formData.token } });
     };
 
     return (
@@ -124,7 +119,7 @@ const RegisterForm = () => {
                                         placeholder="Enter password"
                                         autoComplete="off"
                                         error={!values.password ? touched.password && errors.password : ''}
-                                        disabled={isLoading || Boolean(user?.id)}
+                                        disabled={Boolean(user?.id)}
                                     />
                                 )}
                             </Field>
@@ -146,7 +141,7 @@ const RegisterForm = () => {
                                     placeholder="Enter password"
                                     autoComplete="off"
                                     error={touched.confirmPassword && errors.confirmPassword}
-                                    disabled={isLoading || Boolean(user?.id)}
+                                    disabled={Boolean(user?.id)}
                                 />
                             )}
                         </Field>
@@ -154,10 +149,10 @@ const RegisterForm = () => {
                         <Button
                             variant="default"
                             type="submit"
-                            disabled={isSubmitting || !isValid || isLoading || Boolean(user?.id)}
+                            disabled={isSubmitting || !isValid || Boolean(user?.id)}
                             className="cursor-pointer w-full mt-2"
                         >
-                            {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create your Account'}
+                            {isSubmitting ? "Creating your account..." : 'Create your Account'}
                         </Button>
 
                         {/* Terms and Privacy */}
