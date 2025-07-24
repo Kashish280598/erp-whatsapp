@@ -298,27 +298,27 @@ export const resetPassword = createAsyncThunk(API_ENDPOINTS.auth.resetPassword,
   }
 );
 
-export const refreshToken = createAsyncThunk(API_ENDPOINTS.auth.refresh,
-  async (_, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: true }));
-      const res = await userService.refreshToken({ skipAuth: true, skipRetry: true, credentials: 'include' });
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: false }));
-      } else {
-        throw new Error(res.statusText);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err: any) {
-      if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
-        localStorage.removeItem('isLoggedIn');
-      } else {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: false }));
-        toast.error(err?.data?.message || err?.message);
-      }
-    }
-  }
-);
+// export const refreshToken = createAsyncThunk(API_ENDPOINTS.auth.refresh,
+//   async (_, { dispatch }) => {
+//     try {
+//       dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: true }));
+//       const res = await userService.refreshToken({ skipAuth: true, skipRetry: true, credentials: 'include' });
+//       if (res.status === "success") {
+//         dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: false }));
+//       } else {
+//         throw new Error(res.statusText);
+//       }
+//       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+//     } catch (err: any) {
+//       if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
+//         localStorage.removeItem('isLoggedIn');
+//       } else {
+//         dispatch(setLoading({ key: API_ENDPOINTS.auth.refresh, isLoading: false }));
+//         toast.error(err?.data?.message || err?.message);
+//       }
+//     }
+//   }
+// );
 
 export const validateResetPasswordToken = createAsyncThunk(API_ENDPOINTS.auth.validateResetPasswordToken,
   async (token: string, { dispatch }) => {
