@@ -1,14 +1,15 @@
-import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
-import IntegrationsIcon from "@/assets/icons/integration-icon.svg";
-import FindingsIcon from "@/assets/icons/finding-icon.svg";
-import RulesIcon from "@/assets/icons/rule-icon.svg";
-import ThreatsIcon from "@/assets/icons/threat-icon.svg";
-import IdentitiesIcon from "@/assets/icons/identity-icon.svg";
-import DiscoverIcon from "@/assets/icons/discover-icon.svg";
 import ComplianceIcon from "@/assets/icons/compliance-icon.svg";
-import AlertsIcon from "@/assets/icons/security-alert-icon.svg";
+import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
+import DiscoverIcon from "@/assets/icons/discover-icon.svg";
+import FindingsIcon from "@/assets/icons/finding-icon.svg";
+import IdentitiesIcon from "@/assets/icons/identity-icon.svg";
+import IntegrationsIcon from "@/assets/icons/integration-icon.svg";
 import ReportsIcon from "@/assets/icons/reports-icon.svg";
+import RulesIcon from "@/assets/icons/rule-icon.svg";
+import AlertsIcon from "@/assets/icons/security-alert-icon.svg";
 import SettingsIcon from "@/assets/icons/settings-icon.svg";
+import ThreatsIcon from "@/assets/icons/threat-icon.svg";
+import UsersIcon from "@/assets/icons/user-contact-icon.svg";
 
 
 export interface NavLink {
@@ -107,6 +108,13 @@ export const sidebarlinks: SidebarLink[] = [
     label: "",
     href: "/settings",
     icon: SettingsIcon,
+    sidebarIdentifier: "settings",
+  },
+  {
+    title: "Users",
+    label: "",
+    href: "/users",
+    icon: UsersIcon,
     sidebarIdentifier: "settings",
   },
 ];

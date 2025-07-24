@@ -1,10 +1,10 @@
+import App from "@/App";
 import Loader from "@/components/Loader";
+import { cn } from "@/lib/utils";
+import ErrorElement from "@/pages/errors/general-error";
 import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import AuthRedirect from "./auth-redirect";
-import App from "@/App";
-import ErrorElement from "@/pages/errors/general-error";
-import { cn } from "@/lib/utils";
 import ProtectedRoute from "./ProtectedRoute";
 
 // Application Pages
@@ -25,6 +25,12 @@ const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
 
 // Error Pages
 const NotFoundError = lazy(() => import("@/pages/errors/not-found-error"));
+
+// Users
+const UserCreate = lazy(() => import("@/pages/users/user-create"));
+const UserEdit = lazy(() => import("@/pages/users/user-edit"));
+const UserListing = lazy(() => import("@/pages/users/user-listing"));
+const UserView = lazy(() => import("@/pages/users/user-view"));
 
 const FallbackLoader = ({ className }: { className?: string }) => {
     return <Loader className={cn("h-[calc(100svh)]", className)} />;
@@ -147,6 +153,38 @@ export const router = createBrowserRouter([
                     },
                 ],
             },
+            {
+                path: "users",
+                element: (
+                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
+                        <ProtectedRoute>
+                            <UserListing />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+                errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                children: [
+                    {
+                        index: true,
+                        element: <Navigate to="create" />,
+                    },
+                    {
+                        path: "create",
+                        element: <UserCreate />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                    {
+                        path: "/:id/edit",
+                        element: <UserEdit />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                    {
+                        path: "/:id",
+                        element: <UserView />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                ],
+            }
         ]
     },
 
