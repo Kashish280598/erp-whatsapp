@@ -1,0 +1,17 @@
+[
+  {"id": "P001", "name": "Bubble Wrap", "category": "Packaging", "unitPrice": 120, "costPrice": 90, "currentStock": 150, "reservedStock": 20, "lowStockThreshold": 30, "history": []},
+  {"id": "P002", "name": "Tape", "category": "Packaging", "unitPrice": 60, "costPrice": 45, "currentStock": 80, "reservedStock": 10, "lowStockThreshold": 20, "history": []},
+  {"id": "P003", "name": "Corrugated Box", "category": "Boxes", "unitPrice": 200, "costPrice": 150, "currentStock": 40, "reservedStock": 5, "lowStockThreshold": 15, "history": []},
+  {"id": "P004", "name": "Shrink Film", "category": "Packaging", "unitPrice": 75, "costPrice": 60, "currentStock": 60, "reservedStock": 8, "lowStockThreshold": 10, "history": []},
+  {"id": "P005", "name": "Stretch Wrap", "category": "Packaging", "unitPrice": 90, "costPrice": 70, "currentStock": 100, "reservedStock": 12, "lowStockThreshold": 25, "history": []},
+  {"id": "P006", "name": "Packing Peanuts", "category": "Fillers", "unitPrice": 50, "costPrice": 35, "currentStock": 200, "reservedStock": 30, "lowStockThreshold": 40, "history": []},
+  {"id": "P007", "name": "Foam Sheets", "category": "Fillers", "unitPrice": 110, "costPrice": 85, "currentStock": 90, "reservedStock": 10, "lowStockThreshold": 20, "history": []},
+  {"id": "P008", "name": "Mailing Tubes", "category": "Mailing", "unitPrice": 130, "costPrice": 100, "currentStock": 70, "reservedStock": 7, "lowStockThreshold": 15, "history": []},
+  {"id": "P009", "name": "Poly Bags", "category": "Mailing", "unitPrice": 40, "costPrice": 25, "currentStock": 300, "reservedStock": 50, "lowStockThreshold": 60, "history": []},
+  {"id": "P010", "name": "Labels", "category": "Accessories", "unitPrice": 20, "costPrice": 10, "currentStock": 500, "reservedStock": 60, "lowStockThreshold": 100, "history": []},
+  {"id": "P011", "name": "Packing List Envelopes", "category": "Accessories", "unitPrice": 35, "costPrice": 20, "currentStock": 120, "reservedStock": 15, "lowStockThreshold": 25, "history": []},
+  {"id": "P012", "name": "Edge Protectors", "category": "Accessories", "unitPrice": 55, "costPrice": 40, "currentStock": 80, "reservedStock": 10, "lowStockThreshold": 20, "history": []},
+  {"id": "P013", "name": "Strapping", "category": "Accessories", "unitPrice": 95, "costPrice": 70, "currentStock": 60, "reservedStock": 8, "lowStockThreshold": 15, "history": []},
+  {"id": "P014", "name": "Plastic Pallets", "category": "Pallets", "unitPrice": 400, "costPrice": 320, "currentStock": 30, "reservedStock": 3, "lowStockThreshold": 5, "history": []},
+  {"id": "P015", "name": "Wooden Pallets", "category": "Pallets", "unitPrice": 350, "costPrice": 280, "currentStock": 25, "reservedStock": 2, "lowStockThreshold": 5, "history": []}
+] 

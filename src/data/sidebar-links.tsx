@@ -2,7 +2,8 @@ import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
 import SettingsIcon from "@/assets/icons/settings-icon.svg";
 import UsersIcon from "@/assets/icons/user-contact-icon.svg";
 import ChatIcon from "@/assets/icons/user-contact-icon.svg";
-
+import FindingIcon from "@/assets/icons/finding-icon.svg";
+import ManageUserIcon from "@/assets/icons/manage-user.svg";
 
 export interface NavLink {
   title: string;
@@ -26,6 +27,18 @@ export const sidebarlinks: SidebarLink[] = [
     icon: DashboardIcon,
   },
   {
+    title: "Inventory Manager",
+    label: "",
+    href: "/inventory",
+    icon: FindingIcon,
+  },
+  {
+    title: "Customers",
+    label: "",
+    href: "/customers",
+    icon: ManageUserIcon,
+  },
+  {
     title: "Chat",
     label: "",
     href: "/chat",
@@ -45,5 +58,4 @@ export const sidebarlinks: SidebarLink[] = [
     icon: UsersIcon,
     sidebarIdentifier: "settings",
   },
-
 ];
