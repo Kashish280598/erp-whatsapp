@@ -1,18 +1,20 @@
+import { Toster } from '@/components/custom/Toster'
+import Loader from '@/components/Loader'
+import { useLoading } from '@/hooks/useAppState'
+import { useAutoRefreshToken } from '@/hooks/useAutoRefreshToken'
+import '@/index.css'
+import { API_ENDPOINTS } from '@/lib/api/config'
+import { setInitializing } from '@/lib/features/app/appSlice'
+import { store, useAppDispatch, useAppSelector } from '@/lib/store'
+import { ThemeProvider } from "@/providers/theme-provider"
+import { router } from '@/routes/routers'
+import * as Sentry from '@sentry/react'
+import axios from 'axios'
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { store, useAppDispatch, useAppSelector } from '@/lib/store'
-import '@/index.css'
-import { ThemeProvider } from "@/providers/theme-provider"
-import Loader from '@/components/Loader'
-import { RouterProvider } from "react-router-dom";
-import { router } from '@/routes/routers'
-import { Toster } from '@/components/custom/Toster';
-import { useAutoRefreshToken } from '@/hooks/useAutoRefreshToken';
-import { useLoading } from '@/hooks/useAppState'
-import { API_ENDPOINTS } from '@/lib/api/config'
-import { setInitializing } from '@/lib/features/app/appSlice'
-import * as Sentry from '@sentry/react';
+import { RouterProvider } from "react-router-dom"
+import setupAxios from './lib/axios-interceptors'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
@@ -53,6 +55,8 @@ const AppWrapper: React.FC<WrapperProps> = ({ children }) => {
   return isDev ? <>{children}</> : <React.StrictMode>{children}</React.StrictMode>;
 
 }
+
+setupAxios(axios)
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <AppWrapper>

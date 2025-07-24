@@ -1,13 +1,15 @@
-import { Link } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useAppDispatch, useAppSelector } from '@/lib/store';
-import { loginUser, setLoginType } from '@/lib/features/auth/authSlice';
-import { useEffect } from 'react';
-import { API_ENDPOINTS } from '@/lib/api/config';
+import { Input } from '@/components/ui/input';
 import { useLoading } from '@/hooks/useAppState';
+import { storeAuthToken, useLoginMutation } from '@/lib/api/auth/auth-api';
+import { API_ENDPOINTS } from '@/lib/api/config';
+import { setAuthToken, setCredentials, setLoginType } from '@/lib/features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/lib/store';
+import { Field, Form, Formik } from 'formik';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import * as Yup from 'yup';
 
 // Validation Schema
 const LoginSchema = Yup.object().shape({
@@ -23,6 +25,7 @@ const LoginForm = () => {
   const dispatch = useAppDispatch();
   const { isLoading } = useLoading(API_ENDPOINTS.auth.login);
   const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
+  const [login, { isLoading: isLoginLoading }] = useLoginMutation();
 
   const initialValues = {
     email: loginEmail,
@@ -30,7 +33,17 @@ const LoginForm = () => {
   };
 
   const handleSubmit = async (values: typeof initialValues) => {
-    dispatch(loginUser({ payload: { email: values.email, password: values.password } }) as any);
+    try {
+      const result = await login({ email: values.email, password: values.password }).unwrap();
+      if (result?.data?.token) {
+        storeAuthToken(result?.data?.token);
+        dispatch(setCredentials({ user: null, isAuthenticated: true }));
+        dispatch(setAuthToken(result?.data?.token));
+        // Optionally, fetch user profile here
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message || 'Login failed');
+    }
   };
 
   useEffect(() => {
@@ -96,10 +109,10 @@ const LoginForm = () => {
 
             <Button
               type="submit"
-              disabled={isSubmitting || isLoading}
+              disabled={isSubmitting || isLoading || isLoginLoading}
               className="w-full disabled:opacity-50 disabled:cursor-not-allowed mt-2"
             >
-              {isLoading ? 'Signing in...' : 'Continue'}
+              {(isLoading || isLoginLoading) ? 'Signing in...' : 'Sign In'}
             </Button>
 
           </Form>

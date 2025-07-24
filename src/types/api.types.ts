@@ -44,4 +44,14 @@ export interface PaginationParams {
   pageSize?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+}
+
+export interface LoginResponseData {
+    token: string;
+}
+
+export interface LoginResponse {
+    status: number;
+    message: string;
+    data: LoginResponseData;
 } 

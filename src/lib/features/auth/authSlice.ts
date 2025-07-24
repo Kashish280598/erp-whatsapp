@@ -1,11 +1,11 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { setLoading } from '../app/appSlice';
-import userService from '@/lib/api/services/userService';
 import { API_ENDPOINTS } from '@/lib/api/config';
-import { toast } from 'sonner';
-import type { ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, VerifyPasswordPaylod, ChangePasswordPayload } from '@/types/user.type';
+import userService from '@/lib/api/services/userService';
+import type { ChangePasswordPayload, ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, VerifyPasswordPaylod } from '@/types/user.type';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import Cookies from "js-cookie";
+import { toast } from 'sonner';
+import { setLoading } from '../app/appSlice';
 
 import { closeConfirmPasswordModal, closeSetPasswordModal, openSetPasswordModal, openSuccessModal } from '../settings/settingsSlice';
 interface User {
@@ -59,7 +59,7 @@ interface ResetPasswordState {
     confirmPassword: string;
   };
   data: {
-    email: string;  
+    email: string;
     token: string;
     expiresAt: string;
     isUsed: boolean;
@@ -308,7 +308,7 @@ export const refreshToken = createAsyncThunk(API_ENDPOINTS.auth.refresh,
       } else {
         throw new Error(res.statusText);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     } catch (err: any) {
       if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
         localStorage.removeItem('isLoggedIn');
@@ -357,7 +357,7 @@ export const getProfile = createAsyncThunk(API_ENDPOINTS.users.profile,
       } else {
         throw new Error(res.statusText);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     } catch (err: any) {
       dispatch(setCredentials({ user: null, isAuthenticated: false }));
       if (err?.data?.message?.includes?.("Missing required parameter REFRESH_TOKEN")) {
@@ -383,7 +383,7 @@ export const verifyPassword = createAsyncThunk(API_ENDPOINTS.auth.verifyPassword
       } else {
         throw new Error(res.statusText);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     } catch (err: any) {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyPassword, isLoading: false }));
       toast.error(err?.data?.message || err?.message);
@@ -404,7 +404,7 @@ export const changePassword = createAsyncThunk(API_ENDPOINTS.auth.changePassword
       } else {
         throw new Error(res.statusText);
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     } catch (err: any) {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.changePassword, isLoading: false }));
       toast.error(err?.data?.message || err?.message);
@@ -435,6 +435,7 @@ export const authSlice = createSlice({
       state.token = null;
       state.isAuthenticated = false;
       state.login = initialState.login;
+      localStorage.removeItem('auth_token');
       // const logoutChannel = new BroadcastChannel('erp-auth-broadcast');
       // logoutChannel.postMessage('logout');
       localStorage.removeItem('isLoggedIn');
@@ -507,6 +508,9 @@ export const authSlice = createSlice({
     },
     setVerifiedPassword: (state, action: PayloadAction<string>) => {
       state.verifiedPassword = action.payload;
+    },
+    setAuthToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
     }
   },
 });
@@ -530,7 +534,8 @@ export const {
   setLoginType,
   setIsValidateResetPasswordTokenError,
   setResetPasswordData,
-  setVerifiedPassword
+  setVerifiedPassword,
+  setAuthToken
 } = authSlice.actions;
 
 export default authSlice.reducer; 

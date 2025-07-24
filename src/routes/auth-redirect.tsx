@@ -22,7 +22,7 @@ const AuthRedirect: React.FC<AuthRedirectProps> = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/discover" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
   return children;
 };

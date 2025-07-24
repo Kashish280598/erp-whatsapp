@@ -2,6 +2,7 @@ import { usersApi } from '@/lib/api/users-api';
 import { configureStore } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
+import { authApi } from './api/auth/auth-api';
 import { categoriesApi } from './api/categories-api';
 import appReducer from './features/app/appSlice';
 import authReducer from './features/auth/authSlice';
@@ -18,6 +19,7 @@ export const store = configureStore({
     discovery: discoveryReducer,
     [usersApi.reducerPath]: usersApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
+    [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -25,6 +27,7 @@ export const store = configureStore({
     }).concat([
       usersApi.middleware,
       categoriesApi.middleware,
+      authApi.middleware,
     ]),
   devTools: true,
 });
