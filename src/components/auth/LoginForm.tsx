@@ -102,17 +102,6 @@ const LoginForm = () => {
               {isLoading ? 'Signing in...' : 'Continue'}
             </Button>
 
-            {/* Terms and Privacy */}
-            <p className="text-center text-[13px] text-[#5E5F6E] font-[400]">
-              By continuing, you agree to ERP's{" "}
-              <Link to="/terms" className="text-[#5E5F6E] font-[600] underline underline-offset-2">
-                Terms of Service
-              </Link>{" "}
-              and{" "}
-              <Link to="/privacy" className="text-[#5E5F6E] font-[600] underline underline-offset-2">
-                Privacy Policy
-              </Link>
-            </p>
           </Form>
         )}
       </Formik>
