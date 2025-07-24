@@ -1,17 +1,13 @@
-import { useAppSelector, type RootState } from '@/lib/store';
 // import LoginRightSection from '@/components/auth/LoginRightSection';
 import LoginForm from '@/components/auth/LoginForm';
-import TwoFactorForm from '@/components/auth/TwoFactorForm';
 import Logo from '@/assets/logo.svg';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { useLoading } from '@/hooks/useAppState';
 import Loader from "@/components/Loader";
 
 const Login = () => {
-  const activeStep = useAppSelector((state: RootState) => state.auth.login.step);
-  const { isLoading: isLoadingForEmail } = useLoading(API_ENDPOINTS.auth.verifyEmailForSSO_OR_PasswordLogin);
+  const { isLoading: isLoadingForEmail } = useLoading(API_ENDPOINTS.auth.verifyEmailForPasswordLogin);
   const { isLoading: isLoadingForLogin } = useLoading(API_ENDPOINTS.auth.login);
-  const { isLoading: isLoadingFor2FA } = useLoading(API_ENDPOINTS.auth.verify2MFASetup);
   
   return (
     <div className="custom-scrollbar flex flex-col min-h-screen md:flex-row">
@@ -27,7 +23,7 @@ const Login = () => {
             />
           </div>
 
-          {activeStep === 1 ? <LoginForm /> : <TwoFactorForm />}
+          <LoginForm />
         </div>
       </div>
 
@@ -35,10 +31,10 @@ const Login = () => {
       {/* <LoginRightSection /> */}
 
 
-      {(isLoadingForEmail || isLoadingForLogin || isLoadingFor2FA) && <Loader
+      {(isLoadingForEmail || isLoadingForLogin) && <Loader
         className={`fixed top-0 left-0 z-998 "backdrop-blur-[3px]`}
-        title={isLoadingForEmail ? 'Verifying Your Email' : isLoadingForLogin ? 'Loading...' : isLoadingFor2FA ? 'Verifying Your Code' : 'Loading...'}
-        description={isLoadingForEmail ? 'We\'re confirming your email. This will just take a moment...' : isLoadingForLogin ? 'We\'re logging you in. This will just take a moment...' : isLoadingFor2FA ? 'We\'re verifying your code. This will just take a moment...' : 'This will just take a moment...'} />}
+        title={isLoadingForEmail ? 'Verifying Your Email' : isLoadingForLogin ? 'Loading...' : 'Loading...'}
+        description={isLoadingForEmail ? 'We\'re confirming your email. This will just take a moment...' : isLoadingForLogin ? 'We\'re logging you in. This will just take a moment...' : 'This will just take a moment...'} />}
     </div>
   );
 };

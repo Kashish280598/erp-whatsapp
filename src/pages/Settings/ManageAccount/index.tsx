@@ -1,16 +1,13 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import CardOverlayVisual from '@/assets/icons/rounded-visual.svg';
-import { IconExclamationCircle } from '@tabler/icons-react';
 import ConfirmCurrentPasswordModal from './ConfirmCurrentPasswordModal';
 import SetPasswordModal from './SetPasswordModal';
 import { Dialog, DialogType } from '@/components/custom/Dialog';
 import PSWDICON from '@/assets/icons/success-pswd.svg';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
-import { closeSuccessModal, openReconnectMFADialog } from '@/lib/features/settings/settingsSlice';
-import ReconnectMFADialog from './ReconnectMFADialog';
+import { closeSuccessModal } from '@/lib/features/settings/settingsSlice';
 import { parseFullName, USERS_ENUMS } from '@/lib/utils';
 import { AUTH_METHODS } from '@/utils/constant';
 import moment from 'moment';
@@ -23,10 +20,6 @@ export default function ManageAccount() {
 
     const handleClose = () => {
         dispatch(closeSuccessModal());
-    };
-
-    const handleReconnectMFA = () => {
-        dispatch(openReconnectMFADialog());
     };
 
     return (
@@ -161,7 +154,6 @@ export default function ManageAccount() {
 
                 ]}
             />}
-            {user?.authMethod === AUTH_METHODS.Password && <ReconnectMFADialog />}
         </div>
     );
 } 

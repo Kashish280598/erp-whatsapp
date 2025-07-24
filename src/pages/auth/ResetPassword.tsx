@@ -73,15 +73,12 @@ const ResetPassword = () => {
 
 
   const handleSubmit = async (values: ResetPasswordFormValues) => {
-    if (Boolean(user?.id)) return;
+    if (user?.id) return;
     dispatch(resetPassword({
       data: {
         token: resetToken || '',
         newPassword: values.password,
         tenantId: data.tenantId
-      },
-      callback: () => {
-        navigate("/login");
       }
     }));
   };

@@ -26,19 +26,6 @@ export interface CreateUserDTO {
     invitationToken: string;
 }
 
-export interface VerifyMFAPayload {
-    email: string;
-    totpCode: string;
-    session: string;
-};
-
-export interface Verify2MFAPayload {
-    email: string;
-    totpCode: string;
-    session: string;
-    tenantId: string;
-};
-
 export interface ForgotPasswordRequestPayload {
     email: string;
     tenantId?: string;

@@ -36,7 +36,7 @@ const ForgotPassword = () => {
         try {
             if (!tenantId) {
                 dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: true }));
-                const res = await userService.verifyEmailForSSO_OR_PasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
+                const res = await userService.verifyEmailForPasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
                 if (res.status === "success") {
                     if (res.data.length && !res.data[0]?.active) {
                         throw new Error('Your account has been deactivated by the admin. Please contact support team.')

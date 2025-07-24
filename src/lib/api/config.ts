@@ -42,15 +42,10 @@ export const APP_CONFIG = {
 
 export const API_ENDPOINTS = {
   auth: {
-    verifyEmailForSSO_OR_PasswordLogin: '/api/user-tenant-mappings/by-email/',
+    verifyEmailForPasswordLogin: '/api/user-tenant-mappings/by-email/',
     login: '/api/auth/signin',
-    verify2MFASetup: '/api/auth/verify-mfa',
-    reInitiateMFASetup: '/api/auth/initiate-mfa-setup',
     validateInvitationToken: '/api/invitations/validate?token=',
     register: '/api/auth/signup',
-    initiateSSO: '/api/auth/sso/initiate',
-    callbackSSO: '/api/auth/sso/callback',
-    verifyMFASetup: '/api/auth/verify-mfa-setup',
     forgotPasswordRequest: '/api/password-reset/request',
     validateResetPasswordToken: '/api/password-reset/validate-token',
     resetPassword: '/api/password-reset/confirm',

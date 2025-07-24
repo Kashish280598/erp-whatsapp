@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '../config';
 import apiService from '../apiService';
-import type { CreateUserDTO, VerifyMFAPayload, ForgotPasswordRequestPayload, LoginPayload, Verify2MFAPayload, ResetPasswordPayload, InviteUserRequestPayload, UpdateUserByIdRequestPayload, VerifyPasswordPaylod, ChangePasswordPayload, ResetPasswordForUserPayload } from '@/types/user.type';
+import type { CreateUserDTO, ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, InviteUserRequestPayload, UpdateUserByIdRequestPayload, VerifyPasswordPaylod, ChangePasswordPayload, ResetPasswordForUserPayload } from '@/types/user.type';
 import type { RequestConfig } from '@/types/api.types';
 import type { TableQueryParams } from '@/types/table.types';
 
@@ -15,35 +15,6 @@ export const enhancedUserService = {
     return data;
   },
 
-  async initiateSSO(tenantId: string, provider: string, token?: string, config?: RequestConfig) {
-    const params = [];
-    if (token) params.push(`invitationToken=${encodeURIComponent(token)}`);
-    if (tenantId) params.push(`tenantId=${encodeURIComponent(tenantId)}`);
-    if (provider) params.push(`provider=${encodeURIComponent(provider)}`);
-    const queryString = params.length ? `?${params.join('&')}` : '';
-    const { data } = await apiService.get(API_ENDPOINTS.auth.initiateSSO + queryString, config);
-    return data;
-  },
-
-  async callbackSSO(code: string, state: string, config?: RequestConfig) {
-    const params = [];
-    if (code) params.push(`code=${encodeURIComponent(code)}`);
-    if (state) params.push(`state=${encodeURIComponent(state)}`);
-    const queryString = params.length ? `?${params.join('&')}` : '';
-    const { data } = await apiService.get(API_ENDPOINTS.auth.callbackSSO + queryString, config);
-    return data;
-  },
-
-  async verifyMFASetup(payload: VerifyMFAPayload, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.verifyMFASetup, payload, config);
-    return data;
-  },
-
-  async reInitiateMFASetup(payload: { email: string, password: string, tenantId: string }, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.reInitiateMFASetup, payload, config);
-    return data;
-  },
-
   async validateInvitationToken(token: string, config?: RequestConfig) {
     const { data } = await apiService.get(API_ENDPOINTS.auth.validateInvitationToken + token, config);
     return data;
@@ -54,18 +25,13 @@ export const enhancedUserService = {
     return data;
   },
 
-  async verifyEmailForSSO_OR_PasswordLogin(email: string, config?: RequestConfig) {
-    const { data } = await apiService.get(API_ENDPOINTS.auth.verifyEmailForSSO_OR_PasswordLogin + email, config);
+  async verifyEmailForPasswordLogin(email: string, config?: RequestConfig) {
+    const { data } = await apiService.get(API_ENDPOINTS.auth.verifyEmailForPasswordLogin + email, config);
     return data;
   },
 
   async login(payload: LoginPayload, config?: RequestConfig) {
     const { data } = await apiService.post(API_ENDPOINTS.auth.login, payload, config);
-    return data;
-  },
-
-  async verify2MFASetup(payload: Verify2MFAPayload, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.verify2MFASetup, payload, config);
     return data;
   },
 

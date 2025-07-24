@@ -57,10 +57,7 @@ export const TABLE_CONFIG = {
 
 
 export const AUTH_METHODS = {
-  Password: 'Password',
-  Google: 'Google',
-  Microsoft: 'MicrosoftEntraID',
-  Okta: 'Okta'
+  Password: 'Password'
 };
 
 

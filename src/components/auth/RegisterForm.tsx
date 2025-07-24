@@ -4,7 +4,7 @@ import * as Yup from "yup";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PasswordStrengthChecker from "@/components/custom/PasswordStrengthChecker";
-import { signupUser, initiateSSO } from "@/lib/features/auth/authSlice";
+import { signupUser } from "@/lib/features/auth/authSlice";
 import { useLoading } from "@/hooks/useAppState";
 import { API_ENDPOINTS } from "@/lib/api/config";
 import { Loader2 } from "lucide-react";
@@ -56,9 +56,7 @@ interface RegisterFormValues {
 const RegisterForm = () => {
     const dispatch = useAppDispatch();
     const { isLoading } = useLoading(API_ENDPOINTS.auth.register);
-    const { isLoading: isLoadingForSSO } = useLoading(API_ENDPOINTS.auth.initiateSSO);
     const { formData } = useAppSelector((state: RootState) => state.auth.registration);
-    const { selectedProvider } = useAppSelector((state: RootState) => state.auth.registration);
     const { user } = useAppSelector(state => state.auth);
 
     const initialValues: RegisterFormValues = {
@@ -73,11 +71,6 @@ const RegisterForm = () => {
         if (user?.id) return;
         // Save form data to Redux store
         dispatch(signupUser({ ...values, invitationToken: formData.token }));
-    };
-
-    const handleSSO = async (provider: string) => {
-        if (user?.id) return;
-        dispatch(initiateSSO({ tenantId: formData.tenantId || '', token: formData.token || '', provider }));
     };
 
     return (
@@ -133,7 +126,7 @@ const RegisterForm = () => {
                                         placeholder="Enter password"
                                         autoComplete="off"
                                         error={!values.password ? touched.password && errors.password : ''}
-                                        disabled={isLoading || isLoadingForSSO || Boolean(user?.id)}
+                                        disabled={isLoading || Boolean(user?.id)}
                                     />
                                 )}
                             </Field>
@@ -155,7 +148,7 @@ const RegisterForm = () => {
                                     placeholder="Enter password"
                                     autoComplete="off"
                                     error={touched.confirmPassword && errors.confirmPassword}
-                                    disabled={isLoading || isLoadingForSSO || Boolean(user?.id)}
+                                    disabled={isLoading || Boolean(user?.id)}
                                 />
                             )}
                         </Field>
@@ -163,46 +156,11 @@ const RegisterForm = () => {
                         <Button
                             variant="default"
                             type="submit"
-                            disabled={isSubmitting || !isValid || isLoadingForSSO || isLoading || Boolean(user?.id)}
+                            disabled={isSubmitting || !isValid || isLoading || Boolean(user?.id)}
                             className="cursor-pointer w-full mt-2"
                         >
                             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Create your Account'}
                         </Button>
-
-                        <div className="flex items-center my-4">
-                            <div className="flex-grow h-px bg-gray-200" />
-                            <span className="mx-3 text-gray-400 text-sm font-medium">OR Continue with</span>
-                            <div className="flex-grow h-px bg-gray-200" />
-                        </div>
-                        <div className="flex gap-3 mt-5">
-                            <Button
-                                variant="outline"
-                                type="button"
-                                disabled={isSubmitting || isLoadingForSSO || isLoading || Boolean(user?.id)}
-                                className="cursor-pointer flex-1 border-primary text-primary"
-                                onClick={() => handleSSO('Google')}
-                            >
-                                {isLoadingForSSO && selectedProvider === "Google" ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Google'}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                disabled={isSubmitting || isLoadingForSSO || isLoading || Boolean(user?.id)}
-                                className="cursor-pointer flex-1 border-primary text-primary"
-                                onClick={() => handleSSO('MicrosoftEntraID')}
-                            >
-                                {isLoadingForSSO && selectedProvider === "MicrosoftEntraID" ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Microsoft Entra ID'}
-                            </Button>
-                            <Button
-                                variant="outline"
-                                type="button"
-                                disabled={isSubmitting || isLoadingForSSO || isLoading || Boolean(user?.id)}
-                                className="cursor-pointer flex-1 border-primary text-primary"
-                                onClick={() => handleSSO('Okta')}
-                            >
-                                {isLoadingForSSO && selectedProvider === "Okta" ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Okta'}
-                            </Button>
-                        </div>
 
                         {/* Terms and Privacy */}
                         <p className="text-center text-[13px] text-[#5E5F6E] font-[400]">

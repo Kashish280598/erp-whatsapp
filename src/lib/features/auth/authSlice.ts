@@ -4,7 +4,7 @@ import { setLoading } from '../app/appSlice';
 import userService from '@/lib/api/services/userService';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { toast } from 'sonner';
-import type { ForgotPasswordRequestPayload, LoginPayload, Verify2MFAPayload, ResetPasswordPayload, VerifyPasswordPaylod, ChangePasswordPayload } from '@/types/user.type';
+import type { ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, VerifyPasswordPaylod, ChangePasswordPayload } from '@/types/user.type';
 import Cookies from "js-cookie";
 
 import type { RootState } from '@/lib/store';
@@ -40,13 +40,9 @@ interface RegistrationState {
     tenantId?: string;
     name?: string;
     session?: string;
-    qrCodeImage?: string;
-    secretCode?: string;
-    userSub?: string;
     role?: string;
     id?: string;
     token?: string;
-    totpCode?: string;
   };
   selectedProvider: string | null;
 }
@@ -83,18 +79,11 @@ interface AuthState {
   isAuthenticated: boolean;
   registration: RegistrationState;
   login: {
-    type: 'sso' | 'password' | null,
+    type: 'password' | null,
     step: number;
     formData: LoginFormData;
     isLoading: boolean;
     error: string | null;
-    is2FASetup: boolean;
-    totpCode?: string;
-  };
-  reInitiateMFASetup: {
-    qrCodeBase64: string;
-    secretCode: string;
-    session: string;
   };
   resetPassword: ResetPasswordState;
   forgotPassword: {
@@ -133,7 +122,6 @@ const initialState: AuthState = {
       tenantId: '',
     },
     isLoading: false,
-    is2FASetup: false,
     error: null,
   },
   resetPassword: {
@@ -159,11 +147,6 @@ const initialState: AuthState = {
   },
   tenants: {
     data: []
-  },
-  reInitiateMFASetup: {
-    qrCodeBase64: '',
-    secretCode: '',
-    session: '',
   },
   verifiedPassword: ''
 };
@@ -213,10 +196,6 @@ export const signupUser = createAsyncThunk(API_ENDPOINTS.auth.register,
         dispatch(setRegistrationFormData({
           password: payload.password,
           confirmPassword: confirmPassword,
-          session: res.data.session,
-          qrCodeImage: res.data.qrCodeBase64,
-          secretCode: res.data.secretCode,
-          userSub: res.data.userSub,
         }));
       } else {
         throw new Error(res.statusText);
@@ -228,96 +207,19 @@ export const signupUser = createAsyncThunk(API_ENDPOINTS.auth.register,
   }
 );
 
-export const initiateSSO = createAsyncThunk(
-  API_ENDPOINTS.auth.initiateSSO,
-  async (
-    { tenantId, token, provider }: { tenantId: string; token?: string, provider: string },
-    { dispatch }
-  ) => {
-    try {
-      token && dispatch(setSelectedProvider(provider));
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.initiateSSO, isLoading: true }));
-      const res = await userService.initiateSSO(tenantId, provider, token, { skipAuth: true, skipRetry: true });
-      if (res.status === "success") {
-        window.open(res.data.authorizationUrl, '_self');
-        return res;
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.initiateSSO, isLoading: false }));
-      token && dispatch(setSelectedProvider(null));
-      toast.error(err?.data?.message || 'Something went wrong');
-    }
-  }
-);
-
-export const callbackSSO = createAsyncThunk(
-  API_ENDPOINTS.auth.callbackSSO,
-  async (
-    { code, state, callback }: { code: string; state: string, callback: () => void },
-    { dispatch }
-  ) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.callbackSSO, isLoading: true }));
-      const res = await userService.callbackSSO(code, state, { skipAuth: true, skipRetry: true });
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.callbackSSO, isLoading: false }));
-        dispatch(getProfile());
-        return res;
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      callback();
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.callbackSSO, isLoading: false }));
-      toast.error(err?.data?.message || err?.message || 'Something went wrong');
-    }
-  }
-);
-
-export const verifyMFASetup = createAsyncThunk(API_ENDPOINTS.auth.verifyMFASetup,
-  async ({ payload, callback }: { payload: any, callback: (mfaSessionExpired: boolean) => void }, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyMFASetup, isLoading: true }));
-      const res = await userService.verifyMFASetup(payload, {
-        skipAuth: false,
-        skipRetry: true,
-        credentials: 'include'  // Ensure credentials are included
-      });
-      dispatch(setOTPCode(''));
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyMFASetup, isLoading: false }));
-        if (res?.data?.mfaSessionExpired) {
-          toast.error("Your 2FA session has expired. You will now be redirected to the Sign In page.");
-        } else {
-          dispatch(getProfile());
-        }
-        callback(res?.data?.mfaSessionExpired);
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setOTPCode(''));
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyMFASetup, isLoading: false }));
-      toast.error(err?.data?.message || err?.message);
-    }
-  }
-);
-
-export const verifyEmailForSSO_OR_PasswordLogin = createAsyncThunk(API_ENDPOINTS.auth.verifyEmailForSSO_OR_PasswordLogin,
+export const verifyEmailForPasswordLogin = createAsyncThunk(API_ENDPOINTS.auth.verifyEmailForPasswordLogin,
   async (email: string, { dispatch }) => {
     try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForSSO_OR_PasswordLogin, isLoading: true }));
-      const res = await userService.verifyEmailForSSO_OR_PasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
+      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: true }));
+      const res = await userService.verifyEmailForPasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
       if (res.status === "success") {
         if (res.data.length && !res.data[0]?.active) {
           throw new Error('Your account has been deactivated by the admin. Please contact support team.')
         }
         else if (!res.data.length)
           throw new Error("The user is not registered.");
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForSSO_OR_PasswordLogin, isLoading: false }));
-        dispatch(setLoginType(res?.data[0]?.authMethod));
+        dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: false }));
+        dispatch(setLoginType('password'));
         dispatch(setLoginFormData({ email: email, password: '', tenantId: res?.data[0]?.tenantId, session: '' }));
         dispatch(setTenants(res?.data));
         return res;
@@ -325,7 +227,7 @@ export const verifyEmailForSSO_OR_PasswordLogin = createAsyncThunk(API_ENDPOINTS
         throw new Error(res.statusText);
       }
     } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForSSO_OR_PasswordLogin, isLoading: false }));
+      dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: false }));
       toast.error(err?.data?.message || err?.message);
     }
   }
@@ -333,7 +235,7 @@ export const verifyEmailForSSO_OR_PasswordLogin = createAsyncThunk(API_ENDPOINTS
 
 
 export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
-  async ({ payload, callback }: { payload: LoginPayload, callback: () => void }, { dispatch }) => {
+  async ({ payload }: { payload: LoginPayload }, { dispatch }) => {
     try {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.login, isLoading: true }));
 
@@ -348,13 +250,7 @@ export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
       });
 
       if (res.status === "success") {
-        if (res.data.challengeName === "MFA_SETUP") {
-          dispatch(setIs2FASetup(true));
-          toast.error("Please complete your two-factor authentication to proceed.");
-          callback();
-        } else {
-          dispatch(setLoginStep(2));
-        };
+        dispatch(setLoginStep(2));
         dispatch(setLoginFormData({
           email: payload.email,
           password: payload.password,
@@ -369,37 +265,6 @@ export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
     } catch (error: any) {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.login, isLoading: false }));
       toast.error(error?.data?.message || error?.message);
-    }
-  }
-);
-
-export const verify2MFASetup = createAsyncThunk(API_ENDPOINTS.auth.verify2MFASetup,
-  async ({ payload, callback }: { payload: Verify2MFAPayload, callback: (mfaSessionExpired: boolean) => void }, { dispatch }) => {
-    try {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verify2MFASetup, isLoading: true }));
-      const res = await userService.verify2MFASetup(payload, {
-        skipAuth: false,
-        skipRetry: true,
-        credentials: 'include'  // Ensure credentials are included
-      });
-      dispatch(setOTPCodeLogin(''));
-      if (res.status === "success") {
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.verify2MFASetup, isLoading: false }));
-        if (res.data.mfaSessionExpired) {
-          toast.error("Your 2FA session has expired due to inactivity. Please re-enter your email and password to continue the sign-in process.");
-          dispatch(setLoginType(null));
-          dispatch(resetLoginForm());
-        } else {
-          dispatch(getProfile());
-        }
-        callback(res?.data?.mfaSessionExpired);
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setOTPCodeLogin(''));
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.verify2MFASetup, isLoading: false }));
-      toast.error((err?.data?.message?.includes('Invalid username or password') ? 'The password you entered is incorrect.' : err?.data?.message) || err?.message);
     }
   }
 );
@@ -429,7 +294,7 @@ export const forgotPasswordRequest = createAsyncThunk(API_ENDPOINTS.auth.forgotP
 );
 
 export const resetPassword = createAsyncThunk(API_ENDPOINTS.auth.resetPassword,
-  async ({ data, callback }: { data: ResetPasswordPayload, callback: () => void }, { dispatch }) => {
+  async ({ data }: { data: ResetPasswordPayload }, { dispatch }) => {
     try {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.resetPassword, isLoading: true }));
       const res = await userService.resetPassword(data, { skipAuth: true, skipRetry: true });
@@ -437,7 +302,6 @@ export const resetPassword = createAsyncThunk(API_ENDPOINTS.auth.resetPassword,
         dispatch(setLoading({ key: API_ENDPOINTS.auth.resetPassword, isLoading: false }));
         toast.success("Your password has been successfully reset!");
         dispatch(resetPasswordState());
-        callback();
         return res;
       } else {
         throw new Error(res.statusText);
@@ -501,39 +365,6 @@ export const validateResetPasswordToken = createAsyncThunk(API_ENDPOINTS.auth.va
     }
   }
 );
-
-export const reInitiateMFASetup = createAsyncThunk(API_ENDPOINTS.auth.reInitiateMFASetup,
-  async (_, { dispatch, getState }) => {
-    try {
-      const login = (getState() as RootState).auth.login;
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.reInitiateMFASetup, isLoading: true }));
-      const res = await userService.reInitiateMFASetup(
-        {
-          email: login.formData.email,
-          password: login.formData.password,
-          tenantId: login.formData.tenantId || ''
-        }, {
-        skipAuth: true,
-        skipRetry: true,
-      });
-
-      if (res.status === "success") {
-        dispatch(setReInitiateMFASetup({
-          qrCodeBase64: res.data.qrCodeBase64,
-          secretCode: res.data.secretCode,
-          session: res.data.session,
-        }));
-        dispatch(setLoading({ key: API_ENDPOINTS.auth.reInitiateMFASetup, isLoading: false }));
-      } else {
-        throw new Error(res.statusText);
-      }
-    } catch (err: any) {
-      dispatch(setLoading({ key: API_ENDPOINTS.auth.reInitiateMFASetup, isLoading: false }));
-      toast.error(err?.data?.message || err?.message);
-    }
-  }
-);
-
 
 export const getProfile = createAsyncThunk(API_ENDPOINTS.users.profile,
   async (_, { dispatch }) => {
@@ -665,7 +496,7 @@ export const authSlice = createSlice({
     setLoginFormData: (state, action) => {
       state.login.formData = action.payload;
     },
-    setLoginType: (state, action: PayloadAction<'sso' | 'password' | null>) => {
+    setLoginType: (state, action: PayloadAction<'password' | null>) => {
       state.login.type = action.payload;
     },
     resetLoginForm: (state) => {
@@ -697,21 +528,6 @@ export const authSlice = createSlice({
     setResetPasswordData: (state, action: PayloadAction<typeof initialState.resetPassword.data>) => {
       state.resetPassword.data = action.payload;
     },
-    setIs2FASetup: (state, action: PayloadAction<boolean>) => {
-      state.login.is2FASetup = action.payload;
-    },
-    setReInitiateMFASetup: (state, action: PayloadAction<typeof initialState.reInitiateMFASetup>) => {
-      state.reInitiateMFASetup = action.payload;
-    },
-    setOTPCode: (state, action: PayloadAction<string>) => {
-      state.registration.formData.totpCode = action.payload;
-    },
-    setOTPCodeLogin: (state, action: PayloadAction<string>) => {
-      state.login.totpCode = action.payload;
-    },
-    setSelectedProvider: (state, action: PayloadAction<string | null>) => {
-      state.registration.selectedProvider = action.payload;
-    },
     setVerifiedPassword: (state, action: PayloadAction<string>) => {
       state.verifiedPassword = action.payload;
     }
@@ -738,11 +554,6 @@ export const {
   setTenants,
   setIsValidateResetPasswordTokenError,
   setResetPasswordData,
-  setIs2FASetup,
-  setReInitiateMFASetup,
-  setOTPCode,
-  setOTPCodeLogin,
-  setSelectedProvider,
   setVerifiedPassword
 } = authSlice.actions;
 

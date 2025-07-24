@@ -20,9 +20,7 @@ import Discovery from "@/pages/Discovery/index";
 // Auth Pages
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
-import SSO from "@/pages/auth/SSO";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
-import TwoFASetup from "@/pages/auth/TwoFASetup";
 import ResetPassword from "@/pages/auth/ResetPassword";
 
 // Error Pages
@@ -66,26 +64,6 @@ export const router = createBrowserRouter([
         element: (
             <Suspense fallback={<FallbackLoader />}>
                 <ResetPassword />
-            </Suspense>
-        ),
-    },
-    {
-        path: "/2fa-setup",
-        element: (
-            <Suspense fallback={<FallbackLoader />}>
-                <AuthRedirect>
-                    <TwoFASetup />
-                </AuthRedirect>
-            </Suspense>
-        ),
-    },
-    {
-        path: "/sso",
-        element: (
-            <Suspense fallback={<FallbackLoader />}>
-                <AuthRedirect>
-                    <SSO />
-                </AuthRedirect>
             </Suspense>
         ),
     },

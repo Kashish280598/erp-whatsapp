@@ -1,5 +1,4 @@
 import logo from "@/assets/logo.svg";
-import TwoFactorAuthentication from "@/components/auth/2FactorAuthentication";
 import RegisterForm from "@/components/auth/RegisterForm";
 import { useAppDispatch, useAppSelector, type RootState } from "@/lib/store";
 import { useLoading } from "@/hooks/useAppState";
@@ -16,7 +15,6 @@ const Register = () => {
     const dispatch = useAppDispatch();
     const { activeStep, isExpiredLink, isValidateInvitationTokenError } = useAppSelector((state: RootState) => state.auth.registration);
     const { isLoading } = useLoading(API_ENDPOINTS.auth.register);
-    const { isLoading: isLoadingVerifyMFA } = useLoading(API_ENDPOINTS.auth.verifyMFASetup);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const { isLoading: isLoadingValidateInvitationToken } = useLoading(API_ENDPOINTS.auth.validateInvitationToken);
     const { user } = useAppSelector(state => state.auth);
@@ -90,13 +88,12 @@ const Register = () => {
             {!isLoadingValidateInvitationToken && !isInitialLoading && (
                 <div className="w-full max-w-[480px] space-y-8 relative z-10 mt-35">
                     {activeStep === 1 && <RegisterForm />}
-                    {activeStep === 2 && <TwoFactorAuthentication />}
                 </div>
             )}
-            {(isLoadingValidateInvitationToken || isLoading || isLoadingVerifyMFA || isInitialLoading) && <Loader
+            {(isLoadingValidateInvitationToken || isLoading || isInitialLoading) && <Loader
                 className={`fixed top-0 left-0 z-998 ${isInitialLoading ? "backdrop-blur-[10px]" : "backdrop-blur-[3px]"}`}
-                title={isLoadingValidateInvitationToken ? 'Verifying Your Invitation Link' : isLoadingVerifyMFA ? 'Verifying Your Code' : 'Loading...'}
-                description={isLoadingValidateInvitationToken ? 'We\'re confirming your invitation link. This will just take a moment...' : isLoadingVerifyMFA ? 'We\'re confirming your authentication code. This will just take a moment...' : 'This will just take a moment...'} />}
+                title={isLoadingValidateInvitationToken ? 'Verifying Your Invitation Link' : 'Loading...'}
+                description={isLoadingValidateInvitationToken ? 'We\'re confirming your invitation link. This will just take a moment...' : 'This will just take a moment...'} />}
         </div>
     );
 };
