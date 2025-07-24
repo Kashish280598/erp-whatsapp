@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shield outline -->
+  <path d="M200 50L320 100V200C320 284 268 352 200 380C132 352 80 284 80 200V100L200 50Z" stroke="#4F46E5" stroke-width="8" fill="#EEF2FF"/>
+  
+  <!-- Person figure -->
+  <path d="M180 160C180 138.909 196.909 122 218 122C239.091 122 256 138.909 256 160C256 181.091 239.091 198 218 198C196.909 198 180 181.091 180 160Z" fill="#818CF8"/>
+  <path d="M160 280C160 247.49 186.49 221 219 221C251.51 221 278 247.49 278 280V290C278 293.314 275.314 296 272 296H166C162.686 296 160 293.314 160 290V280Z" fill="#818CF8"/>
+  
+  <!-- Checkmark -->
+  <circle cx="218" cy="160" r="60" stroke="#4F46E5" stroke-width="8" fill="none"/>
+  <path d="M188 160L208 180L248 140" stroke="#4F46E5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="120" cy="100" r="8" fill="#C7D2FE"/>
+  <circle cx="280" cy="320" r="8" fill="#C7D2FE"/>
+  <circle cx="320" cy="180" r="8" fill="#C7D2FE"/>
+</svg> 
