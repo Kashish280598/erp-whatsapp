@@ -47,20 +47,6 @@ export default function Settings() {
                         </div>
                     </AccordionContent>
                 </AccordionItem>
-                <AccordionItem value="about" className="border-b-0 !cursor-pointer mb-1">
-                    <Link to="settings/about" className="underline-0 hover:underline-0 !cursor-pointer">
-                        <AccordionTrigger className={`!cursor-pointer ${checkActiveNav('/settings/about') ? 'bg-[#F4F4F6] text-neutral' : 'bg-transparent text-[#5E5F6E]'} text-[13px] leading-[20px] font-[400] px-2 py-2 [&[data-state=open]>svg]:rotate-270 [&[data-state=closed]>svg]:rotate-270`}>
-                            About
-                        </AccordionTrigger>
-                    </Link>
-                </AccordionItem>
-                <AccordionItem value="license" className="border-b-0 !cursor-pointer">
-                    <Link to="settings/license" className="underline-0 hover:underline-0 !cursor-pointer">
-                        <AccordionTrigger className={`!cursor-pointer ${checkActiveNav('/settings/license') ? 'bg-[#F4F4F6] text-neutral' : 'bg-transparent text-[#5E5F6E]'} text-[13px] leading-[20px] font-[400] px-2 py-2 [&[data-state=open]>svg]:rotate-270 [&[data-state=closed]>svg]:rotate-270`}>
-                            License
-                        </AccordionTrigger>
-                    </Link>
-                </AccordionItem>
             </Accordion>
         </div>
     )

@@ -13,8 +13,6 @@ const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
 const Settings = lazy(() => import("@/pages/Settings/index"));
 const ManageAccount = lazy(() => import("@/pages/Settings/ManageAccount"));
 const UserManagement = lazy(() => import("@/pages/Settings/UserManagement"));
-const About = lazy(() => import("@/pages/Settings/About"));
-const License = lazy(() => import("@/pages/Settings/License"));
 const Discovery = lazy(() => import("@/pages/Discovery/index"));
 
 // Auth Pages
@@ -133,16 +131,6 @@ export const router = createBrowserRouter([
                     {
                         path: "user-management",
                         element: <UserManagement />,
-                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                    },
-                    {
-                        path: "about",
-                        element: <About />,
-                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                    },
-                    {
-                        path: "license",
-                        element: <License />,
                         errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },
                 ],

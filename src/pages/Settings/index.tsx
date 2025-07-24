@@ -2,8 +2,6 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import ManageAccountIcon from '@/assets/icons/manage-account.svg';
 import UserManagementIcon from '@/assets/icons/manage-user.svg';
-import AboutIcon from '@/assets/icons/info-circle.svg';
-import LicenseIcon from '@/assets/icons/document-license.svg';
 
 const navItems = [
     {
@@ -15,16 +13,6 @@ const navItems = [
         icon: UserManagementIcon,
         label: 'User Management',
         path: '/settings/user-management',
-    },
-    {
-        icon: AboutIcon,
-        label: 'About',
-        path: '/settings/about',
-    },
-    {
-        icon: LicenseIcon,
-        label: 'License',
-        path: '/settings/license',
     }
 ];
 
