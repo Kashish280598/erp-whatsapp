@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { store, useAppDispatch, useAppSelector } from '@/lib/store'
+import { store, persistor, useAppDispatch, useAppSelector } from '@/lib/store'
 import '@/index.css'
 import { ThemeProvider } from "@/providers/theme-provider"
 import Loader from '@/components/Loader'
@@ -13,6 +13,8 @@ import { useLoading } from '@/hooks/useAppState'
 import { API_ENDPOINTS } from '@/lib/api/config'
 import { setInitializing } from '@/lib/features/app/appSlice'
 import * as Sentry from '@sentry/react';
+// redux-persist
+import { PersistGate } from 'redux-persist/integration/react';
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
@@ -57,12 +59,14 @@ const AppWrapper: React.FC<WrapperProps> = ({ children }) => {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <AppWrapper>
     <Provider store={store}>
-      <ThemeProvider storageKey="erp-ui-theme" defaultTheme="light">
-        <React.Suspense fallback={<Loader />}>
-          <App />
-        </React.Suspense>
-        <Toster />
-      </ThemeProvider>
+      <PersistGate loading={<Loader />} persistor={persistor}>
+        <ThemeProvider storageKey="erp-ui-theme" defaultTheme="light">
+          <React.Suspense fallback={<Loader />}>
+            <App />
+          </React.Suspense>
+          <Toster />
+        </ThemeProvider>
+      </PersistGate>
     </Provider>
   </AppWrapper>
 );
