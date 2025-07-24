@@ -7,14 +7,11 @@ import { toast } from 'sonner';
 import type { ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, VerifyPasswordPaylod, ChangePasswordPayload } from '@/types/user.type';
 import Cookies from "js-cookie";
 
-import type { RootState } from '@/lib/store';
 import { closeConfirmPasswordModal, closeSetPasswordModal, openSetPasswordModal, openSuccessModal } from '../settings/settingsSlice';
 interface User {
   id: string;
   email: string;
   role: 'admin' | 'read-only' | 'super-admin'; // Adjust if more specific roles exist
-  tenantId: string;
-  cognitoUserId: string;
   active: boolean;
   name: string;
   createdAt: string; // Can also be Date if you parse it
@@ -37,7 +34,6 @@ interface RegistrationState {
     email?: string;
     password?: string;
     confirmPassword?: string;
-    tenantId?: string;
     name?: string;
     session?: string;
     role?: string;
@@ -51,7 +47,6 @@ interface LoginFormData {
   email: string;
   password: string;
   session?: string;
-  tenantId?: string;
 }
 
 interface ResetPasswordState {
@@ -64,8 +59,7 @@ interface ResetPasswordState {
     confirmPassword: string;
   };
   data: {
-    email: string;
-    tenantId: string;
+    email: string;  
     token: string;
     expiresAt: string;
     isUsed: boolean;
@@ -89,9 +83,6 @@ interface AuthState {
   forgotPassword: {
     isRequestSent: boolean;
   };
-  tenants: {
-    data: any[];
-  },
   verifiedPassword: string;
 }
 
@@ -107,7 +98,6 @@ const initialState: AuthState = {
       email: '',
       password: '',
       confirmPassword: '',
-      tenantId: '',
       name: '',
     },
     selectedProvider: null,
@@ -119,7 +109,6 @@ const initialState: AuthState = {
       email: '',
       password: '',
       session: '',
-      tenantId: '',
     },
     isLoading: false,
     error: null,
@@ -135,7 +124,6 @@ const initialState: AuthState = {
     isValidateResetPasswordTokenError: '',
     data: {
       email: '',
-      tenantId: '',
       token: '',
       expiresAt: '',
       isUsed: false,
@@ -144,9 +132,6 @@ const initialState: AuthState = {
   },
   forgotPassword: {
     isRequestSent: false,
-  },
-  tenants: {
-    data: []
   },
   verifiedPassword: ''
 };
@@ -163,7 +148,6 @@ export const validateInvitationToken = createAsyncThunk(API_ENDPOINTS.auth.valid
         dispatch(setIsExpiredLink(false));
         dispatch(setRegistrationFormData({
           email: res.data.email,
-          tenantId: res.data.tenantId,
           name: res.data.name,
           role: res.data.role,
           id: res.data.id,
@@ -220,8 +204,7 @@ export const verifyEmailForPasswordLogin = createAsyncThunk(API_ENDPOINTS.auth.v
           throw new Error("The user is not registered.");
         dispatch(setLoading({ key: API_ENDPOINTS.auth.verifyEmailForPasswordLogin, isLoading: false }));
         dispatch(setLoginType('password'));
-        dispatch(setLoginFormData({ email: email, password: '', tenantId: res?.data[0]?.tenantId, session: '' }));
-        dispatch(setTenants(res?.data));
+        dispatch(setLoginFormData({ email: email, password: '', session: '' }));
         return res;
       } else {
         throw new Error(res.statusText);
@@ -254,7 +237,6 @@ export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
         dispatch(setLoginFormData({
           email: payload.email,
           password: payload.password,
-          tenantId: payload.tenantId,
           session: res.data.session,
         }));
         dispatch(setLoading({ key: API_ENDPOINTS.auth.login, isLoading: false }));
@@ -270,12 +252,10 @@ export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
 );
 
 export const forgotPasswordRequest = createAsyncThunk(API_ENDPOINTS.auth.forgotPasswordRequest,
-  async (payload: ForgotPasswordRequestPayload, { dispatch, getState }) => {
+  async (payload: ForgotPasswordRequestPayload, { dispatch }) => {
     try {
-      const { tenants } = (getState() as RootState).auth;
-      const tenantId = tenants?.data?.[0]?.tenantId;
       dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: true }));
-      const res = await userService.forgotPasswordRequest({ ...payload, tenantId }, { skipAuth: true, skipRetry: true });
+      const res = await userService.forgotPasswordRequest({ ...payload });
       if (res.status === "success") {
         dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: false }));
         dispatch(setIsForgotPasswordRequestSent(true));
@@ -465,9 +445,6 @@ export const authSlice = createSlice({
       // Cookies will be cleared by the server
       // Todo: API intigration is pending
     },
-    setTenants: (state, action: PayloadAction<typeof initialState.tenants.data>) => {
-      state.tenants.data = action.payload;
-    },
     setCredentials: (state, action: PayloadAction<{ user: User | null; isAuthenticated: boolean }>) => {
       state.isAuthenticated = action.payload.isAuthenticated;
       state.user = action.payload.user;
@@ -551,7 +528,6 @@ export const {
   setIsValidateInvitationTokenError,
   setIsForgotPasswordRequestSent,
   setLoginType,
-  setTenants,
   setIsValidateResetPasswordTokenError,
   setResetPasswordData,
   setVerifiedPassword

@@ -58,7 +58,6 @@ export default function InviteUserSideDrawer() {
         validationSchema,
         onSubmit: async (values) => {
             const payload: InviteUserRequestPayload = {
-                tenantId: user?.tenantId || '',
                 invitations: values.users.filter(a => a).map(user => ({
                     email: user.email,
                     name: `${user.firstName} ${user.lastName}`,

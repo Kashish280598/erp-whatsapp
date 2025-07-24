@@ -49,7 +49,6 @@ interface RegisterFormValues {
     email: string;
     password: string;
     confirmPassword: string;
-    tenantId: string;
     name: string;
 }
 
@@ -64,7 +63,6 @@ const RegisterForm = () => {
         email: formData.email || "",
         password: "",
         confirmPassword: "",
-        tenantId: formData.tenantId || "",
     };
 
     const handleSubmit = async (values: RegisterFormValues) => {

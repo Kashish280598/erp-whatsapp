@@ -28,19 +28,16 @@ export interface CreateUserDTO {
 
 export interface ForgotPasswordRequestPayload {
     email: string;
-    tenantId?: string;
 }
 
 export interface LoginPayload {
     email: string;
     password: string;
-    tenantId: string;
-}
+};
 
 export interface ResetPasswordPayload {
     token: string;
     newPassword: string;
-    tenantId: string;
 };
 
 export interface Invitation {
@@ -50,7 +47,6 @@ export interface Invitation {
 };
 
 export interface InviteUserRequestPayload {
-    tenantId: string;
     invitations: Invitation[];
 };
 
@@ -73,5 +69,4 @@ export interface ChangePasswordPayload {
 
 export interface ResetPasswordForUserPayload {
     userId: string;
-    tenantId: string;
 }

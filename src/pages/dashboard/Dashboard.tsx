@@ -1,7 +1,4 @@
-import DoughnutChart from '@/components/charts/DoughnutChart';
-import Gauge from '@/components/charts/Gauge'
-import OpenResolvedLineChart from '@/components/charts/OpenResolvedLineChart'
-import SeverityChartExample from '@/components/charts/SeverityChartExample';
+import React, { useState, Suspense } from 'react';
 import { DataTable } from '@/components/custom/table/data-table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -9,21 +6,25 @@ import type { TableToolbar } from '@/types/table.types';
 import { IconDotsVertical, IconLockCheck } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import { CircularProgress } from '@/components/custom/CircularProgress';
-import { useState } from 'react';
 import { DataTableColumnHeader } from '@/components/custom/table/data-table/data-table-column-header';
-import PasswordStrengthChecker from '@/components/custom/PasswordStrengthChecker';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TabListContainer from '@/components/custom/TabListContainer';
-import { IntegrationCard } from '@/components/custom/IntegrationCard';
 import { toast } from "sonner";
-import ComplianceCardExample from '@/components/charts/ComplianceCardExample';
-import HoursChart from '@/components/charts/HoursChart';
-import ComplianceScoreCard from '@/components/charts/ComplianceScoreCard ';
-import HistoryTimeline from '@/components/custom/HistoryTimeline';
-import CommentSection from '@/components/custom/Comments';
-import { Dialog, DialogType } from '@/components/custom/Dialog';
-import { SideDrawer } from '@/components/custom/SideDrawer';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar } from '@/components/ui/calendar';
+import { DialogType } from '@/components/custom/Dialog';
+const Dialog = React.lazy(() => import('@/components/custom/Dialog').then(m => ({ default: m.Dialog })));
+const SideDrawer = React.lazy(() => import('@/components/custom/SideDrawer').then(m => ({ default: m.SideDrawer })));
+const IntegrationCard = React.lazy(() => import('@/components/custom/IntegrationCard').then(m => ({ default: m.IntegrationCard })));
+const Gauge = React.lazy(() => import('@/components/charts/Gauge'));
+const DoughnutChart = React.lazy(() => import('@/components/charts/DoughnutChart'));
+const PasswordStrengthChecker = React.lazy(() => import('@/components/custom/PasswordStrengthChecker'));
+const OpenResolvedLineChart = React.lazy(() => import('@/components/charts/OpenResolvedLineChart'));
+const SeverityChartExample = React.lazy(() => import('@/components/charts/SeverityChartExample'));
+const ComplianceCardExample = React.lazy(() => import('@/components/charts/ComplianceCardExample'));
+const HoursChart = React.lazy(() => import('@/components/charts/HoursChart'));
+const ComplianceScoreCard = React.lazy(() => import('@/components/charts/ComplianceScoreCard '));
+const HistoryTimeline = React.lazy(() => import('@/components/custom/HistoryTimeline'));
+const CommentSection = React.lazy(() => import('@/components/custom/Comments'));
 
 const data = {
   labels: ['', "24' Nov", '', "24' Dec", '', "Jan", '', "Feb", '', "Mar", '', "Apr", ''],
@@ -108,7 +109,9 @@ export default function Dashboard() {
   return (
     <div className='pb-5 w-full'>
       <div className='w-full h-full flex flex-col gap-4'>
-        <Gauge totalSegments={20} filledSegments={10} className='w-[200px]' />
+        <Suspense fallback={<div>Loading...</div>}>
+          <Gauge totalSegments={20} filledSegments={10} className='w-[200px]' />
+        </Suspense>
         <Calendar
           mode="range"
         />
@@ -120,10 +123,14 @@ export default function Dashboard() {
             <TabsTrigger value="password">Password Strength Checker</TabsTrigger>
           </TabsList>
           <TabsContent value="chart">
-            <DoughnutChart />
+            <Suspense fallback={<div>Loading...</div>}>
+              <DoughnutChart />
+            </Suspense>
           </TabsContent>
           <TabsContent value="password">
-            <PasswordStrengthChecker password="P$assword123" />
+            <Suspense fallback={<div>Loading...</div>}>
+              <PasswordStrengthChecker password="P$assword123" />
+            </Suspense>
           </TabsContent>
         </Tabs>
 
@@ -475,194 +482,230 @@ export default function Dashboard() {
           </TabsContent>
           <TabsContent value="available" className="mt-4">
             <div className="grid grid-cols-4 gap-4">
-              <IntegrationCard
-                name="Appian"
-                logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
-                description="Appian is the leading platform for process orchestration, automation, and intelligence."
-              />
-              <IntegrationCard
-                name="Appian"
-                logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
-                description="Appian is the leading platform for process orchestration, automation, and intelligence."
-              />
-              <IntegrationCard
-                name="Appian"
-                logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
-                description="Appian is the leading platform for process orchestration, automation, and intelligence."
-              />
-              <IntegrationCard
-                name="Appian"
-                logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
-                description="Appian is the leading platform for process orchestration, automation, and intelligence."
-              />
-              <IntegrationCard
-                name="Appian"
-                logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
-                description="Appian is the leading platform for process orchestration, automation, and intelligence."
-              />
-              <IntegrationCard
-                name="Appian"
-                logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
-                description="Appian is the leading platform for process orchestration, automation, and intelligence."
-              />
+              <Suspense fallback={<div>Loading...</div>}>
+                <IntegrationCard
+                  name="Appian"
+                  logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
+                  description="Appian is the leading platform for process orchestration, automation, and intelligence."
+                />
+              </Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
+                <IntegrationCard
+                  name="Appian"
+                  logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
+                  description="Appian is the leading platform for process orchestration, automation, and intelligence."
+                />
+              </Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
+                <IntegrationCard
+                  name="Appian"
+                  logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
+                  description="Appian is the leading platform for process orchestration, automation, and intelligence."
+                />
+              </Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
+                <IntegrationCard
+                  name="Appian"
+                  logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
+                  description="Appian is the leading platform for process orchestration, automation, and intelligence."
+                />
+              </Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
+                <IntegrationCard
+                  name="Appian"
+                  logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
+                  description="Appian is the leading platform for process orchestration, automation, and intelligence."
+                />
+              </Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
+                <IntegrationCard
+                  name="Appian"
+                  logo="https://seeklogo.com/images/A/appian-logo-7700B1B69B-seeklogo.com.png"
+                  description="Appian is the leading platform for process orchestration, automation, and intelligence."
+                />
+              </Suspense>
             </div>
             {/* Content for Available Integrations */}
           </TabsContent>
         </Tabs>
 
         <div className='grid grid-cols-2 gap-4'>
-          <OpenResolvedLineChart
-            key="dashboard-line-chart"
-            data={data}
-            customLegend={(
-              <div className="flex items-center justify-center gap-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-[2px] bg-[#B1241A]"></div>
-                  <span className="text-sm text-gray-600">Open</span>
-                  <span className="font-[600] text-[12px] leading-[14px] px-2 py-[2px] text-[#B1241A] bg-[#FDEDED] rounded-md">
-                    {30}
-                  </span>
+          <Suspense fallback={<div>Loading...</div>}>
+            <OpenResolvedLineChart
+              key="dashboard-line-chart"
+              data={data}
+              customLegend={(
+                <div className="flex items-center justify-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-[2px] bg-[#B1241A]"></div>
+                    <span className="text-sm text-gray-600">Open</span>
+                    <span className="font-[600] text-[12px] leading-[14px] px-2 py-[2px] text-[#B1241A] bg-[#FDEDED] rounded-md">
+                      {30}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-[2px] bg-[#077D48]"></div>
+                    <span className="text-sm text-gray-600">Resolved</span>
+                    <span className="font-[600] text-[12px] leading-[14px] px-2 py-[2px] text-[#077D48] bg-[#E6F4EE] rounded-md">
+                      {28}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-[2px] bg-[#077D48]"></div>
-                  <span className="text-sm text-gray-600">Resolved</span>
-                  <span className="font-[600] text-[12px] leading-[14px] px-2 py-[2px] text-[#077D48] bg-[#E6F4EE] rounded-md">
-                    {28}
-                  </span>
-                </div>
-              </div>
-            )}
-          />
-          <SeverityChartExample />
-          <ComplianceCardExample />
-          <HoursChart data={{
-            labels: ['', "24' Dec", '', "Jan", '', "Feb", '', "Mar", '', "Apr", ''],
-            datasets: [
-              {
-                label: 'Open',
-                data: [1, 2, 2.5, 3, 2.6, 6, 3, 3.5, 3.6, 3.7, 3.5],
-                borderColor: '#7377E3',
-                tension: 0.1,
-                borderWidth: 2,
-                pointBackgroundColor: Array(10).fill('transparent').concat('#fff'),
-                pointBorderColor: Array(10).fill('transparent').concat("#7377E3"),
-                pointRadius: Array(10).fill(0).concat(6),
-                pointHoverRadius: Array(10).fill(0).concat(6),
-                pointBorderWidth: Array(10).fill(0).concat(2),
-              },
-            ]
-          }} className="h-[260px]" />
+              )}
+            />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <SeverityChartExample />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ComplianceCardExample />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <HoursChart data={{
+              labels: ['', "24' Dec", '', "Jan", '', "Feb", '', "Mar", '', "Apr", ''],
+              datasets: [
+                {
+                  label: 'Open',
+                  data: [1, 2, 2.5, 3, 2.6, 6, 3, 3.5, 3.6, 3.7, 3.5],
+                  borderColor: '#7377E3',
+                  tension: 0.1,
+                  borderWidth: 2,
+                  pointBackgroundColor: Array(10).fill('transparent').concat('#fff'),
+                  pointBorderColor: Array(10).fill('transparent').concat("#7377E3"),
+                  pointRadius: Array(10).fill(0).concat(6),
+                  pointHoverRadius: Array(10).fill(0).concat(6),
+                  pointBorderWidth: Array(10).fill(0).concat(2),
+                },
+              ]
+            }} className="h-[260px]" />
+          </Suspense>
         </div>
         <div className='grid grid-cols-4 gap-4 border border-[#E4E4E8] shadow-[0px_1px_2px_0px_#1018280D] p-3 rounded-[8px]'>
-          <ComplianceScoreCard
-            title="Critical Score Example"
-            logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
-            score={19}
-            data={[10, 10, 10, 5, 5, 7, 8]}
-          />
-          <ComplianceScoreCard
-            title="Low Score Example"
-            logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
-            score={80}
-            data={[10, 10, 10, 5, 5, 7, 8]}
-          />
-          <ComplianceScoreCard
-            title="Hihg Score Example"
-            logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
-            score={45}
-            data={[10, 10, 10, 5, 5, 7, 8]}
-          />
-          <ComplianceScoreCard
-            title="Medium Score Example"
-            logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
-            score={75}
-            data={[10, 10, 10, 5, 5, 7, 8]}
-          />
+          <Suspense fallback={<div>Loading...</div>}>
+            <ComplianceScoreCard
+              title="Critical Score Example"
+              logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
+              score={19}
+              data={[10, 10, 10, 5, 5, 7, 8]}
+            />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ComplianceScoreCard
+              title="Low Score Example"
+              logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
+              score={80}
+              data={[10, 10, 10, 5, 5, 7, 8]}
+            />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ComplianceScoreCard
+              title="Hihg Score Example"
+              logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
+              score={45}
+              data={[10, 10, 10, 5, 5, 7, 8]}
+            />
+          </Suspense>
+          <Suspense fallback={<div>Loading...</div>}>
+            <ComplianceScoreCard
+              title="Medium Score Example"
+              logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/AICPA_SOC_Logo.png/120px-AICPA_SOC_Logo.png"
+              score={75}
+              data={[10, 10, 10, 5, 5, 7, 8]}
+            />
+          </Suspense>
         </div>
-        <HistoryTimeline history={[
-          {
-            date: "19/03/2025",
-            time: "08:30 PM",
-            type: "Severity Changed",
-            details: [{ title: "High", type: "high" }, { title: "Low", type: "low" }],
-            user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
-          },
-          {
-            date: "19/03/2025",
-            time: "06:45 PM",
-            type: "Manual Scan Executed",
-            details: [{ finding: 2, open: 2, resolved: 5 }],
-            user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
-          },
-          {
-            date: "19/03/2025",
-            time: "04:45 PM",
-            type: "Description Updated",
-            details: ['Rule description refined to include "MFA verification" checks.'],
-            user: { initials: "PL", name: "Phillip Lang", badge: "PL", image: "https://placehold.co/150" }
-          },
-          {
-            date: "19/03/2025",
-            time: "03:30 PM",
-            type: "Rule Renamed",
-            details: ['Rule renamed from "Appian Access Control Check" to "Security Configuration Check" by Admin.'],
-            user: { initials: "GK", name: "Gaurav Khanna", badge: "GK", image: "https://placehold.co/150" }
-          },
-          {
-            date: "19/03/2025",
-            time: "12:30 PM",
-            type: "Severity Changed",
-            details: [{ title: "Critical", type: "critical" }, { title: "High", type: "high" }],
-            user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
-          },
-          {
-            date: "19/03/2025",
-            time: "10:30 AM",
-            type: "Daily Scan Executed",
-            details: [{ finding: 12, open: 12, resolved: 7 }],
-            user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
-          },
-          {
-            date: "19/03/2025",
-            time: "10:30 AM",
-            type: "Rule Assigned",
-            details: [{
-              service: {
-                name: 'Appian India',
-                logo: 'https://placehold.co/150',
-                id: 'appian-india'
-              }
-            }],
-            user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
-          },
-        ]} />
-        <CommentSection onSubmit={(message) => { console.log(message) }} isShowComments={false} />
-        <Dialog
-          type={DialogType.SUCCESS}
-          icon={<IconLockCheck className="h-9 w-9 text-[#077D48]" />}
-          title="Password Updated!"
-          description="Your password has been successfully reset!"
-          trigger={<Button variant="outline">Open Dialog</Button>}
-          actions={[
-            { label: "Close", variant: "ghost" }
-          ]}
-        />
-        <SideDrawer
-          header={(
-            <div className='mr-auto relative left-5 top-8 flex items-center gap-2'>
-              <Avatar className="h-17 w-17 rounded-[10px] border-2 border-[#E4E4E8] p-0 bg-white">
-                <AvatarImage src="https://placehold.co/150" className='rounded-[0px]' />
-                <AvatarFallback className="rounded-[0px] bg-white text-gray-600 text-[32px]">
-                  {"A"}
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          )}
-          open={false}
-          onClose={() => { }}
-        >
-          <div>Content</div>
-        </SideDrawer>
+        <Suspense fallback={<div>Loading...</div>}>
+          <HistoryTimeline history={[
+            {
+              date: "19/03/2025",
+              time: "08:30 PM",
+              type: "Severity Changed",
+              details: [{ title: "High", type: "high" }, { title: "Low", type: "low" }],
+              user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
+            },
+            {
+              date: "19/03/2025",
+              time: "06:45 PM",
+              type: "Manual Scan Executed",
+              details: [{ finding: 2, open: 2, resolved: 5 }],
+              user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
+            },
+            {
+              date: "19/03/2025",
+              time: "04:45 PM",
+              type: "Description Updated",
+              details: ['Rule description refined to include "MFA verification" checks.'],
+              user: { initials: "PL", name: "Phillip Lang", badge: "PL", image: "https://placehold.co/150" }
+            },
+            {
+              date: "19/03/2025",
+              time: "03:30 PM",
+              type: "Rule Renamed",
+              details: ['Rule renamed from "Appian Access Control Check" to "Security Configuration Check" by Admin.'],
+              user: { initials: "GK", name: "Gaurav Khanna", badge: "GK", image: "https://placehold.co/150" }
+            },
+            {
+              date: "19/03/2025",
+              time: "12:30 PM",
+              type: "Severity Changed",
+              details: [{ title: "Critical", type: "critical" }, { title: "High", type: "high" }],
+              user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
+            },
+            {
+              date: "19/03/2025",
+              time: "10:30 AM",
+              type: "Daily Scan Executed",
+              details: [{ finding: 12, open: 12, resolved: 7 }],
+              user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
+            },
+            {
+              date: "19/03/2025",
+              time: "10:30 AM",
+              type: "Rule Assigned",
+              details: [{
+                service: {
+                  name: 'Appian India',
+                  logo: 'https://placehold.co/150',
+                  id: 'appian-india'
+                }
+              }],
+              user: { initials: "RS", name: "Rahul Sharma", badge: "RS", image: "https://placehold.co/150" }
+            },
+          ]} />
+        </Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
+          <CommentSection onSubmit={(message) => { console.log(message) }} isShowComments={false} />
+        </Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Dialog
+            type={DialogType.SUCCESS}
+            icon={<IconLockCheck className="h-9 w-9 text-[#077D48]" />}
+            title="Password Updated!"
+            description="Your password has been successfully reset!"
+            trigger={<Button variant="outline">Open Dialog</Button>}
+            actions={[
+              { label: "Close", variant: "ghost" }
+            ]}
+          />
+        </Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
+          <SideDrawer
+            header={(
+              <div className='mr-auto relative left-5 top-8 flex items-center gap-2'>
+                <Avatar className="h-17 w-17 rounded-[10px] border-2 border-[#E4E4E8] p-0 bg-white">
+                  <AvatarImage src="https://placehold.co/150" className='rounded-[0px]' />
+                  <AvatarFallback className="rounded-[0px] bg-white text-gray-600 text-[32px]">
+                    {"A"}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+            )}
+            open={false}
+            onClose={() => { }}
+          >
+            <div>Content</div>
+          </SideDrawer>
+        </Suspense>
       </div>
     </div>
   )

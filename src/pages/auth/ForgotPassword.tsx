@@ -7,7 +7,7 @@ import { CircleCheck } from 'lucide-react';
 import Logo from '@/assets/logo.svg';
 import { useAppSelector, type RootState } from '@/lib/store';
 import { useEffect, useState } from 'react';
-import { forgotPasswordRequest, setIsForgotPasswordRequestSent, setTenants } from '@/lib/features/auth/authSlice';
+import { forgotPasswordRequest, setIsForgotPasswordRequestSent } from '@/lib/features/auth/authSlice';
 import { useAppDispatch } from '@/lib/store';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { useLoading } from '@/hooks/useAppState';
@@ -19,7 +19,6 @@ import { setLoading } from '@/lib/features/app/appSlice';
 const ForgotPassword = () => {
     const dispatch = useAppDispatch();
     const { isRequestSent } = useAppSelector((state: RootState) => state.auth.forgotPassword);
-    const { data: tenants } = useAppSelector((state: RootState) => state.auth.tenants);
     const [email, setEmail] = useState('');
     const { isLoading } = useLoading(API_ENDPOINTS.auth.forgotPasswordRequest);
     const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
@@ -32,9 +31,8 @@ const ForgotPassword = () => {
     }, []);
 
     const handleSubmit = async () => {
-        const tenantId = tenants?.[0]?.tenantId || null;
         try {
-            if (!tenantId) {
+            if (!loginEmail) {
                 dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: true }));
                 const res = await userService.verifyEmailForPasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
                 if (res.status === "success") {
@@ -43,7 +41,6 @@ const ForgotPassword = () => {
                     }
                     if (!res.data.length)
                         throw new Error("The user is not registered.");
-                    dispatch(setTenants(res?.data));
                     dispatch(forgotPasswordRequest({ email }));
                     return res;
                 } else {

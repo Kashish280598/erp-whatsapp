@@ -42,7 +42,7 @@ const ResetPassword = () => {
   const { isLoading: isResetPasswordLoading } = useLoading(API_ENDPOINTS.auth.resetPassword);
   const { user } = useAppSelector(state => state.auth);
 
-  const { isExpiredLink, isValidateResetPasswordTokenError, isLoading, error, formData, data } = useAppSelector(
+  const { isExpiredLink, isValidateResetPasswordTokenError, isLoading, error, formData } = useAppSelector(
     (state: RootState) => state.auth.resetPassword
   );
 
@@ -78,7 +78,6 @@ const ResetPassword = () => {
       data: {
         token: resetToken || '',
         newPassword: values.password,
-        tenantId: data.tenantId
       }
     }));
   };

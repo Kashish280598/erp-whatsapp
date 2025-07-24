@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
 import { cn } from "@/lib/utils";
 import { CircleCheck, X as CircleX } from "lucide-react";
-import PasswordStrengthBar from 'react-password-strength-bar';
 
 type StrengthLevel = "Too Short" | "Weak" | "Medium" | "Strong" | "Ultimate" | "";
 
@@ -49,15 +48,15 @@ const getProgressValue = (strength: StrengthLevel): number => {
 
 
 const PasswordStrengthChecker: React.FC<{ password: string, className?: string }> = ({ password, className }) => {
-    const [strength, setStrength] = useState<StrengthLevel>("Too Short");
+    // Compute strength directly from password
+    const strength = getPasswordStrength(
+        password.length < 8 ? 0 :
+        [/[a-z]/, /[A-Z]/, /\d/, /[^A-Za-z0-9]/].reduce((acc, regex) => acc + Number(regex.test(password)), 0)
+    );
 
     const progress = getProgressValue(strength);
     const strengthColor = getStrengthColor(strength);
     const strengthTextColor = getStrengthTextColor(strength);
-
-    const handlePasswordStrengthChange = (score: number) => {
-        setStrength(getPasswordStrength(score));
-    }
 
     return (
         <div className={cn("w-[480px] p-6 bg-white shadow-lg rounded-xl", className)}>
@@ -69,13 +68,13 @@ const PasswordStrengthChecker: React.FC<{ password: string, className?: string }
                         style={{ width: `${progress}%` }}
                     />
                 </div>
-                <PasswordStrengthBar
+                {/* <PasswordStrengthBar
                     className="!hidden"
                     scoreWords={["Too Short", "Weak", "Medium", "Strong", "Ultimate"]}
                     password={password}
                     minLength={5}
                     onChangeScore={handlePasswordStrengthChange}
-                />
+                /> */}
                 <p className="font-[600] text-[#5E5F6E] text-[13px] leading-5 mt-2">
                     Strength:{" "}
                     <span className={`font-[400] ${strengthTextColor}`}>

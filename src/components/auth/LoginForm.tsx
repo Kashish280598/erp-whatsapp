@@ -22,7 +22,7 @@ const LoginSchema = Yup.object().shape({
 const LoginForm = () => {
   const dispatch = useAppDispatch();
   const { isLoading } = useLoading(API_ENDPOINTS.auth.login);
-  const { email: loginEmail, tenantId } = useAppSelector(state => state.auth.login.formData);
+  const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
 
   const initialValues = {
     email: loginEmail,
@@ -30,7 +30,7 @@ const LoginForm = () => {
   };
 
   const handleSubmit = async (values: typeof initialValues) => {
-    dispatch(loginUser({ payload: { email: values.email, password: values.password, tenantId: tenantId || '' } }) as any);
+    dispatch(loginUser({ payload: { email: values.email, password: values.password } }) as any);
   };
 
   useEffect(() => {
@@ -64,7 +64,6 @@ const LoginForm = () => {
                     id="email"
                     type="email"
                     label="Email"
-                    disabled
                     placeholder="Enter your email address"
                     error={touched.email && errors.email}
                   />

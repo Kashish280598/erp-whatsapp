@@ -1,5 +1,5 @@
 import Loader from "@/components/Loader";
-import { Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import AuthRedirect from "./auth-redirect";
 import App from "@/App";
@@ -8,23 +8,23 @@ import { cn } from "@/lib/utils";
 import ProtectedRoute from "./ProtectedRoute";
 
 // Application Pages
-import Components from "@/pages/dashboard/Components";
-import Dashboard from "@/pages/dashboard/Dashboard";
-import Settings from "@/pages/Settings/index";
-import ManageAccount from "@/pages/Settings/ManageAccount";
-import UserManagement from "@/pages/Settings/UserManagement";
-import About from "@/pages/Settings/About";
-import License from "@/pages/Settings/License";
-import Discovery from "@/pages/Discovery/index";
+const Components = lazy(() => import("@/pages/dashboard/Components"));
+const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
+const Settings = lazy(() => import("@/pages/Settings/index"));
+const ManageAccount = lazy(() => import("@/pages/Settings/ManageAccount"));
+const UserManagement = lazy(() => import("@/pages/Settings/UserManagement"));
+const About = lazy(() => import("@/pages/Settings/About"));
+const License = lazy(() => import("@/pages/Settings/License"));
+const Discovery = lazy(() => import("@/pages/Discovery/index"));
 
 // Auth Pages
-import Login from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
-import ForgotPassword from "@/pages/auth/ForgotPassword";
-import ResetPassword from "@/pages/auth/ResetPassword";
+const Login = lazy(() => import("@/pages/auth/Login"));
+const Register = lazy(() => import("@/pages/auth/Register"));
+const ForgotPassword = lazy(() => import("@/pages/auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
 
 // Error Pages
-import NotFoundError from "@/pages/errors/not-found-error";
+const NotFoundError = lazy(() => import("@/pages/errors/not-found-error"));
 
 const FallbackLoader = ({ className }: { className?: string }) => {
     return <Loader className={cn("h-[calc(100svh)]", className)} />;

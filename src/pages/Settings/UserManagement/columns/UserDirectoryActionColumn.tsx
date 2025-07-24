@@ -45,17 +45,10 @@ const UserDirectoryActionColumn: React.FC<UserDirectoryActionColumnProps> = ({ r
 
     const handleResetPassword = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
-        if (AdminUser && AdminUser.tenantId)
-            dispatch(resetPasswordForUser({ userId: user.id, tenantId: AdminUser?.tenantId }));
+        if (AdminUser)
+            dispatch(resetPasswordForUser({ userId: user.id }));
         else
             toast.error('TanentId is missing.');
-    };
-
-    const handleResetMFA = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        if (AdminUser?.id === user?.id) return
-        // TODO: Implement MFA reset email
-        toast.success('MFA reset email sent successfully.');
     };
 
     return (
@@ -84,10 +77,6 @@ const UserDirectoryActionColumn: React.FC<UserDirectoryActionColumnProps> = ({ r
                                     <DropdownMenuItem className={`py-2.5 text-sm cursor-pointer`} onClick={handleResetPassword}>
                                         Reset Password
                                     </DropdownMenuItem>
-                                    {/* Todo: Enable after BE blocker resolved */}
-                                    {/* <DropdownMenuItem disabled={AdminUser?.id === user?.id} className={`py-2.5 text-sm ${AdminUser?.id === user?.id?'cursor-not-allowed':'cursor-pointer'}`} onClick={handleResetMFA}>
-                                        Reset MFA
-                                    </DropdownMenuItem> */}
                                 </>
                             )}
                         </>
