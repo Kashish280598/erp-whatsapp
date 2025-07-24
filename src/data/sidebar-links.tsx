@@ -1,6 +1,7 @@
 import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
 import SettingsIcon from "@/assets/icons/settings-icon.svg";
 import UsersIcon from "@/assets/icons/user-contact-icon.svg";
+import ChatIcon from "@/assets/icons/user-contact-icon.svg";
 
 
 export interface NavLink {
@@ -25,6 +26,12 @@ export const sidebarlinks: SidebarLink[] = [
     icon: DashboardIcon,
   },
   {
+    title: "Chat",
+    label: "",
+    href: "/chat",
+    icon: ChatIcon,
+  },
+  {
     title: "Settings",
     label: "",
     href: "/settings",
@@ -38,4 +45,5 @@ export const sidebarlinks: SidebarLink[] = [
     icon: UsersIcon,
     sidebarIdentifier: "settings",
   },
+
 ];

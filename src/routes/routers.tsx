@@ -6,6 +6,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import AuthRedirect from "./auth-redirect";
 import ProtectedRoute from "./ProtectedRoute";
+import Chat from "@/pages/Chat";
 
 // Application Pages
 const Components = lazy(() => import("@/pages/dashboard/Components"));
@@ -24,10 +25,10 @@ const ResetPassword = lazy(() => import("@/pages/auth/ResetPassword"));
 // Error Pages
 const NotFoundError = lazy(() => import("@/pages/errors/not-found-error"));
 
-// Users
+// User Pages
+const UserListing = lazy(() => import("@/pages/users/user-listing"));
 const UserCreate = lazy(() => import("@/pages/users/user-create"));
 const UserEdit = lazy(() => import("@/pages/users/user-edit"));
-const UserListing = lazy(() => import("@/pages/users/user-listing"));
 const UserView = lazy(() => import("@/pages/users/user-view"));
 
 const FallbackLoader = ({ className }: { className?: string }) => {
@@ -93,6 +94,15 @@ export const router = createBrowserRouter([
                         </ProtectedRoute>
                     </Suspense>
                 ),
+            },
+            {
+                path: "chat",
+                element: (
+                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
+                        <Chat />
+                    </Suspense>
+                ),
+                errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
             },
             {
                 path: 'discover',
