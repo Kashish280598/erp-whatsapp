@@ -1,4 +1,5 @@
 import { usersApi } from '@/components/users/users-api';
+import { authApi } from '@/lib/api/auth/auth-api';
 import { configureStore } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
@@ -16,11 +17,12 @@ export const store = configureStore({
     settings: settingsReducer,
     discovery: discoveryReducer,
     [usersApi.reducerPath]: usersApi.reducer,
+    [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false,
-    }),
+    getDefaultMiddleware()
+      .concat(usersApi.middleware)
+      .concat(authApi.middleware),
   devTools: true,
 });
 
