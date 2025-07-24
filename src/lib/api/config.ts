@@ -62,9 +62,10 @@ export const API_ENDPOINTS = {
     editUserById: '/api/users',
     updateInvitationById: '/api/invitations',
     inviteUsers: '/api/invitations/bulk',
-    resendInvitation:'/api/invitations/resend',
-    toggleActiveUser:'/api/users/toggle-active',
-    deleteUser:'/api/users',
+    resendInvitation: '/api/invitations/resend',
+    toggleActiveUser: '/api/users/toggle-active',
+    deleteUser: '/api/users',
     resetPasswordForUser: '/api/password-reset/request-by-id',
   },
+  categories: '/api/categories'
 } as const; 
