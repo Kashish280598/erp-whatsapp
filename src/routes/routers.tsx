@@ -3,7 +3,7 @@ import Loader from "@/components/Loader";
 import { cn } from "@/lib/utils";
 import ErrorElement from "@/pages/errors/general-error";
 import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
 import AuthRedirect from "./auth-redirect";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -146,7 +146,8 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
                         <ProtectedRoute>
-                            <UserListing />
+                            {/* Use Outlet for nested user routes */}
+                            <Outlet />
                         </ProtectedRoute>
                     </Suspense>
                 ),
@@ -154,7 +155,8 @@ export const router = createBrowserRouter([
                 children: [
                     {
                         index: true,
-                        element: <Navigate to="create" />,
+                        element: <UserListing />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },
                     {
                         path: "create",
@@ -162,12 +164,12 @@ export const router = createBrowserRouter([
                         errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },
                     {
-                        path: "/:id/edit",
+                        path: ":id/edit",
                         element: <UserEdit />,
                         errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },
                     {
-                        path: "/:id",
+                        path: ":id",
                         element: <UserView />,
                         errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },

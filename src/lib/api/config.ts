@@ -51,20 +51,9 @@ export const API_ENDPOINTS = {
     resetPassword: '/api/password-reset/confirm',
     logout: '/api/auth/logout',
     refresh: '/api/auth/refresh-token',
-    verifyPassword:'/api/auth/verify-password',
-    changePassword:'/api/auth/change-password',
-    toggleDiscoveryAllSet:'/api/users/show-guide'
+    verifyPassword: '/api/auth/verify-password',
+    changePassword: '/api/auth/change-password',
+    toggleDiscoveryAllSet: '/api/users/show-guide'
   },
-  users: {
-    all: '/api/users',
-    profile: '/api/users/me',
-    allInvitations: '/api/invitations',
-    editUserById: '/api/users',
-    updateInvitationById: '/api/invitations',
-    inviteUsers: '/api/invitations/bulk',
-    resendInvitation:'/api/invitations/resend',
-    toggleActiveUser:'/api/users/toggle-active',
-    deleteUser:'/api/users',
-    resetPasswordForUser: '/api/password-reset/request-by-id',
-  },
+  users: '/api/users',
 } as const; 
