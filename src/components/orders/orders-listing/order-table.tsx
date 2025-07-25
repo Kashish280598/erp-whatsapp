@@ -3,15 +3,14 @@ import { DataTableColumnHeader } from "@/components/custom/table/data-table/data
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useDeleteOrderMutation } from "@/lib/api/orders-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
-import { IconEye, IconPencil, IconTrash } from "@tabler/icons-react";
+import { IconEye, IconPencil } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchOrders: (params: TableQueryParams) => void, isLoading: boolean, orders: any[], totalCount: number }) => {
     const navigate = useNavigate()
-    const [deleteOrder] = useDeleteOrderMutation()
+
 
     const tableToolbar: TableToolbar = {
         enableSearch: true,
@@ -44,9 +43,7 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
 
     const [searchTerm, setSearchTerm] = useState('');
 
-    const onDelete = (id: any) => {
-        deleteOrder(id).unwrap()
-    }
+
 
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -240,9 +237,9 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/orders/${row?.original?.id}/edit`)}>
                                 <IconPencil className="h-4 w-4 text-gray-500" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                            {/* <Button variant="ghost" size="icon" className="h-8 w-8">
                                 <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
-                            </Button>
+                            </Button> */}
                         </div>
                     )
                 }
