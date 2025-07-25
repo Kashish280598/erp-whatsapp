@@ -3,6 +3,7 @@ import CategoryIcon from "@/assets/icons/discover-icon.svg";
 import FindingIcon from "@/assets/icons/finding-icon.svg";
 import CustomersIcon from "@/assets/icons/invite-user.svg";
 import { default as ManageUserIcon, default as UsersIcon } from "@/assets/icons/manage-user.svg";
+import OrdersIcon from "@/assets/icons/document-license.svg";
 import SettingsIcon from "@/assets/icons/settings-icon.svg";
 import ChatIcon from "@/assets/icons/tv-play-icon.svg";
 
@@ -70,6 +71,6 @@ export const sidebarlinks: SidebarLink[] = [
     title: "Orders",
     label: "",
     href: "/orders",
-    icon: ManageUserIcon,
+    icon: OrdersIcon,
   },
 ];

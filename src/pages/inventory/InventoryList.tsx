@@ -9,7 +9,7 @@ import "./InventoryList.css";
 import CategoryDropdown from "@/components/categories/category-dropdown";
 import { Formik, Field } from "formik";
 import { Input } from "@/components/ui/input";
-import { Tooltip } from "@/components/ui/tooltip";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Product {
   id: string;
@@ -351,17 +351,27 @@ const InventoryList = () => {
       id: "actions",
       accessorKey: "actions", // Fix: add accessorKey for display-only column
       header: "Actions",
-      cell: () => (
+            cell: () => (
         <div className="flex gap-1">
-          <Tooltip content="Coming soon">
-            <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
-              <Edit size={16} />
-            </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
+                <Edit size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Coming soon</p>
+            </TooltipContent>
           </Tooltip>
-          <Tooltip content="Coming soon">
-            <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
-              <Info size={16} />
-            </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
+                <Info size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Coming soon</p>
+            </TooltipContent>
           </Tooltip>
         </div>
       ),
@@ -632,7 +642,7 @@ const InventoryList = () => {
                   }
                 }}
               >
-                {({ errors, touched, isSubmitting, handleSubmit, values, setFieldValue }) => (
+                {({ errors, touched, isSubmitting, handleSubmit }) => (
                   <form className="grid grid-cols-1 gap-4 w-full" onSubmit={handleSubmit}>
                     <h2 className="text-2xl font-bold mb-2 text-center text-blue-900" style={{ marginBottom: 24 }}>Add Stocks</h2>
                     <div className="w-full">
