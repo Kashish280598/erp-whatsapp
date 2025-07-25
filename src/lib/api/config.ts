@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseURL: 'https://whatsapp-erp.vercel.app',
+  baseURL: 'https://whatsapp-erp-production.up.railway.app',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,

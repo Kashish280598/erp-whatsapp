@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import OrderForm from "./order-form";
+
 
 export const getInitialValues = (order?: Order) => {
     return {
@@ -40,4 +40,4 @@ export type Order = {
     updated_at?: string;
 }
 
-export default OrderForm;
+
