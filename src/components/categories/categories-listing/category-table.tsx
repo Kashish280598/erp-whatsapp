@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { useDeleteCategoryMutation } from "@/lib/api/categories-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
-const CategoryTable = ({ onFetchCategories, isLoading }: { onFetchCategories: (params: TableQueryParams) => void, isLoading: boolean }) => {
+const CategoryTable = ({ onFetchCategories, isLoading, categories, totalCount }: { onFetchCategories: (params: TableQueryParams) => void, isLoading: boolean, categories: any[], totalCount: number }) => {
     const navigate = useNavigate()
     const [deleteCategory] = useDeleteCategoryMutation()
 
@@ -19,25 +20,23 @@ const CategoryTable = ({ onFetchCategories, isLoading }: { onFetchCategories: (p
 
     const [searchTerm, setSearchTerm] = useState('');
 
-    const categories = useMemo(() => [
-        {
-            id: 1,
-            name: 'Category A',
-            description: 'Description for Category A',
-            created_at: '2025-03-15 09:30:00',
-            updated_at: '2025-03-15 09:30:00',
-        },
-        {
-            id: 2,
-            name: 'Category B',
-            description: 'Description for Category B',
-            created_at: '2025-03-15 08:45:00',
-            updated_at: '2025-03-15 08:45:00',
-        },
-    ], [])
-
-    const onDelete = (id: any) => {
-        deleteCategory(id).unwrap()
+    const onDelete = async (id: any) => {
+        console.log('id', id)
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: 'gray',
+            confirmButtonText: 'Yes'
+        });
+        if (result.isConfirmed) {
+            const response = await deleteCategory(id).unwrap();
+            if (response?.status === 200) {
+                Swal.fire('Deleted!', 'The category has been deleted.', 'success');
+            }
+        }
     }
 
     return (
@@ -67,8 +66,8 @@ const CategoryTable = ({ onFetchCategories, isLoading }: { onFetchCategories: (p
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/categories/${row?.original?.id}/edit`)}>
                                 <IconPencil className="h-4 w-4 text-gray-500" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onDelete(row?.original?.id)}>
+                                <IconTrash className="h-4 w-4 text-red-500" />
                             </Button>
                         </div>
                     )
@@ -80,7 +79,7 @@ const CategoryTable = ({ onFetchCategories, isLoading }: { onFetchCategories: (p
                 setSearchTerm,
             }}
             fetchData={onFetchCategories}
-            totalCount={200}
+            totalCount={totalCount}
             loading={isLoading}
             tableId="dashboard-categories"
         />

@@ -1,21 +1,9 @@
 import type { AxiosInstance } from "axios"
 import { toast } from "sonner"
-import { store } from "./store"
 
 function setupAxios(axios: AxiosInstance) {
-	const jwtToken = localStorage.getItem('auth_token') || null
-
-	const { auth } = store.getState()
-
-	console.log('auth', auth?.token)
-
-
 	axios.interceptors.request.use(
 		(config) => {
-			if (jwtToken) {
-				config.headers.Authorization = `Bearer ${auth?.token}`
-			}
-
 			config.headers['Content-Type'] = 'application/json'
 			config.headers.Accept = 'application/json'
 

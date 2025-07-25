@@ -1,10 +1,12 @@
 import { useLazyGetCategoriesQuery } from "@/lib/api/categories-api"
 import type { TableQueryParams } from "@/types/table.types"
-import { useCallback } from "react"
+import { useCallback, useMemo } from "react"
 import CategoryTable from "./category-table"
 
 const CategoriesListingContainer = () => {
-    const [getCategories, { isUninitialized, isFetching }] = useLazyGetCategoriesQuery()
+    const [getCategories, { data, isUninitialized, isFetching }] = useLazyGetCategoriesQuery()
+
+    const categories = useMemo(() => Array.isArray(data?.data?.categories) ? data?.data?.categories : [], [data?.data?.categories])
 
 
     const onFetchCategories = useCallback(
@@ -25,16 +27,16 @@ const CategoriesListingContainer = () => {
                     sortOrder: params?.sort_order
                 })
             }
-
             getCategories($params)
         },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         [],
     )
 
 
     return (
         <div>
-            <CategoryTable onFetchCategories={onFetchCategories} isLoading={isUninitialized || isFetching} />
+            <CategoryTable onFetchCategories={onFetchCategories} isLoading={isUninitialized || isFetching} categories={categories} totalCount={data?.data?.totalCount} />
         </div>
     )
 }

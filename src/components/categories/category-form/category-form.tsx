@@ -27,6 +27,7 @@ const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
                 navigate('/categories')
             }
         } catch (error: any) {
+            console.log('error', error)
             toast.error(error?.data?.message || 'Something went wrong')
         } finally {
             setSubmitting(false)
