@@ -1,16 +1,15 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Formik, Form, Field } from 'formik';
-import * as Yup from 'yup';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { useAppDispatch, useAppSelector } from '@/lib/store';
-import { setLoginType } from '@/lib/features/auth/authSlice';
-import { useEffect } from 'react';
-import { API_ENDPOINTS } from '@/lib/api/config';
+import { Input } from '@/components/ui/input';
 import { useLoading } from '@/hooks/useAppState';
-import { useLoginMutation, storeAuthToken } from '@/lib/api/auth/auth-api';
+import { storeAuthToken, useLoginMutation } from '@/lib/api/auth/auth-api';
+import { API_ENDPOINTS } from '@/lib/api/config';
+import { setAuthToken, setCredentials, setLoginType } from '@/lib/features/auth/authSlice';
+import { useAppDispatch, useAppSelector } from '@/lib/store';
+import { Field, Form, Formik } from 'formik';
+import { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { setCredentials } from '@/lib/features/auth/authSlice';
+import * as Yup from 'yup';
 
 // Validation Schema
 const LoginSchema = Yup.object().shape({
@@ -24,9 +23,9 @@ const LoginSchema = Yup.object().shape({
 
 const LoginForm = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate(); // Remove unused variable
   const { isLoading } = useLoading(API_ENDPOINTS.auth.login);
-  const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
+  const { email: loginEmail } = useAppSelector((state: any) => state.auth.login.formData); // If RootState is available, use (state: RootState)
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
 
   const initialValues = {
@@ -38,9 +37,10 @@ const LoginForm = () => {
     try {
       const result = await login({ email: values.email, password: values.password }).unwrap();
       if (result?.data?.token) {
-        storeAuthToken(result.data.token);
+        storeAuthToken(result?.data?.token);
         dispatch(setCredentials({ user: null, isAuthenticated: true }));
-        navigate('/dashboard');
+        dispatch(setAuthToken(result?.data?.token));
+        // Optionally, fetch user profile here
       }
     } catch (error: any) {
       toast.error(error?.data?.message || 'Login failed');

@@ -5,7 +5,7 @@ import { useMemo, type FC } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { getInitialValues, getPayload, validationSchema, type User } from "."
-import { useCreateUserMutation, useUpdateUserMutation } from "../users-api"
+import { useCreateUserMutation, useUpdateUserMutation } from "../../../lib/api/users-api"
 
 const UserForm: FC<{ user?: User }> = ({ user }) => {
     const [createUser] = useCreateUserMutation()

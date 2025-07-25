@@ -90,7 +90,7 @@ export default function AddCustomer({ mode = 'add' }: { mode?: 'add' | 'edit' })
   };
 
   return (
-    <div style={{ width: '100%', minHeight: '100vh', background: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 0' }}>
+    <div style={{ width: '100%', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 0' }}>
       <div style={{ width: '100%', background: '#fff', borderRadius: 16, boxShadow: '0 6px 32px rgba(30,41,59,0.10)', padding: 36, margin: '0 16px' }}>
         <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 18, color: '#1e293b', letterSpacing: 0.2, textAlign: 'center' }}>Add Customer / Organization</h2>
         <form onSubmit={handleSubmit}>

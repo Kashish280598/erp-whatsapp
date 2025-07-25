@@ -1,15 +1,18 @@
-import { usersApi } from '@/components/users/users-api';
-import { authApi } from '@/lib/api/auth/auth-api';
+import { usersApi } from '@/lib/api/users-api';
 import { configureStore } from '@reduxjs/toolkit';
 import type { TypedUseSelectorHook } from 'react-redux';
 import { useDispatch, useSelector } from 'react-redux';
+import { authApi } from './api/auth/auth-api';
+import { categoriesApi } from './api/categories-api';
 import appReducer from './features/app/appSlice';
 import authReducer from './features/auth/authSlice';
 import breadcrumbReducer from './features/breadcrumb/breadcrumbSlice';
 import discoveryReducer from './features/discovery/discoverySlice';
 import settingsReducer from './features/settings/settingsSlice';
+
+
 // redux-persist imports
-import { persistStore, persistReducer } from 'redux-persist';
+import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 
 const persistConfig = {
@@ -35,14 +38,15 @@ export const store = configureStore({
     settings: settingsReducer,
     discovery: discoveryReducer,
     [usersApi.reducerPath]: usersApi.reducer,
+    [categoriesApi.reducerPath]: categoriesApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     })
-      .concat(usersApi.middleware)
-      .concat(authApi.middleware),
+      .concat([usersApi.middleware, categoriesApi.middleware, authApi.middleware]),
+
   devTools: true,
 });
 

@@ -62,10 +62,13 @@ const CustomersList = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [columnFilters, setColumnFilters] = useState<{ id: string; value: string }[]>([]);
   const navigate = useNavigate();
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // Fetch customers from API
     const fetchCustomers = async () => {
+      setLoading(true);
       try {
         const res = await fetch(API_CONFIG.baseURL + API_ENDPOINTS.customers.all, {
           headers: {
@@ -74,10 +77,20 @@ const CustomersList = () => {
         });
         if (!res.ok) throw new Error('Failed to fetch customers');
         const apiData = await res.json();
-        // The customers array is in apiData.data.customers
-        setCustomers(apiData.data?.customers || []);
-      } catch (err) {
+        console.log('Fetched customers API response:', apiData);
+        if (!apiData.data || !Array.isArray(apiData.data.customers)) {
+          setFetchError('No customers found or API response format changed.');
+          setCustomers([]);
+        } else {
+          setCustomers(apiData.data.customers);
+          setFetchError(null);
+        }
+      } catch (err: any) {
+        setFetchError(err.message || 'Failed to fetch customers');
         setCustomers([]);
+        console.error('Error fetching customers:', err);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCustomers();
@@ -187,18 +200,30 @@ const CustomersList = () => {
           <Plus className="mr-2" size={16} /> Add Customer
         </Button>
       </div>
-      <DataTable
-        columns={columns}
-        data={customers}
-        tableToolbar={tableToolbar}
-        fetchData={() => {}}
-        totalCount={customers.length}
-        loading={false}
-        tableId="customers-table"
-        className="!text-[13px]"
-        headerClassName="!py-2 !px-2"
-        tableMainContainerClassName="!rounded-lg"
-      />
+      {fetchError && (
+        <div style={{ color: '#e11d48', fontWeight: 600, marginBottom: 16, textAlign: 'center' }}>
+          {fetchError}
+        </div>
+      )}
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+          <span className="loader" style={{ width: 40, height: 40, border: '4px solid #e5e7eb', borderTop: '4px solid #2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={customers}
+          tableToolbar={tableToolbar}
+          fetchData={() => {}}
+          totalCount={customers.length}
+          loading={false}
+          tableId="customers-table"
+          className="!text-[13px]"
+          headerClassName="!py-2 !px-2"
+          tableMainContainerClassName="!rounded-lg"
+        />
+      )}
     </div>
   );
 };

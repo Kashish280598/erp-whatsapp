@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  baseURL: 'https://whatsapp-erp.vercel.app',
+  baseURL: 'https://whatsapp-erp-production.up.railway.app',
+  // baseURL: 'https://whatsapp-erp.vercel.app',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
@@ -47,6 +48,10 @@ export const API_ENDPOINTS = {
     resetPassword: '/api/auth/reset-password',
     logout: '/api/auth/logout',
   },
+   customers: {
+    all: '/api/customers', 
+    byId: '/api/customers', 
+  },
   users: {
     all: '/api/users',
     profile: '/api/users/me',
@@ -54,13 +59,10 @@ export const API_ENDPOINTS = {
     editUserById: '/api/users',
     updateInvitationById: '/api/invitations',
     inviteUsers: '/api/invitations/bulk',
-    resendInvitation:'/api/invitations/resend',
-    toggleActiveUser:'/api/users/toggle-active',
-    deleteUser:'/api/users',
+    resendInvitation: '/api/invitations/resend',
+    toggleActiveUser: '/api/users/toggle-active',
+    deleteUser: '/api/users',
     resetPasswordForUser: '/api/password-reset/request-by-id',
   },
-  customers: {
-    all: '/api/customers', 
-    byId: '/api/customers', 
-  },
+  categories: '/api/categories'
 } as const; 

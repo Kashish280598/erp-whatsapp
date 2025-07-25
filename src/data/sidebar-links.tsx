@@ -4,6 +4,7 @@ import UsersIcon from "@/assets/icons/manage-user.svg";
 import ChatIcon from "@/assets/icons/tv-play-icon.svg";
 import FindingIcon from "@/assets/icons/finding-icon.svg";
 import CustomersIcon from "@/assets/icons/invite-user.svg";
+import CategoryIcon from "@/assets/icons/discover-icon.svg";
 
 export interface NavLink {
   title: string;
@@ -56,6 +57,13 @@ export const sidebarlinks: SidebarLink[] = [
     label: "",
     href: "/users",
     icon: UsersIcon,
+    sidebarIdentifier: "settings",
+  },
+  {
+    title: "Categories",
+    label: "",
+    href: "/categories",
+    icon: CategoryIcon,
     sidebarIdentifier: "settings",
   },
 ];
