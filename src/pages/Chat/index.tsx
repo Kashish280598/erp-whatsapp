@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -10,13 +10,47 @@ import { Separator } from '@/components/ui/separator';
 import { IconMessage, IconSettings, IconCheck, IconArrowLeft } from '@tabler/icons-react';
 import WhatsAppChat from './WhatsAppChat';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useGetWhatsAppQrImageQuery } from '@/lib/api/auth/auth-api';
+import Loader from '@/components/Loader';
 
 const ChatIntegration = () => {
   const [isEnabled, setIsEnabled] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState('whatsapp');
   const [showWhatsAppChat, setShowWhatsAppChat] = useState(false);
   const [showWhatsAppQRModal, setShowWhatsAppQRModal] = useState(false);
+
+  const { data, isLoading: isQrLoading, isError: isQrError, refetch } = useGetWhatsAppQrImageQuery(undefined, { skip: !showWhatsAppQRModal });
   console.log(selectedPlatform);
+
+  // Auto-open chat if already connected
+  useEffect(() => {
+    if (
+      data &&
+      typeof data.data === 'object' &&
+      data.data.connected === true &&
+      data.data.connectionState === 'open'
+    ) {
+      setShowWhatsAppChat(true);
+      setShowWhatsAppQRModal(false);
+    }
+  }, [data]);
+
+  // Poll for QR code every 20 seconds if not connected
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    if (
+      !showWhatsAppChat &&
+      showWhatsAppQRModal &&
+      data && typeof data.data !== 'object'
+    ) {
+      interval = setInterval(() => {
+        refetch();
+      }, 20000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [showWhatsAppChat, data, refetch]);
 
   const chatPlatforms = [
     {
@@ -42,14 +76,12 @@ const ChatIntegration = () => {
   const handleConnect = (platformId: string) => {
     if (platformId === 'whatsapp') {
       setShowWhatsAppQRModal(true);
+      // Optionally refetch QR code every time modal opens
+      setTimeout(() => refetch(), 0);
     }
     setSelectedPlatform(platformId);
   };
 
-  const handleWhatsAppConnectSuccess = () => {
-    setShowWhatsAppQRModal(false);
-    setShowWhatsAppChat(true);
-  };
 
   const handleBackToPlatforms = () => {
     setShowWhatsAppChat(false);
@@ -83,6 +115,7 @@ const ChatIntegration = () => {
     );
   }
 
+  {console.log('data ::', data)}
   return (
     <>
       <Dialog open={showWhatsAppQRModal} onOpenChange={setShowWhatsAppQRModal}>
@@ -99,16 +132,22 @@ const ChatIntegration = () => {
                 </ol>
               </div>
               <div className="flex flex-col items-center gap-4">
-                {/* Mock QR code */}
-                <div className="bg-white dark:bg-neutral-900 border rounded-lg p-2 flex items-center justify-center">
-                  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=mock-whatsapp-login" alt="WhatsApp QR" className="w-44 h-44 object-contain" />
-                  <div className="absolute flex items-center justify-center w-12 h-12 rounded-full bg-white dark:bg-neutral-900 border -ml-6">
-                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M23.49 19.37c-.36-.18-2.13-1.05-2.46-1.17-.33-.12-.57-.18-.81.18-.24.36-.93 1.17-1.14 1.41-.21.24-.42.27-.78.09-.36-.18-1.52-.56-2.89-1.78-1.07-.95-1.79-2.13-2-2.49-.21-.36-.02-.55.16-.73.17-.17.36-.45.54-.68.18-.24.24-.42.36-.69.12-.27.06-.51-.03-.69-.09-.18-.81-1.95-1.11-2.67-.29-.7-.59-.6-.81-.61-.21-.01-.45-.01-.69-.01-.24 0-.63.09-.96.45-.33.36-1.26 1.23-1.26 3 .01 1.77 1.29 3.48 1.47 3.72.18.24 2.53 3.87 6.13 5.27.86.3 1.53.48 2.05.61.86.22 1.65.19 2.27.12.69-.08 2.13-.87 2.43-1.71.3-.84.3-1.56.21-1.71-.09-.15-.33-.24-.69-.42z" fill="#fff"/></svg>
-                  </div>
+                {/* WhatsApp QR code from API */}
+                <div className="bg-white dark:bg-neutral-900 border rounded-lg p-2 flex items-center justify-center min-h-[180px] min-w-[180px] relative">
+                  {isQrLoading && <Loader className="w-20 h-20" title="Loading QR..." />}
+                  {isQrError && (
+                    <div className="text-red-500 text-sm">Failed to load QR code. <Button variant="link" size="sm" onClick={() => refetch()}>Retry</Button></div>
+                  )}
+                  {data && !isQrLoading && !isQrError && (
+                    typeof data.data === 'object' && data.data.connected === true && data.data.connectionState === 'open' ? (
+                      <div className="text-green-600 text-center font-semibold text-lg">
+                        You're already connected!
+                      </div>
+                    ) : (
+                      <img src={data.data} alt="WhatsApp QR" width={180} height={180} />
+                    )
+                  )}
                 </div>
-                <Button className="w-full mt-2" onClick={handleWhatsAppConnectSuccess}>
-                  Mock: WhatsApp Connected
-                </Button>
               </div>
             </CardContent>
           </Card>

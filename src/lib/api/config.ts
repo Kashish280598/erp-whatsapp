@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  baseURL: 'https://whatsapp-erp.vercel.app',
+  // baseURL: 'https://whatsapp-erp.vercel.app',
+  baseURL: 'https://16mjdkcm-3000.inc1.devtunnels.ms',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
@@ -58,6 +59,9 @@ export const API_ENDPOINTS = {
     toggleActiveUser: '/api/users/toggle-active',
     deleteUser: '/api/users',
     resetPasswordForUser: '/api/password-reset/request-by-id',
+  },
+  whatsapp: {
+    qrImage: '/api/whatsapp/qr',
   },
   categories: '/api/categories'
 } as const; 

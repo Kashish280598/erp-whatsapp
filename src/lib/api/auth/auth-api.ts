@@ -3,6 +3,16 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { API_ENDPOINTS } from '@/lib/api/config'
 import axiosBaseQuery from '@/lib/axios-base-query'
 
+// WhatsApp contact type
+export interface WhatsAppContact {
+  id: number;
+  name: string | null;
+  email: string;
+  mobileNo: string;
+  role: string;
+  createdAt: string;
+}
+
 export const authApi = createApi({
 	reducerPath: 'Auth',
 	keepUnusedDataFor: 0,
@@ -48,6 +58,19 @@ export const authApi = createApi({
 				data: payload,
 			}),
 		}),
+		getWhatsAppQrImage: builder.query<any, void>({
+			query: () => ({
+				url: API_ENDPOINTS.whatsapp.qrImage,
+				method: 'GET',
+			}),
+		}),
+		getWhatsAppContacts: builder.query<WhatsAppContact[], void>({
+			query: () => ({
+				url: '/api/whatsapp/contacts',
+				method: 'GET',
+			}),
+			transformResponse: (response: { status: number; message: string; data: WhatsAppContact[] }) => response.data,
+		}),
 	}),
 })
 
@@ -57,6 +80,8 @@ export const {
 	useLazyGetCurrentUserQuery,
 	useForgotPasswordMutation,
 	useResetPasswordMutation,
+	useGetWhatsAppQrImageQuery,
+	useGetWhatsAppContactsQuery,
 } = authApi 
 
 // Utility to store token in localStorage

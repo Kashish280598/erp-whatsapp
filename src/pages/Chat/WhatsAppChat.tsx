@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+// import { Badge } from '@/components/ui/badge';
 import { 
   IconSearch, 
   IconDotsVertical, 
@@ -16,6 +16,7 @@ import {
   IconSend,
   IconArrowLeft
 } from '@tabler/icons-react';
+import { useGetWhatsAppContactsQuery } from '@/lib/api/auth/auth-api';
 
 interface User {
   id: string;
@@ -23,7 +24,7 @@ interface User {
   avatar: string;
   lastMessage: string;
   timestamp: string;
-  unreadCount?: number;
+  // unreadCount?: number;
   isOnline?: boolean;
   isGroup?: boolean;
 }
@@ -40,71 +41,25 @@ interface Message {
 
 const WhatsAppChat: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Mock data for users
-  const users: User[] = [
-    {
-      id: '1',
-      name: 'A',
-      avatar: 'G',
-      lastMessage: 'Hello, How are you?',
-      timestamp: '11:48 AM',
-      unreadCount: 2,
-      isOnline: true
-    },
-    {
-      id: '2',
-      name: 'B',
-      avatar: '👶',
-      lastMessage: 'Thanks for the update!',
-      timestamp: '11:34 AM',
-      isOnline: false
-    },
-    {
-      id: '3',
-      name: 'C',
-      avatar: '✈️',
-      lastMessage: 'Meeting scheduled for tomorrow',
-      timestamp: '11:33 AM',
-      isOnline: true
-    },
-    {
-      id: '4',
-      name: 'D',
-      avatar: '👥',
-      lastMessage: 'This message was deleted',
-      timestamp: '5:46 AM',
-      isOnline: false
-    },
-    {
-      id: '5',
-      name: 'E',
-      avatar: '👥',
-      lastMessage: 'Got it 👍',
-      timestamp: '12:15 AM',
-      isOnline: false
-    },
-    {
-      id: '6',
-      name: 'F',
-      avatar: '👩',
-      lastMessage: 'Will check and get back to you',
-      timestamp: '12:02 AM',
-      isOnline: true
-    },
-    {
-      id: '7',
-      name: 'G',
-      avatar: '⚛️',
-      lastMessage: 'New job opportunities available',
-      timestamp: 'Yesterday',
-      isOnline: false
-    }
-  ];
+  // Fetch WhatsApp contacts from API
+  const { data: contacts, isLoading: isContactsLoading, isError: isContactsError, refetch } = useGetWhatsAppContactsQuery();
+  // Map API contacts to User[] shape for UI
+  const users: User[] = (contacts || []).map((c: any) => ({
+    id: String(c.id),
+    name: c.name || c.email || 'Unknown',
+    avatar: c.name ? c.name.charAt(0).toUpperCase() : (c.email ? c.email.charAt(0).toUpperCase() : 'U'),
+    lastMessage: '',
+    timestamp: '',
+    // unreadCount: 0,
+    isOnline: false,
+    isGroup: false,
+  }));
 
   // Initialize messages for each user
   useEffect(() => {
@@ -193,13 +148,23 @@ const WhatsAppChat: React.FC = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    if (activeFilter === 'unread') return user.unreadCount && user.unreadCount > 0;
+    if (activeFilter === 'unread') return false;
     if (activeFilter === 'favourites') return false; // Add favorite logic
     if (activeFilter === 'groups') return user.isGroup;
+    if (search.trim()) {
+      return user.name.toLowerCase().includes(search.trim().toLowerCase());
+    }
     return true;
   });
 
   const currentMessages = selectedUser ? messages[selectedUser.id] || [] : [];
+
+  if (isContactsLoading) {
+    return <div className="flex items-center justify-center h-full">Loading contacts...</div>;
+  }
+  if (isContactsError) {
+    return <div className="flex items-center justify-center h-full text-red-500">Failed to load contacts. <Button onClick={() => refetch()}>Retry</Button></div>;
+  }
 
   return (
     <div className="flex h-screen bg-neutral-50 font-sans overflow-hidden">
@@ -232,13 +197,15 @@ const WhatsAppChat: React.FC = () => {
               <Input
                 placeholder="Search or start a new chat"
                 className="pl-7 bg-white border-neutral-200 text-xs h-8"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
               />
             </div>
           </div>
 
           {/* Filter Tabs */}
           <div className="flex border-b border-neutral-200 flex-shrink-0">
-            {['all', 'unread', 'favourites', 'groups'].map((filter) => (
+            {[].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
@@ -280,11 +247,11 @@ const WhatsAppChat: React.FC = () => {
                   </div>
                   <p className="text-xs text-neutral-400 truncate">{user.lastMessage}</p>
                 </div>
-                {user.unreadCount && user.unreadCount > 0 && (
+                {/* {user.unreadCount && user.unreadCount > 0 && (
                   <Badge className="bg-primary text-white text-xs rounded-full min-w-[16px] h-4 text-[10px]">
                     {user.unreadCount}
                   </Badge>
-                )}
+                )} */}
               </div>
             ))}
           </div>
