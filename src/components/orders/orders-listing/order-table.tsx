@@ -23,8 +23,9 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                 title: 'Status',
                 options: [
                     { label: 'Pending', value: 'pending' },
-                    { label: 'Processing', value: 'processing' },
-                    { label: 'Completed', value: 'completed' },
+                    { label: 'Confirmed', value: 'confirmed' },
+                    { label: 'Shipped', value: 'shipped' },
+                    { label: 'Delivered', value: 'delivered' },
                     { label: 'Cancelled', value: 'cancelled' },
                 ],
             },
@@ -35,6 +36,7 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                     { label: 'Pending', value: 'pending' },
                     { label: 'Paid', value: 'paid' },
                     { label: 'Failed', value: 'failed' },
+                    { label: 'Refunded', value: 'refunded' },
                 ],
             },
         ],
@@ -50,9 +52,11 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
         switch (status.toLowerCase()) {
             case 'pending':
                 return 'bg-yellow-100 text-yellow-800';
-            case 'processing':
+            case 'confirmed':
                 return 'bg-blue-100 text-blue-800';
-            case 'completed':
+            case 'shipped':
+                return 'bg-purple-100 text-purple-800';
+            case 'delivered':
                 return 'bg-green-100 text-green-800';
             case 'cancelled':
                 return 'bg-red-100 text-red-800';
