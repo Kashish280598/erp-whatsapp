@@ -71,10 +71,19 @@ function NavLinkIcon(props: NavLinkProps) {
   const { title, icon, href, sidebarIdentifier } = props;
   const { checkActiveNav } = useCheckActiveNav();
 
+  // Normalize title for data-tour attribute
+  const tourId = ["Dashboard", "Inventory Manager", "Customers", "Chat"].includes(title)
+    ? `sidebar-${title.toLowerCase().replace(/\s+/g, '-')}`
+    : undefined;
+
   return (
     <HoverCard>
       <HoverCardTrigger asChild>
-        <Link to={href} className="flex flex-col gap-[4px] items-center w-[58px]">
+        <Link
+          to={href}
+          className="flex flex-col gap-[4px] items-center w-[58px]"
+          {...(tourId ? { 'data-tour': tourId } : {})}
+        >
           <span
             className={cn(
               buttonVariants({
