@@ -36,6 +36,12 @@ const UserView = lazy(() => import("@/pages/users/user-view"));
 // Category Pages
 const CategoryListing = lazy(() => import("@/pages/categories/category-listing"));
 
+// Order Pages
+const OrderListing = lazy(() => import("@/pages/orders/order-listing"));
+const OrderCreate = lazy(() => import("@/pages/orders/order-create"));
+const OrderEdit = lazy(() => import("@/pages/orders/order-edit"));
+const OrderView = lazy(() => import("@/pages/orders/order-view"));
+
 
 const FallbackLoader = ({ className }: { className?: string }) => {
     return <Loader className={cn("h-[calc(100svh)]", className)} />;
@@ -209,6 +215,40 @@ export const router = createBrowserRouter([
                     {
                         path: ":id",
                         element: <UserView />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                ],
+            },
+            {
+                path: "orders",
+                element: (
+                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
+                        <ProtectedRoute>
+                            {/* Use Outlet for nested order routes */}
+                            <Outlet />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+                errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                children: [
+                    {
+                        index: true,
+                        element: <OrderListing />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                    {
+                        path: "create",
+                        element: <OrderCreate />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                    {
+                        path: ":id/edit",
+                        element: <OrderEdit />,
+                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+                    },
+                    {
+                        path: ":id",
+                        element: <OrderView />,
                         errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },
                 ],

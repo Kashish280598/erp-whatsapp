@@ -3,15 +3,15 @@ import { DataTableColumnHeader } from "@/components/custom/table/data-table/data
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useDeleteUserMutation } from "@/lib/api/users-api";
+import { useDeleteOrderMutation } from "@/lib/api/orders-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
 import { IconEye, IconPencil, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUsers: (params: TableQueryParams) => void, isLoading: boolean, users: any[], totalCount: number }) => {
+const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchOrders: (params: TableQueryParams) => void, isLoading: boolean, orders: any[], totalCount: number }) => {
     const navigate = useNavigate()
-    const [deleteUser] = useDeleteUserMutation()
+    const [deleteOrder] = useDeleteOrderMutation()
 
     const tableToolbar: TableToolbar = {
         enableSearch: true,
@@ -35,12 +35,12 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
 
 
     const onDelete = (id: any) => {
-        deleteUser(id).unwrap()
+        deleteOrder(id).unwrap()
     }
 
     return (
         <DataTable
-            data={users}
+            data={orders}
             columns={[
                 {
                     id: 'name',
@@ -140,19 +140,15 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                     accessorKey: 'actions',
                     cell: ({ row }) => (
                         <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}`)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/orders/${row?.original?.id}`)}>
                                 <IconEye className="h-4 w-4 text-gray-500" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}/edit`)}>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/orders/${row?.original?.id}/edit`)}>
                                 <IconPencil className="h-4 w-4 text-gray-500" />
                             </Button>
-                            {
-                                row?.original?.role !== 'admin' && row?.original?.role !== 'super-admin' && (
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                        <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
-                                    </Button>
-                                )
-                            }
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
+                            </Button>
                         </div>
                     )
                 }
@@ -162,7 +158,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                 searchTerm,
                 setSearchTerm,
             }}
-            fetchData={onFetchUsers}
+            fetchData={onFetchOrders}
             totalCount={totalCount}
             loading={isLoading}
             tableId="dashboard-integrations"
@@ -170,4 +166,4 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
     )
 }
 
-export default UserTable
+export default OrderTable

@@ -1,20 +1,19 @@
-import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
     Dialog as CoreDialog,
-    DialogClose,
     DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
+    DialogTrigger
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { IconX } from "@tabler/icons-react";
-import Confetti from 'react-confetti';
-import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import Confetti from 'react-confetti';
 
 export const DialogType = {
     DEFAULT: 'default',
@@ -81,6 +80,7 @@ export function Dialog({
     iconInitials,
     isShowConfetti = false,
     iconClassName,
+    onClose,
 }: DialogProps) {
     const dialogHeaderRef = useRef<HTMLDivElement>(null);
     const confettiRef = useRef<HTMLCanvasElement>(null);
@@ -152,9 +152,13 @@ export function Dialog({
                                 <AvatarFallback className={`text-2xl font-bold rounded-[10px] text-neutral bg-white`}>{iconInitials}</AvatarFallback>
                             )}
                         </Avatar>
-                        <DialogClose className="p-0 h-7 w-7 rounded-full bg-white cursor-pointer hover:bg-red-100 ml-auto flex items-center justify-center">
+                        <button
+                            type="button"
+                            className="p-0 h-7 w-7 rounded-full bg-white cursor-pointer hover:bg-red-100 ml-auto flex items-center justify-center"
+                            onClick={onClose}
+                        >
                             <IconX className="h-5 w-5 text-gray-500" />
-                        </DialogClose>
+                        </button>
                     </div>
                 </DialogHeader>
                 <div className="p-1 pt-0 pb-2 w-full">

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import productsData from "./dummy-products.json";
 import { Button } from "../../components/ui/button";
 import { Plus, Edit, Info, TrendingDown } from "lucide-react";
 import { DataTable } from "@/components/custom/table/data-table";
 import { Badge } from "@/components/ui/badge";
+import { API_CONFIG, API_ENDPOINTS } from '@/lib/api/config';
 import "./InventoryList.css";
 
 interface Product {
@@ -42,14 +42,34 @@ const InventoryList = () => {
   const [form, setForm] = useState<Product>(initialForm);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [isEdit, setIsEdit] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    const localProducts = localStorage.getItem("erp_products");
-    if (localProducts) {
-      setProducts(JSON.parse(localProducts));
-    } else {
-      setProducts(productsData as Product[]);
-    }
+    // Fetch products from API
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(API_CONFIG.baseURL + '/api/products');
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const apiData = await res.json();
+        console.log('Fetched products API response:', apiData);
+        if (!apiData.data || !Array.isArray(apiData.data.products)) {
+          setFetchError('No products found or API response format changed.');
+          setProducts([]);
+        } else {
+          setProducts(apiData.data.products);
+          setFetchError(null);
+        }
+      } catch (err: any) {
+        setFetchError(err.message || 'Failed to fetch products');
+        setProducts([]);
+        console.error('Error fetching products:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   // Add/Edit Modal logic
@@ -231,25 +251,30 @@ const InventoryList = () => {
   };
 
   return (
-    <div className="inventory-container" style={{ padding: '1.5rem 0.5rem' }}>
+    <div className="inventory-container" style={{ width: '100%', padding: '1.5rem 0.5rem' }}>
       <div className="inventory-header" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }}>Inventory Management</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }}>Inventory</h1>
           <div style={{ fontSize: 14, color: '#64748b', fontWeight: 500, marginBottom: 0 }}>
-            Track, adjust, and manage your product stock in real time.
+            Manage your products and stock levels.
           </div>
         </div>
         <Button onClick={openAddModal} className="add-btn" size="sm" style={{ height: 36, fontSize: 14, padding: '0 18px' }}>
           <Plus className="mr-2" size={16} /> Add Product
         </Button>
       </div>
+      {fetchError && (
+        <div style={{ color: '#e11d48', fontWeight: 600, marginBottom: 16, textAlign: 'center' }}>
+          {fetchError}
+        </div>
+      )}
       <DataTable
         columns={columns}
         data={products}
         tableToolbar={tableToolbar}
         fetchData={() => {}}
         totalCount={products.length}
-        loading={false}
+        loading={loading}
         tableId="inventory-table"
         className="!text-[13px]"
         headerClassName="!py-2 !px-2"

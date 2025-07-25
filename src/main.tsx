@@ -19,6 +19,7 @@ import { router } from './routes/routers'
 // reactour
 import { useTheme } from '@/providers/theme-provider'
 import { TourProvider, useTour } from '@reactour/tour'
+import { SocketProvider } from './providers/socket-provider'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
@@ -344,7 +345,9 @@ if (!(window as any)._viteReactRoot) {
         <AppTourProvider>
           <ThemeProvider storageKey="erp-ui-theme" defaultTheme="light">
             <React.Suspense fallback={<Loader />}>
-              <App />
+              <SocketProvider>
+                <App />
+              </SocketProvider>
             </React.Suspense>
             <Toster />
           </ThemeProvider>
