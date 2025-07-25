@@ -10,9 +10,10 @@ interface POC {
   email: string;
   phone: string;
   designation?: string;
+  location?: string;
 }
 
-const defaultPOC: POC = { name: '', role: '', email: '', phone: '', designation: '' };
+const defaultPOC: POC = { name: '', role: '', email: '', phone: '', designation: '', location: '' };
 
 export default function AddCustomer({ mode = 'add' }: { mode?: 'add' | 'edit' }) {
   const { id } = useParams();
@@ -62,6 +63,7 @@ export default function AddCustomer({ mode = 'add' }: { mode?: 'add' | 'edit' })
         email: poc.email,
         mobileNo: poc.phone,
         designation: poc.designation,
+        location: poc.location,
       }));
       // Prepare payload
       const payload = {
@@ -150,9 +152,17 @@ export default function AddCustomer({ mode = 'add' }: { mode?: 'add' | 'edit' })
                     <label style={{ fontWeight: 500, color: '#334155', fontSize: 14, marginBottom: 2, display: 'block' }}>Name *</label>
                     <input required placeholder="Name" value={poc.name} onChange={e => handlePOCChange(idx, 'name', e.target.value)} style={{ width: '100%', padding: 10, border: '1.2px solid #cbd5e1', borderRadius: 6, fontSize: 14, background: '#fff', transition: 'border 0.2s', outline: 'none' }} onFocus={e => e.target.style.border = '1.2px solid #2563eb'} onBlur={e => e.target.style.border = '1.2px solid #cbd5e1'} />
                   </div>
-                  <div style={{ flex: 2, minWidth: 160 }}>
-                    <label style={{ fontWeight: 500, color: '#334155', fontSize: 14, marginBottom: 2, display: 'block' }}>Email *</label>
-                    <input required type="email" placeholder="Email" value={poc.email} onChange={e => handlePOCChange(idx, 'email', e.target.value)} style={{ width: '100%', padding: 10, border: '1.2px solid #cbd5e1', borderRadius: 6, fontSize: 14, background: '#fff', transition: 'border 0.2s', outline: 'none' }} onFocus={e => e.target.style.border = '1.2px solid #2563eb'} onBlur={e => e.target.style.border = '1.2px solid #cbd5e1'} />
+                  <div style={{ flex: 2, minWidth: 160, display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontWeight: 500, color: '#334155', fontSize: 14, marginBottom: 2, display: 'block' }}>Email *</label>
+                      <input required type="email" placeholder="Email" value={poc.email} onChange={e => handlePOCChange(idx, 'email', e.target.value)} style={{ width: '100%', padding: 10, border: '1.2px solid #cbd5e1', borderRadius: 6, fontSize: 14, background: '#fff', transition: 'border 0.2s', outline: 'none' }} onFocus={e => e.target.style.border = '1.2px solid #2563eb'} onBlur={e => e.target.style.border = '1.2px solid #cbd5e1'} />
+                    </div>
+                  </div>
+                  <div style={{ flex: 2, minWidth: 160, display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ fontWeight: 500, color: '#334155', fontSize: 14, marginBottom: 2, display: 'block' }}>Location</label>
+                      <input placeholder="Location" value={poc.location || ''} onChange={e => handlePOCChange(idx, 'location', e.target.value)} style={{ width: '100%', padding: 10, border: '1.2px solid #cbd5e1', borderRadius: 6, fontSize: 14, background: '#fff', transition: 'border 0.2s', outline: 'none' }} onFocus={e => e.target.style.border = '1.2px solid #2563eb'} onBlur={e => e.target.style.border = '1.2px solid #cbd5e1'} />
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>

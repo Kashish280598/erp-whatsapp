@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Plus, Info, Edit } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/custom/table/data-table";
 import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
@@ -166,10 +167,17 @@ const CustomersList = () => {
       header: "Actions",
       cell: ({ row }: { row: any }) => (
         <div className="flex gap-1">
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/edit/${row.original.id}`)}>
-            <Edit size={16} />
-          </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/company/${encodeURIComponent(row.original.companyName)}`)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
+                <Edit size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Coming soon</p>
+            </TooltipContent>
+          </Tooltip>
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/details/${row.original.id}`)}>
             <Info size={16} />
           </Button>
         </div>

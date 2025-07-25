@@ -1,6 +1,5 @@
 export const API_CONFIG = {
   baseURL: 'https://whatsapp-erp-production.up.railway.app',
-  // baseURL: 'https://whatsapp-erp.vercel.app',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
@@ -64,6 +63,11 @@ export const API_ENDPOINTS = {
     deleteUser: '/api/users',
     resetPasswordForUser: '/api/password-reset/request-by-id',
   },
+  whatsapp: {
+    qrImage: '/api/whatsapp/qr',
+  },
   orders: '/api/orders',
-  categories: '/api/categories'
+  categories: '/api/categories',
+  stocks: '/api/stocks',
+  products: '/api/products',
 } as const; 
