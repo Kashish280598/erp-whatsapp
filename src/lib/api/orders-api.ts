@@ -63,6 +63,13 @@ export const ordersApi = createApi({
                 params: params,
             }),
         }),
+        getProducts: builder.query({
+            query: (params) => ({
+                url: '/api/products',
+                method: 'GET',
+                params: params,
+            }),
+        }),
     }),
 })
 
@@ -73,4 +80,5 @@ export const {
     useUpdateOrderMutation,
     useDeleteOrderMutation,
     useLazyGetCustomersQuery,
+    useLazyGetProductsQuery,
 } = ordersApi 
