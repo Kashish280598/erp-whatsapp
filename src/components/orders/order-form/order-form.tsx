@@ -3,7 +3,6 @@ import { useMemo, type FC } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
-import CategoryDropdown from "@/components/categories/category-dropdown"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -46,12 +45,9 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
             onSubmit={onSubmit}
             enableReinitialize>
             {({ errors, touched, isSubmitting, handleSubmit, values, setFieldValue }) => (
-                <div className="grid grid-cols-1 gap-4 max-w-[500px] mx-auto">
+                <div className="grid grid-cols-3 gap-4 mx-auto">
                     <div>
                         <CustomersDropdown />
-                    </div>
-                    <div>
-                        <CategoryDropdown />
                     </div>
                     <div>
                         <Field name="name">
