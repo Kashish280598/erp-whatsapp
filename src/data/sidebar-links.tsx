@@ -1,9 +1,9 @@
 import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
-import SettingsIcon from "@/assets/icons/settings-icon.svg";
-import UsersIcon from "@/assets/icons/user-contact-icon.svg";
-import ChatIcon from "@/assets/icons/user-contact-icon.svg";
 import FindingIcon from "@/assets/icons/finding-icon.svg";
 import ManageUserIcon from "@/assets/icons/manage-user.svg";
+import SettingsIcon from "@/assets/icons/settings-icon.svg";
+import { IconChartTreemap, IconUser } from "@tabler/icons-react";
+
 
 export interface NavLink {
   title: string;
@@ -42,7 +42,7 @@ export const sidebarlinks: SidebarLink[] = [
     title: "Chat",
     label: "",
     href: "/chat",
-    icon: ChatIcon,
+    icon: IconChartTreemap,
   },
   {
     title: "Settings",
@@ -55,7 +55,14 @@ export const sidebarlinks: SidebarLink[] = [
     title: "Users",
     label: "",
     href: "/users",
-    icon: UsersIcon,
+    icon: IconUser,
+    sidebarIdentifier: "settings",
+  },
+  {
+    title: "Categories",
+    label: "",
+    href: "/categories",
+    icon: IconChartTreemap,
     sidebarIdentifier: "settings",
   },
 ];

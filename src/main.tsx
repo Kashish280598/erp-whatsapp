@@ -1,23 +1,24 @@
+import { Toster } from '@/components/custom/Toster'
+import Loader from '@/components/Loader'
+import { useLoading } from '@/hooks/useAppState'
+import { useAutoRefreshToken } from '@/hooks/useAutoRefreshToken'
+import '@/index.css'
+import { API_ENDPOINTS } from '@/lib/api/config'
+import { setInitializing, setTourCompleted } from '@/lib/features/app/appSlice'
+import * as Sentry from '@sentry/react'
+import axios from 'axios'
 import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { store, persistor, useAppDispatch, useAppSelector } from '@/lib/store'
-import '@/index.css'
-import { ThemeProvider } from "@/providers/theme-provider"
-import Loader from '@/components/Loader'
-import { RouterProvider } from "react-router-dom";
-import { router } from '@/routes/routers'
-import { Toster } from '@/components/custom/Toster';
-import { useAutoRefreshToken } from '@/hooks/useAutoRefreshToken';
-import { useLoading } from '@/hooks/useAppState'
-import { API_ENDPOINTS } from '@/lib/api/config'
-import { setInitializing, setTourCompleted } from '@/lib/features/app/appSlice'
-import * as Sentry from '@sentry/react';
-// redux-persist
-import { PersistGate } from 'redux-persist/integration/react';
+import { RouterProvider } from 'react-router-dom'
+import { PersistGate } from 'redux-persist/integration/react'
+import setupAxios from './lib/axios-interceptors'
+import { persistor, store, useAppDispatch, useAppSelector } from './lib/store'
+import { ThemeProvider } from './providers/theme-provider'
+import { router } from './routes/routers'
 // reactour
-import { TourProvider, useTour } from '@reactour/tour';
-import { useTheme } from '@/providers/theme-provider';
+import { useTheme } from '@/providers/theme-provider'
+import { TourProvider, useTour } from '@reactour/tour'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
@@ -30,7 +31,7 @@ Sentry.init({
 // Custom Tour Step Components with Close Buttons
 const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
-  
+
   const handleClose = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
@@ -40,7 +41,7 @@ const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
     <div className="space-y-4">
       <div className="text-lg font-semibold mb-2">🎉 Welcome to Alchemy ERP!</div>
       <div className="text-sm leading-relaxed">
-        Let's take a quick tour to help you get started with your new ERP system. 
+        Let's take a quick tour to help you get started with your new ERP system.
         We'll show you the key features and how to navigate through the application.
       </div>
       <button
@@ -55,7 +56,7 @@ const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
 
 const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
-  
+
   const handleClose = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
@@ -65,7 +66,7 @@ const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
     <div className="space-y-4">
       <div className="text-lg font-semibold mb-2">📊 Dashboard</div>
       <div className="text-sm leading-relaxed">
-        This is your command center! Here you'll find an overview of your business metrics, 
+        This is your command center! Here you'll find an overview of your business metrics,
         recent activities, and quick access to important features.
       </div>
       <div className="flex gap-2">
@@ -88,7 +89,7 @@ const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
 
 const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
-  
+
   const handleClose = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
@@ -98,7 +99,7 @@ const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
     <div className="space-y-4">
       <div className="text-lg font-semibold mb-2">📦 Inventory Manager</div>
       <div className="text-sm leading-relaxed">
-        Manage your product inventory here. Add new items, track stock levels, 
+        Manage your product inventory here. Add new items, track stock levels,
         monitor sales, and keep your warehouse organized efficiently.
       </div>
       <div className="flex gap-2">
@@ -121,7 +122,7 @@ const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
 
 const CustomersStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
-  
+
   const handleClose = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
@@ -131,7 +132,7 @@ const CustomersStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
     <div className="space-y-4">
       <div className="text-lg font-semibold mb-2">👥 Customers</div>
       <div className="text-sm leading-relaxed">
-        View and manage your customer database. Track customer information, 
+        View and manage your customer database. Track customer information,
         order history, and maintain strong relationships with your clients.
       </div>
       <div className="flex gap-2">
@@ -154,7 +155,7 @@ const CustomersStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
 
 const ChatStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
-  
+
   const handleClose = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
@@ -164,7 +165,7 @@ const ChatStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
     <div className="space-y-4">
       <div className="text-lg font-semibold mb-2">💬 Chat Integration</div>
       <div className="text-sm leading-relaxed">
-        Connect with your customers through our integrated chat system. 
+        Connect with your customers through our integrated chat system.
         Manage conversations, respond to inquiries, and provide excellent customer support.
       </div>
       <button
@@ -291,8 +292,9 @@ interface WrapperProps {
 const AppWrapper: React.FC<WrapperProps> = ({ children }) => {
   const isDev = import.meta.env.MODE === 'development';
   return isDev ? <>{children}</> : <React.StrictMode>{children}</React.StrictMode>;
-
 }
+
+setupAxios(axios)
 
 // Vite HMR/React 18 createRoot fix
 const rootElement = document.getElementById('root');
@@ -300,6 +302,7 @@ if (!(window as any)._viteReactRoot) {
   (window as any)._viteReactRoot = ReactDOM.createRoot(rootElement!);
 }
 (window as any)._viteReactRoot.render(
+
   <AppWrapper>
     <Provider store={store}>
       <PersistGate loading={<Loader />} persistor={persistor}>

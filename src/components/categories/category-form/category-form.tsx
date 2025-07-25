@@ -4,35 +4,35 @@ import { Field, Formik, type FormikHelpers } from "formik"
 import { useMemo, type FC } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
-import { getInitialValues, getPayload, validationSchema, type User } from "."
-import { useCreateUserMutation, useUpdateUserMutation } from "../../../lib/api/users-api"
+import { getInitialValues, getPayload, validationSchema, type Category } from "."
+import { useCreateCategoryMutation, useUpdateCategoryMutation } from "../../../lib/api/categories-api"
 
-const UserForm: FC<{ user?: User }> = ({ user }) => {
-    const [createUser] = useCreateUserMutation()
-    const [updateUser] = useUpdateUserMutation()
+const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
+    const [createCategory] = useCreateCategoryMutation()
+    const [updateCategory] = useUpdateCategoryMutation()
     const navigate = useNavigate()
-    const initialValues = useMemo(() => getInitialValues(user), [user])
+    const initialValues = useMemo(() => getInitialValues(category), [category])
 
     const onSubmit = async (values: any, { setSubmitting }: FormikHelpers<any>) => {
         try {
             let response
             const payload = getPayload(values)
-            if (user) {
-                response = await updateUser({ id: user?.id, payload }).unwrap()
+            if (category) {
+                response = await updateCategory({ id: category?.id, payload }).unwrap()
             } else {
-                response = await createUser(payload).unwrap()
+                response = await createCategory(payload).unwrap()
             }
             if (response?.status === 200) {
                 toast.success(response?.message)
-                navigate('/users')
+                navigate('/categories')
             }
         } catch (error: any) {
+            console.log('error', error)
             toast.error(error?.data?.message || 'Something went wrong')
         } finally {
             setSubmitting(false)
         }
     }
-
 
     return (
         <Formik
@@ -50,44 +50,17 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
                                     id="name"
                                     type="text"
                                     label="Name"
-                                    placeholder="Enter name"
+                                    placeholder="Enter category name"
                                     error={touched.name && errors.name}
                                 />
                             )}
                         </Field>
                     </div>
-                    <div>
-                        <Field name="email">
-                            {({ field }: any) => (
-                                <Input
-                                    {...field}
-                                    id="email"
-                                    type="email"
-                                    label="Email"
-                                    placeholder="Enter email address"
-                                    error={touched.email && errors.email}
-                                />
-                            )}
-                        </Field>
-                    </div>
-                    <div>
-                        <Field name="role">
-                            {({ field }: any) => (
-                                <Input
-                                    {...field}
-                                    id="role"
-                                    type="text"
-                                    label="Role"
-                                    placeholder="Enter role"
-                                    error={touched.role && errors.role}
-                                />
-                            )}
-                        </Field>
-                    </div>
+
                     <div className="flex justify-center gap-4">
                         <Button
                             type="button"
-                            onClick={() => navigate('/users')}
+                            onClick={() => navigate('/categories')}
                             variant="outline"
                         >
                             Cancel
@@ -96,8 +69,6 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
                             type="submit"
                             onClick={() => handleSubmit()}
                             disabled={isSubmitting}
-
-
                         >
                             {isSubmitting ? 'Saving...' : 'Save'}
                         </Button>
@@ -108,4 +79,4 @@ const UserForm: FC<{ user?: User }> = ({ user }) => {
     )
 }
 
-export default UserForm
+export default CategoryForm

@@ -1,18 +1,18 @@
-import { Outlet } from "react-router-dom";
 import { Layout } from "@/components/layout";
 import Sidebar from "@/components/layout/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { Outlet } from "react-router-dom";
 // import useCheckActiveNav from "./hooks/use-check-active-nav";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { NavgationBreadcrumb } from "@/components/custom/NavgationBreadcrumb";
 import { Notifications } from "@/components/custom/Notifications";
-import ProtectedRoute from "@/routes/ProtectedRoute";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { IconLogout2 } from "@tabler/icons-react";
-import { useAppDispatch, useAppSelector } from "@/lib/store";
-import { logout } from "@/lib/features/auth/authSlice";
-import { parseFullName } from "@/lib/utils";
 import ThemeSwitch from "@/components/ThemeSwitch";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { logout, setAuthToken } from "@/lib/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/store";
+import { parseFullName } from "@/lib/utils";
+import ProtectedRoute from "@/routes/ProtectedRoute";
+import { IconLogout2 } from "@tabler/icons-react";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -22,6 +22,8 @@ function App() {
 
   const handleLogout = () => {
     dispatch(logout());
+    // @ts-ignore
+    dispatch(setAuthToken(null));
   };
 
   return (

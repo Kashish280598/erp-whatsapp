@@ -1,10 +1,10 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { setLoading } from '../app/appSlice';
-import userService from '@/lib/api/services/userService';
 import { API_ENDPOINTS } from '@/lib/api/config';
-import { toast } from 'sonner';
+import { default as enhancedUserService, default as userService } from '@/lib/api/services/userService';
+import type { PayloadAction } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import Cookies from "js-cookie";
+import { toast } from 'sonner';
+import { setLoading } from '../app/appSlice';
 
 
 interface User {
@@ -58,7 +58,7 @@ interface ResetPasswordState {
     confirmPassword: string;
   };
   data: {
-    email: string;  
+    email: string;
     token: string;
     expiresAt: string;
     isUsed: boolean;
@@ -135,13 +135,12 @@ const initialState: AuthState = {
   verifiedPassword: ''
 };
 
-
 export const loginUser = createAsyncThunk(API_ENDPOINTS.auth.login,
   async ({ payload }: { payload: LoginFormData }, { dispatch }) => {
     try {
       dispatch(setLoading({ key: API_ENDPOINTS.auth.login, isLoading: true }));
 
-      const res = await userService.login(payload, {
+      const res = await enhancedUserService.login(payload, {
         skipAuth: true,
         skipRetry: true,
         credentials: 'include',
@@ -197,11 +196,12 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    logout: (state) => {
+    logout: (state: AuthState) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
       state.login = initialState.login;
+      localStorage.removeItem('auth_token');
       // const logoutChannel = new BroadcastChannel('erp-auth-broadcast');
       // logoutChannel.postMessage('logout');
       localStorage.removeItem('isLoggedIn');
@@ -212,68 +212,71 @@ export const authSlice = createSlice({
       // Cookies will be cleared by the server
       // Todo: API intigration is pending
     },
-    setCredentials: (state, action: PayloadAction<{ user: User | null; isAuthenticated: boolean }>) => {
+    setCredentials: (state: AuthState, action: PayloadAction<{ user: User | null; isAuthenticated: boolean }>) => {
       state.isAuthenticated = action.payload.isAuthenticated;
       state.user = action.payload.user;
       if (action.payload.isAuthenticated) localStorage.setItem('isLoggedIn', 'true');
       else localStorage.removeItem('isLoggedIn');
     },
-    setIsShowAllSetDialog: (state, action: PayloadAction<boolean>) => {
+    setIsShowAllSetDialog: (state: AuthState, action: PayloadAction<boolean>) => {
       if (state.user)
         state.user.showGuide = action.payload;
     },
-    setRegistrationStep: (state, action: PayloadAction<number>) => {
+    setRegistrationStep: (state: AuthState, action: PayloadAction<number>) => {
       state.registration.activeStep = action.payload;
     },
-    setRegistrationFormData: (state, action: PayloadAction<typeof initialState.registration.formData>) => {
+    setRegistrationFormData: (state: AuthState, action: PayloadAction<typeof initialState.registration.formData>) => {
       state.registration.formData = {
         ...state.registration.formData,
         ...action.payload
       }
     },
-    resetRegistration: (state) => {
+    resetRegistration: (state: AuthState) => {
       state.registration = initialState.registration;
     },
-    setLoginStep: (state, action: PayloadAction<number>) => {
+    setLoginStep: (state: AuthState, action: PayloadAction<number>) => {
       state.login.step = action.payload;
     },
-    setLoginFormData: (state, action) => {
+    setLoginFormData: (state: AuthState, action: PayloadAction<typeof initialState.login.formData>) => {
       state.login.formData = action.payload;
     },
-    setLoginType: (state, action: PayloadAction<'password' | null>) => {
+    setLoginType: (state: AuthState, action: PayloadAction<'password' | null>) => {
       state.login.type = action.payload;
     },
-    resetLoginForm: (state) => {
+    resetLoginForm: (state: AuthState) => {
       state.login.formData = initialState.login.formData;
       state.login.step = 1;
       state.login.error = null;
     },
-    setResetPasswordLinkExpired: (state, action: PayloadAction<boolean>) => {
+    setResetPasswordLinkExpired: (state: AuthState, action: PayloadAction<boolean>) => {
       state.resetPassword.isExpiredLink = action.payload;
     },
-    setResetPasswordFormData: (state, action: PayloadAction<typeof initialState.resetPassword.formData>) => {
+    setResetPasswordFormData: (state: AuthState, action: PayloadAction<typeof initialState.resetPassword.formData>) => {
       state.resetPassword.formData = action.payload;
     },
-    resetPasswordState: (state) => {
+    resetPasswordState: (state: AuthState) => {
       state.resetPassword = initialState.resetPassword;
     },
-    setIsExpiredLink: (state, action: PayloadAction<boolean>) => {
+    setIsExpiredLink: (state: AuthState, action: PayloadAction<boolean>) => {
       state.registration.isExpiredLink = action.payload;
     },
-    setIsValidateInvitationTokenError: (state, action: PayloadAction<string>) => {
+    setIsValidateInvitationTokenError: (state: AuthState, action: PayloadAction<string>) => {
       state.registration.isValidateInvitationTokenError = action.payload;
     },
-    setIsValidateResetPasswordTokenError: (state, action: PayloadAction<string>) => {
+    setIsValidateResetPasswordTokenError: (state: AuthState, action: PayloadAction<string>) => {
       state.resetPassword.isValidateResetPasswordTokenError = action.payload;
     },
-    setIsForgotPasswordRequestSent: (state, action: PayloadAction<boolean>) => {
+    setIsForgotPasswordRequestSent: (state: AuthState, action: PayloadAction<boolean>) => {
       state.forgotPassword.isRequestSent = action.payload;
     },
-    setResetPasswordData: (state, action: PayloadAction<typeof initialState.resetPassword.data>) => {
+    setResetPasswordData: (state: AuthState, action: PayloadAction<typeof initialState.resetPassword.data>) => {
       state.resetPassword.data = action.payload;
     },
-    setVerifiedPassword: (state, action: PayloadAction<string>) => {
+    setVerifiedPassword: (state: AuthState, action: PayloadAction<string>) => {
       state.verifiedPassword = action.payload;
+    },
+    setAuthToken: (state: AuthState, action: PayloadAction<string>) => {
+      state.token = action.payload;
     }
   },
 });
@@ -297,7 +300,8 @@ export const {
   setLoginType,
   setIsValidateResetPasswordTokenError,
   setResetPasswordData,
-  setVerifiedPassword
+  setVerifiedPassword,
+  setAuthToken
 } = authSlice.actions;
 
 export default authSlice.reducer; 
