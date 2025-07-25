@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLazyGetUsersQuery } from "@/lib/api/users-api"
 import { Field } from "formik"
@@ -10,7 +11,7 @@ const CustomersDropdown = () => {
         getCustomers(params)
     }, [])
 
-    const customers = useMemo(() => Array.isArray(data?.data?.users) ? data?.data?.users : [], [data?.data?.users])
+    const customers = useMemo(() => Array.isArray(data?.data?.users) ? data?.data?.users.filter((user: any) => !!user?.mobileNo) : [], [data?.data?.users])
 
     return (
         <Field name="customer">
