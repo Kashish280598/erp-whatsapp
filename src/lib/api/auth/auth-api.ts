@@ -71,6 +71,16 @@ export const authApi = createApi({
 			}),
 			transformResponse: (response: { status: number; message: string; data: WhatsAppContact[] }) => response.data,
 		}),
+		getWhatsAppMessagesBetween: builder.query<any[], { toNumber: string }>({
+			query: ({ toNumber }) => ({
+				url: `/api/whatsapp/messages/between`,
+				method: 'GET',
+				params: {
+					fromNumber: '919712323801',
+					toNumber,
+				},
+			}),
+		}),
 	}),
 })
 
@@ -82,6 +92,8 @@ export const {
 	useResetPasswordMutation,
 	useGetWhatsAppQrImageQuery,
 	useGetWhatsAppContactsQuery,
+	useGetWhatsAppMessagesBetweenQuery,
+	useLazyGetWhatsAppMessagesBetweenQuery,
 } = authApi 
 
 // Utility to store token in localStorage
