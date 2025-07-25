@@ -4,15 +4,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { useLazyGetOrderQuery } from '@/lib/api/orders-api';
+import { useDeleteOrderMutation, useLazyGetOrderQuery } from '@/lib/api/orders-api';
 import { IconArrowLeft, IconEdit, IconTrash } from '@tabler/icons-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 const OrderView = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [getOrder, { data, isLoading, error }] = useLazyGetOrderQuery();
+    const [deleteOrder, { isLoading: isDeleting }] = useDeleteOrderMutation();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     useEffect(() => {
         if (id) {
@@ -23,6 +25,18 @@ const OrderView = () => {
     }, [id]);
 
     const order = data?.data?.order;
+
+    const handleDeleteOrder = async () => {
+        if (!order?.id) return;
+
+        try {
+            await deleteOrder(order.id).unwrap();
+            navigate('/orders');
+        } catch (error) {
+            console.error('Failed to delete order:', error);
+            // You can add toast notification here if you have a toast system
+        }
+    };
 
     const getStatusColor = (status: string) => {
         switch (status?.toLowerCase()) {
@@ -113,10 +127,14 @@ const OrderView = () => {
                         <IconEdit className="h-4 w-4 mr-2" />
                         Edit Order
                     </Button>
-                    <Button variant="destructive">
+                    {/* <Button
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        disabled={isDeleting}
+                    >
                         <IconTrash className="h-4 w-4 mr-2" />
-                        Delete Order
-                    </Button>
+                        {isDeleting ? 'Deleting...' : 'Delete Order'}
+                    </Button> */}
                 </div>
             </div>
 
@@ -281,6 +299,43 @@ const OrderView = () => {
                     </Card>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                <IconTrash className="h-5 w-5 text-red-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-900">Delete Order</h3>
+                                <p className="text-sm text-gray-500">This action cannot be undone.</p>
+                            </div>
+                        </div>
+                        <p className="text-gray-700 mb-6">
+                            Are you sure you want to delete order <span className="font-semibold">#{order.id}</span>?
+                            This will permanently remove the order and all its associated data.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowDeleteConfirm(false)}
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={handleDeleteOrder}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? 'Deleting...' : 'Delete Order'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
