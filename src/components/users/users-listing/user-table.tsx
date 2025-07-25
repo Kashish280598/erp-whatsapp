@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button";
 import { useDeleteUserMutation } from "@/lib/api/users-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
 import { IconEye, IconPencil, IconTrash } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQueryParams) => void, isLoading: boolean }) => {
+const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUsers: (params: TableQueryParams) => void, isLoading: boolean, users: any[], totalCount: number }) => {
     const navigate = useNavigate()
     const [deleteUser] = useDeleteUserMutation()
 
@@ -32,38 +32,7 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
 
     const [searchTerm, setSearchTerm] = useState('');
 
-    const users = useMemo(() => [
-        {
-            id: 1,
-            name: 'John Doe',
-            service: {
-                name: 'Appian',
-                logo: 'https://placehold.co/150',
-            },
-            openIssues: 10,
-            scanFrequency: 'Daily',
-            severity: 'Critical',
-            riskScore: 78,
-            roles: ['Admin'],
-            lastScan: '2025-03-15 09:30:00',
-            status: 'active',
-        },
-        {
-            id: 2,
-            name: 'Jane Doe',
-            service: {
-                name: 'Auth0',
-                logo: 'https://placehold.co/150',
-            },
-            openIssues: 8,
-            scanFrequency: 'Daily',
-            severity: 'High',
-            riskScore: 75,
-            roles: ['Customer'],
-            lastScan: '2025-03-15 08:45:00',
-            status: 'active',
-        },
-    ], [])
+
 
     const onDelete = (id: any) => {
         deleteUser(id).unwrap()
@@ -87,7 +56,7 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
                             <div className="flex items-center gap-2">
                                 <Avatar className="h-6 w-6 rounded-full border-1 border-[#E4E4E8]">
                                     <AvatarFallback className="rounded-[2px] bg-gray-100 text-gray-600">
-                                        {row.original.name.charAt(0)}
+                                        {row?.original?.name?.charAt(0)}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
@@ -98,29 +67,52 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
                     }
                 },
                 {
-                    id: 'roles',
-                    accessorKey: 'roles',
+                    id: 'email',
+                    accessorKey: 'email',
                     enableHiding: true,
                     header: ({ column }) => (
-                        <DataTableColumnHeader column={column} title="Roles" />
+                        <DataTableColumnHeader column={column} title="Email" />
                     ),
                     cell: ({ row }) => (
                         <div className="flex gap-1.5">
-                            {row.original.roles.map((tag: string) => (
-                                <Badge
-                                    key={tag}
-                                    variant="secondary"
-                                    className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600"
-                                >
-                                    {tag}
-                                </Badge>
-                            ))}
+                            <span className="text-sm text-gray-600">{row.original.email}</span>
+                        </div>
+                    )
+                },
+                {
+                    id: 'mobileNo',
+                    accessorKey: 'mobileNo',
+                    enableHiding: true,
+                    header: ({ column }) => (
+                        <DataTableColumnHeader column={column} title="Phone Number" />
+                    ),
+                    cell: ({ row }) => (
+                        <div className="flex gap-1.5">
+                            <span className="text-sm text-gray-600">{row.original.mobileNo}</span>
+                        </div>
+                    )
+                },
+                {
+                    id: 'role',
+                    accessorKey: 'role',
+                    enableHiding: true,
+                    header: ({ column }) => (
+                        <DataTableColumnHeader column={column} title="Role" />
+                    ),
+                    cell: ({ row }) => (
+                        <div className="flex gap-1.5">
+                            <Badge
+                                variant="secondary"
+                                className="px-2 py-0.5 text-xs capitalize font-medium bg-gray-100 text-gray-600"
+                            >
+                                {row.original.role}
+                            </Badge>
                         </div>
                     )
                 },
                 {
                     id: 'addedOn',
-                    accessorKey: 'addedOn',
+                    accessorKey: 'createdAt',
                     filterFn: 'arrIncludesSome',
                     enableSorting: true,
                     enableHiding: true,
@@ -128,7 +120,7 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
                         <DataTableColumnHeader column={column} title="Added On" />
                     ),
                     cell: ({ row }) => {
-                        const date = new Date(row.original.lastScan);
+                        const date = new Date(row.original.createdAt);
                         return (
                             <span className="text-sm text-gray-600">
                                 {date.toLocaleDateString('en-US', {
@@ -167,7 +159,7 @@ const UserTable = ({ onFetchUsers, isLoading }: { onFetchUsers: (params: TableQu
                 setSearchTerm,
             }}
             fetchData={onFetchUsers}
-            totalCount={200}
+            totalCount={totalCount}
             loading={isLoading}
             tableId="dashboard-integrations"
         />
