@@ -2,15 +2,13 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Field, Formik, type FormikHelpers } from "formik"
 import { useMemo, type FC } from "react"
-import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 import { getInitialValues, getPayload, validationSchema, type Category } from "."
 import { useCreateCategoryMutation, useUpdateCategoryMutation } from "../../../lib/api/categories-api"
 
-const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
+const CategoryForm: FC<{ category?: Category, onClose: () => void }> = ({ category, onClose }) => {
     const [createCategory] = useCreateCategoryMutation()
     const [updateCategory] = useUpdateCategoryMutation()
-    const navigate = useNavigate()
     const initialValues = useMemo(() => getInitialValues(category), [category])
 
     const onSubmit = async (values: any, { setSubmitting }: FormikHelpers<any>) => {
@@ -24,10 +22,9 @@ const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
             }
             if (response?.status === 200) {
                 toast.success(response?.message)
-                navigate('/categories')
+                onClose()
             }
         } catch (error: any) {
-            console.log('error', error)
             toast.error(error?.data?.message || 'Something went wrong')
         } finally {
             setSubmitting(false)
@@ -41,7 +38,7 @@ const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
             onSubmit={onSubmit}
             enableReinitialize>
             {({ errors, touched, isSubmitting, handleSubmit }) => (
-                <div className="grid grid-cols-1 gap-4 max-w-[500px] mx-auto">
+                <div className="grid grid-cols-1 gap-4 max-w-[500px] mx-auto mt-3">
                     <div>
                         <Field name="name">
                             {({ field }: any) => (
@@ -49,7 +46,7 @@ const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
                                     {...field}
                                     id="name"
                                     type="text"
-                                    label="Name"
+                                    // label="Name"
                                     placeholder="Enter category name"
                                     error={touched.name && errors.name}
                                 />
@@ -60,7 +57,7 @@ const CategoryForm: FC<{ category?: Category }> = ({ category }) => {
                     <div className="flex justify-center gap-4">
                         <Button
                             type="button"
-                            onClick={() => navigate('/categories')}
+                            onClick={onClose}
                             variant="outline"
                         >
                             Cancel

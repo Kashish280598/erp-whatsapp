@@ -35,8 +35,6 @@ const UserView = lazy(() => import("@/pages/users/user-view"));
 
 // Category Pages
 const CategoryListing = lazy(() => import("@/pages/categories/category-listing"));
-const CategoryCreate = lazy(() => import("@/pages/categories/category-create"));
-const CategoryEdit = lazy(() => import("@/pages/categories/category-edit"));
 
 
 const FallbackLoader = ({ className }: { className?: string }) => {
@@ -229,16 +227,6 @@ export const router = createBrowserRouter([
                     {
                         index: true,
                         element: <CategoryListing />,
-                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                    },
-                    {
-                        path: "create",
-                        element: <CategoryCreate />,
-                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                    },
-                    {
-                        path: ":id/edit",
-                        element: <CategoryEdit />,
                         errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
                     },
                 ],
