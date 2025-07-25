@@ -12,6 +12,7 @@ import {
   IconArrowLeft
 } from '@tabler/icons-react';
 import { useGetWhatsAppContactsQuery, useLazyGetWhatsAppMessagesBetweenQuery } from '@/lib/api/auth/auth-api';
+import { useSocket } from '@/providers/socket-provider';
 
 interface User {
   id: string;
@@ -45,6 +46,10 @@ const WhatsAppChat: React.FC = () => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [triggerGetMessages] = useLazyGetWhatsAppMessagesBetweenQuery();
+  
+  // Socket integration
+  const { isConnected, isAuthenticated, sendMessage: socketSendMessage, joinConversation, leaveConversation } = useSocket();
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
 
   // Fetch WhatsApp contacts from API
   const { data: contacts, isLoading: isContactsLoading, isError: isContactsError, refetch } = useGetWhatsAppContactsQuery();
@@ -126,6 +131,72 @@ const WhatsAppChat: React.FC = () => {
     setMessages(initialMessages);
   }, []);
 
+  // Socket event listeners for real-time messaging
+  useEffect(() => {
+    const handleNewMessage = (event: CustomEvent) => {
+      const newMessage = event.detail;
+      console.log('Received new message via socket:', newMessage);
+      
+      // Update messages state with new message
+      setMessages(prev => {
+        const conversationMessages = prev[selectedUser?.id || ''] || [];
+        const messageExists = conversationMessages.some(msg => msg.id === newMessage.id);
+        
+        if (!messageExists) {
+          return {
+            ...prev,
+            [selectedUser?.id || '']: [...conversationMessages, {
+              id: newMessage.id,
+              sender: newMessage.isOutgoing ? 'user' : 'contact',
+              content: newMessage.content,
+              timestamp: new Date(newMessage.createdAt).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+              }),
+              type: 'text',
+              isOutgoing: newMessage.isOutgoing,
+              messageType: newMessage.messageType,
+              createdAt: newMessage.createdAt
+            }]
+          };
+        }
+        return prev;
+      });
+    };
+
+    const handleMessageSent = (event: CustomEvent) => {
+      const sentMessage = event.detail;
+      console.log('Message sent confirmation via socket:', sentMessage);
+    };
+
+    const handleMessageSendError = (event: CustomEvent) => {
+      const error = event.detail;
+      console.error('Message send error via socket:', error);
+      // You could show a toast notification here
+    };
+
+    const handleStatusUpdate = (event: CustomEvent) => {
+      const status = event.detail;
+      console.log('WhatsApp status update via socket:', status);
+      // You could update connection status in UI here
+    };
+
+    // Add event listeners
+    window.addEventListener('whatsapp:new_message', handleNewMessage as EventListener);
+    window.addEventListener('whatsapp:message_sent', handleMessageSent as EventListener);
+    window.addEventListener('whatsapp:message_send_error', handleMessageSendError as EventListener);
+    window.addEventListener('whatsapp:status_update', handleStatusUpdate as EventListener);
+
+    return () => {
+      // Clean up event listeners
+      window.removeEventListener('whatsapp:new_message', handleNewMessage as EventListener);
+      window.removeEventListener('whatsapp:message_sent', handleMessageSent as EventListener);
+      window.removeEventListener('whatsapp:message_send_error', handleMessageSendError as EventListener);
+      window.removeEventListener('whatsapp:status_update', handleStatusUpdate as EventListener);
+    };
+  }, [selectedUser]);
+
   // Auto scroll to bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -133,25 +204,42 @@ const WhatsAppChat: React.FC = () => {
 
   const handleSendMessage = () => {
     if (message.trim() && selectedUser) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'user',
-        content: message.trim(),
-        timestamp: new Date().toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
-          minute: '2-digit',
-          hour12: true 
-        }),
-        type: 'text',
-        isOutgoing: true,
-        messageType: 'text',
-        createdAt: new Date().toISOString()
-      };
+      const messageText = message.trim();
+      const contact = contacts?.find(c => String(c.id) === selectedUser.id);
+      const mobileNo = contact?.mobileNo;
 
-      setMessages(prev => ({
-        ...prev,
-        [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage]
-      }));
+      if (!mobileNo) {
+        console.error('No mobile number found for selected user');
+        return;
+      }
+
+      // Use socket to send message if connected and authenticated
+      if (isConnected && isAuthenticated) {
+        console.log('Sending message via socket to:', mobileNo);
+        socketSendMessage(mobileNo, messageText, currentConversationId || undefined);
+      } else {
+        console.warn('Socket not connected, falling back to optimistic update');
+        // Fallback: Add message optimistically to UI
+        const newMessage: Message = {
+          id: Date.now().toString(),
+          sender: 'user',
+          content: messageText,
+          timestamp: new Date().toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+          }),
+          type: 'text',
+          isOutgoing: true,
+          messageType: 'text',
+          createdAt: new Date().toISOString()
+        };
+
+        setMessages(prev => ({
+          ...prev,
+          [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage]
+        }));
+      }
 
       setMessage('');
     }
@@ -180,14 +268,31 @@ const WhatsAppChat: React.FC = () => {
 
   // Update the contact click handler
   const handleSelectUser = async (user: User, mobileNo: string) => {
+    // Leave previous conversation if exists
+    if (currentConversationId) {
+      leaveConversation(currentConversationId);
+    }
+    
     setSelectedUser(user);
+    
     try {
       const result: any = await triggerGetMessages({ toNumber: mobileNo }).unwrap();
       const messagesArray: Message[] = Array.isArray(result.data?.messages) ? result.data.messages : [];
+      
+      // Set messages for this conversation
       setMessages(prev => ({
         ...prev,
         [user.id]: messagesArray,
       }));
+      
+      // If we got a conversation ID from the result, join the socket room
+      if (result.data?.conversationId) {
+        setCurrentConversationId(result.data.conversationId);
+        if (isAuthenticated) {
+          joinConversation(result.data.conversationId);
+        }
+      }
+      
     } catch {
       setMessages(prev => ({
         ...prev,

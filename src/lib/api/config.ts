@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  baseURL: 'https://whatsapp-erp-production.up.railway.app',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://whatsapp-erp-production.up.railway.app',
+  socketURL: import.meta.env.VITE_SOCKET_URL || (import.meta.env.DEV ? 'http://localhost:5000' : 'https://whatsapp-erp-production.up.railway.app'),
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
