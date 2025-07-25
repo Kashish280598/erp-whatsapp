@@ -12,14 +12,14 @@ export const getInitialValues = (order?: Order) => {
 }
 
 export const validationSchema = yup.object({
-    // name: yup.string().required('Order name is required'),
     customer: yup.string().required('Customer is required'),
-    // status: yup.string().required('Status is required'),
-    // total: yup.number().required('Total is required'),
     items: yup.array().of(
         yup.object({
-            product: yup.string().required('Product is required'),
-            quantity: yup.number().min(1, 'Quantity must be at least 1').required('Quantity is required'),
+            product: yup.string().required('Product is required').min(1, 'Please select a product'),
+            quantity: yup.number()
+                .required('Quantity is required')
+                .min(1, 'Quantity must be at least 1')
+                .positive('Quantity must be positive'),
         })
     ).min(1, 'At least one product is required').required('Items are required'),
 })

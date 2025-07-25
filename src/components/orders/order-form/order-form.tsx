@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { useCreateOrderMutation, useUpdateOrderMutation } from "@/lib/api/orders-api"
 import { useLazyGetUsersQuery } from "@/lib/api/users-api"
-import { getInitialValues, getPayload, type Order } from "."
+import { getInitialValues, getPayload, validationSchema, type Order } from "."
 import CustomersDropdown from "./customers-dropdown"
 import ProductsDropdown from "./products-dropdown"
 
@@ -100,7 +100,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
         <>
             <Formik
                 initialValues={initialValues}
-                // validationSchema={validationSchema}
+                validationSchema={validationSchema}
                 onSubmit={onSubmit}
                 enableReinitialize>
                 {({ errors, touched, isSubmitting, handleSubmit, values, }) => {
@@ -188,12 +188,13 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                             Total Price: <span className="text-blue-700">₹{totalPrice}</span>
                                         </div>
                                     </div>
-                                    <div className="flex justify-center gap-2 mt-8">
+                                    <div className="flex justify-center gap-4 mt-8 pt-6 border-t border-gray-200">
                                         <Button
                                             type="button"
                                             onClick={() => navigate('/orders')}
                                             variant="outline"
                                             disabled={isSubmitting}
+                                            className="px-8 py-2"
                                         >
                                             Cancel
                                         </Button>
@@ -201,6 +202,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                             type="submit"
                                             onClick={() => handleSubmit()}
                                             disabled={isSubmitting}
+                                            className="px-8 py-2"
                                         >
                                             {isSubmitting ? 'Creating...' : 'Create'}
                                         </Button>
