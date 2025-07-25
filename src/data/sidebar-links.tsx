@@ -66,4 +66,10 @@ export const sidebarlinks: SidebarLink[] = [
     icon: CategoryIcon,
     sidebarIdentifier: "settings",
   },
+  {
+    title: "Orders",
+    label: "",
+    href: "/orders",
+    icon: ManageUserIcon,
+  },
 ];
