@@ -1,10 +1,10 @@
 import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
-import CategoryIcon from "@/assets/icons/discover-icon.svg";
-import FindingIcon from "@/assets/icons/finding-icon.svg";
-import ManageUserIcon from "@/assets/icons/manage-user.svg";
 import SettingsIcon from "@/assets/icons/settings-icon.svg";
-import { default as ChatIcon, default as UserIcon } from '@/assets/icons/user-contact-icon.svg';
-
+import UsersIcon from "@/assets/icons/manage-user.svg";
+import ChatIcon from "@/assets/icons/tv-play-icon.svg";
+import FindingIcon from "@/assets/icons/finding-icon.svg";
+import CustomersIcon from "@/assets/icons/invite-user.svg";
+import CategoryIcon from "@/assets/icons/discover-icon.svg";
 
 export interface NavLink {
   title: string;
@@ -37,7 +37,7 @@ export const sidebarlinks: SidebarLink[] = [
     title: "Customers",
     label: "",
     href: "/customers",
-    icon: ManageUserIcon,
+    icon: CustomersIcon,
   },
   {
     title: "Chat",
@@ -56,7 +56,7 @@ export const sidebarlinks: SidebarLink[] = [
     title: "Users",
     label: "",
     href: "/users",
-    icon: UserIcon,
+    icon: UsersIcon,
     sidebarIdentifier: "settings",
   },
   {

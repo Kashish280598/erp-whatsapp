@@ -1,6 +1,7 @@
 import { Routes, Route, useParams } from "react-router-dom";
 import CustomersList from "./CustomersList";
 import customersData from "./dummy-customers.json";
+import AddCustomer from "./add-customer";
 
 function AddCustomerForm() {
   return <div>Add Customer (coming soon)</div>;
@@ -15,7 +16,7 @@ function CustomersCompanyDetail() {
   const allPOCs = companyCustomers.flatMap(c => c.pocs.map(poc => ({ ...poc, customerId: c.id })));
 
   return (
-    <div style={{ width: 900, margin: '2rem auto', padding: 24, background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
+    <div style={{ margin: '2rem auto', padding: 24, background: '#fff', borderRadius: 12, boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
       <h2 style={{ fontSize: 24, fontWeight: 700, marginBottom: 8 }}>{decodedName}</h2>
       <div style={{ color: '#64748b', fontWeight: 500, marginBottom: 18 }}>
         All Points of Contact (POCs) for this company:
@@ -46,8 +47,8 @@ export default function CustomersPage() {
   return (
     <Routes>
       <Route path="" element={<CustomersList />} />
-      <Route path="add" element={<AddCustomerForm />} />
-      <Route path="edit/:id" element={<div>Edit Customer (coming soon)</div>} />
+      <Route path="add" element={<AddCustomer />} />
+      <Route path="edit/:id" element={<AddCustomer mode="edit" />} />
       <Route path="details/:id" element={<div>Customer Details (coming soon)</div>} />
       <Route path="company/:companyName" element={<CustomersCompanyDetail />} />
     </Routes>
