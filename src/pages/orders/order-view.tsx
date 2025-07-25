@@ -127,14 +127,6 @@ const OrderView = () => {
                         <IconEdit className="h-4 w-4 mr-2" />
                         Edit Order
                     </Button>
-                    {/* <Button
-                        variant="destructive"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        disabled={isDeleting}
-                    >
-                        <IconTrash className="h-4 w-4 mr-2" />
-                        {isDeleting ? 'Deleting...' : 'Delete Order'}
-                    </Button> */}
                 </div>
             </div>
 
