@@ -2,20 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
+// import { Badge } from '@/components/ui/badge';
 import { 
   IconSearch, 
-  IconDotsVertical, 
-  IconPlus, 
-  IconCircle, 
   IconMicrophone, 
-  IconPaperclip,
-  IconMoodSmile,
   IconDownload,
   IconFileText,
   IconSend,
   IconArrowLeft
 } from '@tabler/icons-react';
+import { useGetWhatsAppContactsQuery, useLazyGetWhatsAppMessagesBetweenQuery } from '@/lib/api/auth/auth-api';
 
 interface User {
   id: string;
@@ -23,7 +19,7 @@ interface User {
   avatar: string;
   lastMessage: string;
   timestamp: string;
-  unreadCount?: number;
+  // unreadCount?: number;
   isOnline?: boolean;
   isGroup?: boolean;
 }
@@ -36,75 +32,33 @@ interface Message {
   type: 'text' | 'file' | 'image';
   fileName?: string;
   fileSize?: string;
+  isOutgoing?: boolean; // Added for new_code
+  messageType?: string; // Added for new_code
+  createdAt?: string; // Added for new_code
 }
 
 const WhatsAppChat: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [triggerGetMessages] = useLazyGetWhatsAppMessagesBetweenQuery();
 
-  // Mock data for users
-  const users: User[] = [
-    {
-      id: '1',
-      name: 'A',
-      avatar: 'G',
-      lastMessage: 'Hello, How are you?',
-      timestamp: '11:48 AM',
-      unreadCount: 2,
-      isOnline: true
-    },
-    {
-      id: '2',
-      name: 'B',
-      avatar: '👶',
-      lastMessage: 'Thanks for the update!',
-      timestamp: '11:34 AM',
-      isOnline: false
-    },
-    {
-      id: '3',
-      name: 'C',
-      avatar: '✈️',
-      lastMessage: 'Meeting scheduled for tomorrow',
-      timestamp: '11:33 AM',
-      isOnline: true
-    },
-    {
-      id: '4',
-      name: 'D',
-      avatar: '👥',
-      lastMessage: 'This message was deleted',
-      timestamp: '5:46 AM',
-      isOnline: false
-    },
-    {
-      id: '5',
-      name: 'E',
-      avatar: '👥',
-      lastMessage: 'Got it 👍',
-      timestamp: '12:15 AM',
-      isOnline: false
-    },
-    {
-      id: '6',
-      name: 'F',
-      avatar: '👩',
-      lastMessage: 'Will check and get back to you',
-      timestamp: '12:02 AM',
-      isOnline: true
-    },
-    {
-      id: '7',
-      name: 'G',
-      avatar: '⚛️',
-      lastMessage: 'New job opportunities available',
-      timestamp: 'Yesterday',
-      isOnline: false
-    }
-  ];
+  // Fetch WhatsApp contacts from API
+  const { data: contacts, isLoading: isContactsLoading, isError: isContactsError, refetch } = useGetWhatsAppContactsQuery();
+  // Map API contacts to User[] shape for UI
+  const users: User[] = (contacts || []).map((c: any) => ({
+    id: String(c.id),
+    name: c.name || c.email || 'Unknown',
+    avatar: c.name ? c.name.charAt(0).toUpperCase() : (c.email ? c.email.charAt(0).toUpperCase() : 'U'),
+    lastMessage: '',
+    timestamp: '',
+    // unreadCount: 0,
+    isOnline: false,
+    isGroup: false,
+  }));
 
   // Initialize messages for each user
   useEffect(() => {
@@ -117,14 +71,20 @@ const WhatsAppChat: React.FC = () => {
             sender: 'user',
             content: 'Thank You.',
             timestamp: '3:53 PM',
-            type: 'text'
+            type: 'text',
+            isOutgoing: true,
+            messageType: 'text',
+            createdAt: '2023-10-27T15:53:00Z'
           },
           {
             id: '2',
             sender: 'contact',
             content: 'Hey',
             timestamp: '6:34 PM',
-            type: 'text'
+            type: 'text',
+            isOutgoing: false,
+            messageType: 'text',
+            createdAt: '2023-10-27T18:34:00Z'
           },
           {
             id: '3',
@@ -133,21 +93,30 @@ const WhatsAppChat: React.FC = () => {
             timestamp: '6:34 PM',
             type: 'file',
             fileName: 'Invoice_BIDU8262',
-            fileSize: '56 kB'
+            fileSize: '56 kB',
+            isOutgoing: false,
+            messageType: 'file',
+            createdAt: '2023-10-27T18:34:00Z'
           },
           {
             id: '4',
             sender: 'contact',
             content: 'Hey',
             timestamp: '11:48 AM',
-            type: 'text'
+            type: 'text',
+            isOutgoing: false,
+            messageType: 'text',
+            createdAt: '2023-10-27T10:48:00Z'
           },
           {
             id: '5',
             sender: 'user',
             content: 'hi',
             timestamp: '2:21 PM',
-            type: 'text'
+            type: 'text',
+            isOutgoing: true,
+            messageType: 'text',
+            createdAt: '2023-10-27T14:21:00Z'
           }
         ];
       } else {
@@ -173,7 +142,10 @@ const WhatsAppChat: React.FC = () => {
           minute: '2-digit',
           hour12: true 
         }),
-        type: 'text'
+        type: 'text',
+        isOutgoing: true,
+        messageType: 'text',
+        createdAt: new Date().toISOString()
       };
 
       setMessages(prev => ({
@@ -193,13 +165,43 @@ const WhatsAppChat: React.FC = () => {
   };
 
   const filteredUsers = users.filter(user => {
-    if (activeFilter === 'unread') return user.unreadCount && user.unreadCount > 0;
+    if (activeFilter === 'unread') return false;
     if (activeFilter === 'favourites') return false; // Add favorite logic
     if (activeFilter === 'groups') return user.isGroup;
+    if (search.trim()) {
+      return user.name.toLowerCase().includes(search.trim().toLowerCase());
+    }
     return true;
   });
 
+  // Ensure currentMessages is always an array and filter out undefined
   const currentMessages = selectedUser ? messages[selectedUser.id] || [] : [];
+  // const currentMessages = selectedUser ? (messages[selectedUser.id] || []).filter(Boolean) : [];
+
+  // Update the contact click handler
+  const handleSelectUser = async (user: User, mobileNo: string) => {
+    setSelectedUser(user);
+    try {
+      const result: any = await triggerGetMessages({ toNumber: mobileNo }).unwrap();
+      const messagesArray: Message[] = Array.isArray(result.data?.messages) ? result.data.messages : [];
+      setMessages(prev => ({
+        ...prev,
+        [user.id]: messagesArray,
+      }));
+    } catch {
+      setMessages(prev => ({
+        ...prev,
+        [user.id]: [],
+      }));
+    }
+  };
+
+  if (isContactsLoading) {
+    return <div className="flex items-center justify-center h-full">Loading contacts...</div>;
+  }
+  if (isContactsError) {
+    return <div className="flex items-center justify-center h-full text-red-500">Failed to load contacts. <Button onClick={() => refetch()}>Retry</Button></div>;
+  }
 
   return (
     <div className="flex h-screen bg-neutral-50 font-sans overflow-hidden">
@@ -212,7 +214,7 @@ const WhatsAppChat: React.FC = () => {
             <div className="flex items-center gap-2">
               <span className="font-semibold text-sm">Chat</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="text-white hover:bg-primary-600 h-8 w-8">
                 <IconPlus className="h-4 w-4" />
               </Button>
@@ -222,7 +224,7 @@ const WhatsAppChat: React.FC = () => {
               <Button variant="ghost" size="icon" className="text-white hover:bg-primary-600 h-8 w-8">
                 <IconDotsVertical className="h-4 w-4" />
               </Button>
-            </div>
+            </div> */}
           </div>
 
           {/* Search Bar */}
@@ -232,13 +234,15 @@ const WhatsAppChat: React.FC = () => {
               <Input
                 placeholder="Search or start a new chat"
                 className="pl-7 bg-white border-neutral-200 text-xs h-8"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
               />
             </div>
           </div>
 
           {/* Filter Tabs */}
           <div className="flex border-b border-neutral-200 flex-shrink-0">
-            {['all', 'unread', 'favourites', 'groups'].map((filter) => (
+            {[].map((filter) => (
               <button
                 key={filter}
                 onClick={() => setActiveFilter(filter)}
@@ -258,7 +262,7 @@ const WhatsAppChat: React.FC = () => {
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                onClick={() => setSelectedUser(user)}
+                onClick={() => handleSelectUser(user, contacts?.find(c => String(c.id) === user.id)?.mobileNo || '')}
                 className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-neutral-50 transition-colors ${
                   selectedUser?.id === user.id ? 'bg-primary-50' : ''
                 }`}
@@ -280,11 +284,11 @@ const WhatsAppChat: React.FC = () => {
                   </div>
                   <p className="text-xs text-neutral-400 truncate">{user.lastMessage}</p>
                 </div>
-                {user.unreadCount && user.unreadCount > 0 && (
+                {/* {user.unreadCount && user.unreadCount > 0 && (
                   <Badge className="bg-primary text-white text-xs rounded-full min-w-[16px] h-4 text-[10px]">
                     {user.unreadCount}
                   </Badge>
-                )}
+                )} */}
               </div>
             ))}
           </div>
@@ -324,14 +328,14 @@ const WhatsAppChat: React.FC = () => {
                     )}
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
+                {/* <div className="flex items-center gap-1">
                   <Button variant="ghost" size="icon" className="h-7 w-7">
                     <IconSearch className="h-3 w-3" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-7 w-7">
                     <IconDotsVertical className="h-3 w-3" />
                   </Button>
-                </div>
+                </div> */}
               </div>
 
               {/* Chat Messages */}
@@ -339,15 +343,15 @@ const WhatsAppChat: React.FC = () => {
                 className="flex-1 overflow-y-auto p-3 min-h-0 bg-white"
               >
                 {currentMessages.map((msg) => (
-                  <div key={msg.id} className={`mb-3 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                  <div key={msg.id} className={`mb-3 ${msg.isOutgoing === true ? 'text-right' : 'text-left'}`}>
                     <div
                       className={`inline-block max-w-[85%] md:max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
-                        msg.sender === 'user'
+                        msg.isOutgoing === true
                           ? 'bg-primary text-white'
                           : 'bg-neutral-100 text-neutral shadow-sm'
                       }`}
                     >
-                      {msg.type === 'file' && (
+                      {msg.messageType === 'media' && (
                         <div className="mb-2">
                           <div className="flex items-center gap-2 bg-white p-2 rounded border">
                             <IconFileText className="h-3 w-3 text-primary" />
@@ -360,8 +364,8 @@ const WhatsAppChat: React.FC = () => {
                         </div>
                       )}
                       <p className="text-xs break-words">{msg.content}</p>
-                      <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-primary-100' : 'text-neutral-400'}`}>
-                        {msg.timestamp}
+                      <p className={`text-xs mt-1 ${msg.isOutgoing === true ? 'text-primary-100' : 'text-neutral-400'}`}>
+                        {msg.timestamp || msg.createdAt}
                       </p>
                     </div>
                   </div>
@@ -373,9 +377,9 @@ const WhatsAppChat: React.FC = () => {
               {/* Message Input - Fixed at bottom */}
               <div className="bg-white border-t border-neutral-200 p-3 flex-shrink-0 mt-auto">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="text-neutral-400 h-8 w-8">
+                  {/* <Button variant="ghost" size="icon" className="text-neutral-400 h-8 w-8">
                     <IconPaperclip className="h-4 w-4" />
-                  </Button>
+                  </Button> */}
                   <div className="flex-1 relative">
                     <Input
                       value={message}
@@ -384,13 +388,13 @@ const WhatsAppChat: React.FC = () => {
                       placeholder="Type a message"
                       className="pr-20 text-xs h-8"
                     />
-                    <Button
+                    {/* <Button
                       variant="ghost"
                       size="icon"
                       className="absolute right-1 top-1/2 transform -translate-y-1/2 text-neutral-400 h-6 w-6"
                     >
                       <IconMoodSmile className="h-3 w-3" />
-                    </Button>
+                    </Button> */}
                   </div>
                   {message.trim() ? (
                     <Button
@@ -414,7 +418,6 @@ const WhatsAppChat: React.FC = () => {
               </div>
             </>
           ) : (
-            // Empty state when no user is selected (desktop only)
             <div className="hidden md:flex flex-1 items-center justify-center">
               <div className="text-center">
                 <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mx-auto mb-3">
