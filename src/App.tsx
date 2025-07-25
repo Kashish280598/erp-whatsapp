@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/store";
 import { parseFullName } from "@/lib/utils";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import { IconLogout2 } from "@tabler/icons-react";
+import { setTourCompleted } from '@/lib/features/app/appSlice';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -24,6 +25,7 @@ function App() {
     dispatch(logout());
     // @ts-ignore
     dispatch(setAuthToken(null));
+    dispatch(setTourCompleted(false)); // Reset the tour flag on logout
   };
 
   return (
