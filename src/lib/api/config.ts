@@ -48,9 +48,9 @@ export const API_ENDPOINTS = {
     resetPassword: '/api/auth/reset-password',
     logout: '/api/auth/logout',
   },
-   customers: {
-    all: '/api/customers', 
-    byId: '/api/customers', 
+  customers: {
+    all: '/api/customers',
+    byId: '/api/customers',
   },
   users: {
     all: '/api/users',
@@ -64,5 +64,6 @@ export const API_ENDPOINTS = {
     deleteUser: '/api/users',
     resetPasswordForUser: '/api/password-reset/request-by-id',
   },
+  orders: '/api/orders',
   categories: '/api/categories'
 } as const; 

@@ -14,6 +14,7 @@ import settingsReducer from './features/settings/settingsSlice';
 // redux-persist imports
 import { persistReducer, persistStore } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
+import { ordersApi } from './api/orders-api';
 
 const persistConfig = {
   key: 'auth',
@@ -40,12 +41,13 @@ export const store = configureStore({
     [usersApi.reducerPath]: usersApi.reducer,
     [categoriesApi.reducerPath]: categoriesApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
+    [ordersApi.reducerPath]: ordersApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
     })
-      .concat([usersApi.middleware, categoriesApi.middleware, authApi.middleware]),
+      .concat([usersApi.middleware, categoriesApi.middleware, authApi.middleware, ordersApi.middleware]),
 
   devTools: true,
 });

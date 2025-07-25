@@ -1,10 +1,10 @@
 import DashboardIcon from "@/assets/icons/dashboard-icon.svg";
-import SettingsIcon from "@/assets/icons/settings-icon.svg";
-import UsersIcon from "@/assets/icons/manage-user.svg";
-import ChatIcon from "@/assets/icons/tv-play-icon.svg";
+import CategoryIcon from "@/assets/icons/discover-icon.svg";
 import FindingIcon from "@/assets/icons/finding-icon.svg";
 import CustomersIcon from "@/assets/icons/invite-user.svg";
-import CategoryIcon from "@/assets/icons/discover-icon.svg";
+import { default as ManageUserIcon, default as UsersIcon } from "@/assets/icons/manage-user.svg";
+import SettingsIcon from "@/assets/icons/settings-icon.svg";
+import ChatIcon from "@/assets/icons/tv-play-icon.svg";
 
 export interface NavLink {
   title: string;
@@ -65,5 +65,11 @@ export const sidebarlinks: SidebarLink[] = [
     href: "/categories",
     icon: CategoryIcon,
     sidebarIdentifier: "settings",
+  },
+  {
+    title: "Orders",
+    label: "",
+    href: "/orders",
+    icon: ManageUserIcon,
   },
 ];
