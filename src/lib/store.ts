@@ -18,12 +18,19 @@ const persistConfig = {
   whitelist: ['isAuthenticated', 'user', 'token'], // persist only auth essentials
 };
 
+const appPersistConfig = {
+  key: 'app',
+  storage,
+  whitelist: ['tourCompleted'], // persist only tourCompleted for app slice
+};
+
 const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+const persistedAppReducer = persistReducer(appPersistConfig, appReducer);
 
 export const store = configureStore({
   reducer: {
     auth: persistedAuthReducer,
-    app: appReducer,
+    app: persistedAppReducer,
     breadcrumb: breadcrumbReducer,
     settings: settingsReducer,
     discovery: discoveryReducer,

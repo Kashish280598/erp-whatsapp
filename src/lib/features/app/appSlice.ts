@@ -6,13 +6,15 @@ interface AppState {
   loading: LoadingState;
   errors: ErrorState[];
   lastError: ErrorState | null;
+  tourCompleted: boolean;
 }
 
 const initialState: AppState = {
   loading: {},
   errors: [],
   lastError: null,
-  initializing: true
+  initializing: true,
+  tourCompleted: false,
 };
 
 export const appSlice = createSlice({
@@ -45,9 +47,12 @@ export const appSlice = createSlice({
     },
     setInitializing: (state, action: PayloadAction<boolean>) => {
       state.initializing = action.payload
-    }
+    },
+    setTourCompleted(state, action) {
+      state.tourCompleted = action.payload;
+    },
   },
 });
 
-export const { setLoading, getLoading, addError, clearError, clearAllErrors, setInitializing } = appSlice.actions;
+export const { setLoading, getLoading, addError, clearError, clearAllErrors, setInitializing, setTourCompleted } = appSlice.actions;
 export default appSlice.reducer; 
