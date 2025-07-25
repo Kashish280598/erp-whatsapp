@@ -20,7 +20,6 @@ const CategoryTable = ({ onFetchCategories, isLoading, categories, totalCount, o
     const [searchTerm, setSearchTerm] = useState('');
 
     const onDelete = async (id: any) => {
-        console.log('id', id)
         const result = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
