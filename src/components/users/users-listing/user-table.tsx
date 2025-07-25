@@ -146,9 +146,13 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}/edit`)}>
                                 <IconPencil className="h-4 w-4 text-gray-500" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
-                            </Button>
+                            {
+                                row?.original?.role !== 'admin' && row?.original?.role !== 'super-admin' && (
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                        <IconTrash className="h-4 w-4 text-red-500" onClick={() => onDelete(row?.original?.id)} />
+                                    </Button>
+                                )
+                            }
                         </div>
                     )
                 }

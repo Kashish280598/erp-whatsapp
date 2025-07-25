@@ -3,7 +3,8 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { API_ENDPOINTS } from '@/lib/api/config'
 import axiosBaseQuery from '@/lib/axios-base-query'
 
-const API_URL = API_ENDPOINTS.orders.all
+const API_URL = API_ENDPOINTS.orders
+const CUSTOMER_API_URL = API_ENDPOINTS.customers.all
 
 export const ordersApi = createApi({
     reducerPath: 'Orders',
@@ -54,6 +55,14 @@ export const ordersApi = createApi({
             }),
             invalidatesTags: ['Order'],
         }),
+
+        getCustomers: builder.query({
+            query: (params) => ({
+                url: CUSTOMER_API_URL,
+                method: 'GET',
+                params: params,
+            }),
+        }),
     }),
 })
 
@@ -63,4 +72,5 @@ export const {
     useCreateOrderMutation,
     useUpdateOrderMutation,
     useDeleteOrderMutation,
+    useLazyGetCustomersQuery,
 } = ordersApi 

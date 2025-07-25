@@ -64,8 +64,6 @@ export const API_ENDPOINTS = {
     deleteUser: '/api/users',
     resetPasswordForUser: '/api/password-reset/request-by-id',
   },
-  orders: {
-    all: '/api/orders',
-  },
+  orders: '/api/orders',
   categories: '/api/categories'
 } as const; 
