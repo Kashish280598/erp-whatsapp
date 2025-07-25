@@ -7,14 +7,13 @@ import { CircleCheck } from 'lucide-react';
 import Logo from '@/assets/logo.svg';
 import { useAppSelector, type RootState } from '@/lib/store';
 import { useEffect, useState } from 'react';
-import { forgotPasswordRequest, setIsForgotPasswordRequestSent } from '@/lib/features/auth/authSlice';
+import { setIsForgotPasswordRequestSent } from '@/lib/features/auth/authSlice';
 import { useAppDispatch } from '@/lib/store';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { useLoading } from '@/hooks/useAppState';
 import Loader from "@/components/Loader";
 import { toast } from 'sonner';
-import userService from '@/lib/api/services/userService';
-import { setLoading } from '@/lib/features/app/appSlice';
+import { useForgotPasswordMutation } from '@/lib/api/auth/auth-api';
 
 const ForgotPassword = () => {
     const dispatch = useAppDispatch();
@@ -22,6 +21,7 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const { isLoading } = useLoading(API_ENDPOINTS.auth.forgotPasswordRequest);
     const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
+    const [forgotPassword, { isLoading: isForgotLoading }] = useForgotPasswordMutation();
 
     useEffect(() => {
         setEmail(loginEmail || '');
@@ -32,26 +32,11 @@ const ForgotPassword = () => {
 
     const handleSubmit = async () => {
         try {
-            if (!loginEmail) {
-                dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: true }));
-                const res = await userService.verifyEmailForPasswordLogin(email, { skipAuth: true, skipRetry: true, credentials: 'omit' });
-                if (res.status === "success") {
-                    if (res.data.length && !res.data[0]?.active) {
-                        throw new Error('Your account has been deactivated by the admin. Please contact support team.')
-                    }
-                    if (!res.data.length)
-                        throw new Error("The user is not registered.");
-                    dispatch(forgotPasswordRequest({ email }));
-                    return res;
-                } else {
-                    throw new Error(res?.statusText);
-                }
-            } else {
-                dispatch(forgotPasswordRequest({ email }));
-            };
+            await forgotPassword({ email }).unwrap();
+            toast.success('Password reset link sent! Please check your email.');
+            dispatch(setIsForgotPasswordRequestSent(true));
         } catch (err: any) {
-            dispatch(setLoading({ key: API_ENDPOINTS.auth.forgotPasswordRequest, isLoading: false }));
-            toast.error(err?.data?.message || err?.message);
+            toast.error(err?.data?.message || err?.message || 'Failed to send reset link.');
         }
     };
 
@@ -102,12 +87,12 @@ const ForgotPassword = () => {
 
                         {!isRequestSent && <Button
                             onClick={handleSubmit}
-                            disabled={!isValidEmail(email) || isLoading}
+                            disabled={!isValidEmail(email) || isLoading || isForgotLoading}
                             variant="default"
                             type="submit"
                             className="w-full"
                         >
-                            Continue
+                            {(isLoading || isForgotLoading) ? 'Sending...' : 'Continue'}
                         </Button>}
                         <Link
                             to="/login"

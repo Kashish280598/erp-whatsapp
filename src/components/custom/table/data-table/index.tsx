@@ -113,9 +113,10 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
+    // Remove manualPagination/manualSorting/manualFiltering for client-side mode
+    // manualPagination: false,
+    // manualSorting: false,
+    // manualFiltering: false,
   });
 
   // to get debounce search text

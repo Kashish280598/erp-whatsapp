@@ -10,9 +10,22 @@ import breadcrumbReducer from './features/breadcrumb/breadcrumbSlice';
 import discoveryReducer from './features/discovery/discoverySlice';
 import settingsReducer from './features/settings/settingsSlice';
 
+
+// redux-persist imports
+import { persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+
+const persistConfig = {
+  key: 'auth',
+  storage,
+  whitelist: ['isAuthenticated', 'user', 'token'], // persist only auth essentials
+};
+
+const persistedAuthReducer = persistReducer(persistConfig, authReducer);
+
 export const store = configureStore({
   reducer: {
-    auth: authReducer,
+    auth: persistedAuthReducer,
     app: appReducer,
     breadcrumb: breadcrumbReducer,
     settings: settingsReducer,
@@ -24,13 +37,13 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat([
-      usersApi.middleware,
-      categoriesApi.middleware,
-      authApi.middleware,
-    ]),
+    })
+      .concat([usersApi.middleware, categoriesApi.middleware, authApi.middleware]),
+
   devTools: true,
 });
+
+export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

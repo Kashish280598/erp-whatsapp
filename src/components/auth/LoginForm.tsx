@@ -23,8 +23,9 @@ const LoginSchema = Yup.object().shape({
 
 const LoginForm = () => {
   const dispatch = useAppDispatch();
+  // const navigate = useNavigate(); // Remove unused variable
   const { isLoading } = useLoading(API_ENDPOINTS.auth.login);
-  const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
+  const { email: loginEmail } = useAppSelector((state: any) => state.auth.login.formData); // If RootState is available, use (state: RootState)
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
 
   const initialValues = {

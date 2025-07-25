@@ -6,9 +6,6 @@ import { closeSetPasswordModal } from '@/lib/features/settings/settingsSlice';
 import { Field, Form, Formik } from 'formik';
 import * as Yup from 'yup';
 import PasswordStrengthChecker from '@/components/custom/PasswordStrengthChecker';
-import { useLoading } from '@/hooks/useAppState';
-import { API_ENDPOINTS } from '@/lib/api/config';
-import { changePassword } from '@/lib/features/auth/authSlice';
 
 interface ResetPasswordFormValues {
     password: string;
@@ -32,9 +29,6 @@ const ResetPasswordSchema = Yup.object().shape({
 export default function SetPasswordModal() {
     const dispatch = useAppDispatch();
     const { isOpen } = useAppSelector((state) => state.settings.setPasswordModal);
-    const { user } = useAppSelector(state => state.auth);
-    const { verifiedPassword } = useAppSelector(state => state.auth);
-    const { isLoading } = useLoading(API_ENDPOINTS.auth.changePassword);
 
     const handleClose = (callback?: () => void) => {
         if (callback) {
@@ -43,11 +37,11 @@ export default function SetPasswordModal() {
         dispatch(closeSetPasswordModal());
     };
 
-    const onSubmit = async (values: ResetPasswordFormValues, callback?: () => void) => {
-        await dispatch(changePassword({ email: user?.email || '', newPassword: values.password, currentPassword: verifiedPassword }));
-        if (callback) {
-            callback();
-        };
+    const onSubmit = async (_: ResetPasswordFormValues, { resetForm }: { resetForm: () => void }) => {
+        // await dispatch(changePassword({ email: user?.email || '', newPassword: values.password, currentPassword: verifiedPassword }));
+        if (resetForm) {
+            resetForm();
+        }
     };
 
     const initialValues = {
@@ -59,7 +53,7 @@ export default function SetPasswordModal() {
         <Formik
             initialValues={initialValues}
             validationSchema={ResetPasswordSchema}
-            onSubmit={(values, { resetForm }) => onSubmit(values, resetForm)}
+            onSubmit={(values, { resetForm }) => onSubmit(values, { resetForm })}
             validateOnChange={true}
             validateOnBlur={true}
             enableReinitialize={true}
@@ -83,15 +77,15 @@ export default function SetPasswordModal() {
                             {
                                 label: "Cancel",
                                 variant: "ghost",
-                                disabled: isLoading,
+                                disabled: false, // isLoading, // Removed useLoading()
                                 onClick: () => handleClose(resetForm)
                             },
                             {
-                                label: isLoading ? "Verifying..." : "Set Password",
+                                label: "Set Password", // isLoading, // Removed useLoading()
                                 variant: "default",
-                                isLoading: isLoading,
+                                isLoading: false, // isLoading, // Removed useLoading()
                                 onClick: handleSubmit,
-                                disabled: !isValid || isLoading
+                                disabled: !isValid || false // isLoading // Removed useLoading()
                             }
                         ]}
                     >

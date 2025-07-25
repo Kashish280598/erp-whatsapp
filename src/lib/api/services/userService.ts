@@ -1,6 +1,6 @@
 import { API_ENDPOINTS } from '../config';
 import apiService from '../apiService';
-import type { CreateUserDTO, ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, InviteUserRequestPayload, UpdateUserByIdRequestPayload, VerifyPasswordPaylod, ChangePasswordPayload, ResetPasswordForUserPayload } from '@/types/user.type';
+import type { ForgotPasswordRequestPayload, LoginPayload, ResetPasswordPayload, UpdateUserByIdRequestPayload,  ResetPasswordForUserPayload } from '@/types/user.type';
 import type { RequestConfig } from '@/types/api.types';
 import type { TableQueryParams } from '@/types/table.types';
 
@@ -10,33 +10,13 @@ import type { TableQueryParams } from '@/types/table.types';
 export const enhancedUserService = {
 
   // Authentications Methods
-  async signup(payload: CreateUserDTO, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.register, payload, config);
-    return data;
-  },
-
-  async validateInvitationToken(token: string, config?: RequestConfig) {
-    const { data } = await apiService.get(API_ENDPOINTS.auth.validateInvitationToken + token, config);
-    return data;
-  },
-
   async forgotPasswordRequest(payload: ForgotPasswordRequestPayload, config?: RequestConfig) {
     const { data } = await apiService.post(API_ENDPOINTS.auth.forgotPasswordRequest, payload, config);
     return data;
   },
 
-  async verifyEmailForPasswordLogin(email: string, config?: RequestConfig) {
-    const { data } = await apiService.get(API_ENDPOINTS.auth.verifyEmailForPasswordLogin + email, config);
-    return data;
-  },
-
   async login(payload: LoginPayload, config?: RequestConfig) {
     const { data } = await apiService.post(API_ENDPOINTS.auth.login, payload, config);
-    return data;
-  },
-
-  async validateResetPasswordToken(token: string, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.validateResetPasswordToken, { token }, config);
     return data;
   },
 
@@ -87,36 +67,8 @@ export const enhancedUserService = {
     return data;
   },
 
-  async refreshToken(config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.refresh, {}, config);
-    return data;
-  },
-
   async getProfile(config?: RequestConfig) {
     const { data } = await apiService.get(API_ENDPOINTS.users.profile, config);
-    return data;
-  },
-
-  async verifyPassword(payload: VerifyPasswordPaylod, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.verifyPassword, payload, config);
-    return data;
-  },
-
-  async changePassword(payload: ChangePasswordPayload, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.auth.changePassword, payload, config);
-    return data;
-  },
-
-
-  // User Managements Methods
-
-  async inviteUsers(payload: InviteUserRequestPayload, config?: RequestConfig) {
-    const { data } = await apiService.post(API_ENDPOINTS.users.inviteUsers, payload, config);
-    return data;
-  },
-
-  async resendInvitation(userId: string, config?: RequestConfig) {
-    const { data } = await apiService.post(`${API_ENDPOINTS.users.resendInvitation}/${encodeURIComponent(userId)}`, {}, config);
     return data;
   },
 
@@ -142,11 +94,6 @@ export const enhancedUserService = {
 
   async resetPasswordForUser(payload: ResetPasswordForUserPayload, config?: RequestConfig) {
     const { data } = await apiService.post(API_ENDPOINTS.users.resetPasswordForUser, payload, config);
-    return data;
-  },
-
-  async toggleDiscoveryAllSet(payload: { showGuide: boolean; }, config?: RequestConfig) {
-    const { data } = await apiService.patch(API_ENDPOINTS.auth.toggleDiscoveryAllSet, payload, config);
     return data;
   },
 

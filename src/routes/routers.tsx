@@ -15,6 +15,8 @@ const Settings = lazy(() => import("@/pages/Settings/index"));
 const ManageAccount = lazy(() => import("@/pages/Settings/ManageAccount"));
 const UserManagement = lazy(() => import("@/pages/Settings/UserManagement"));
 const Discovery = lazy(() => import("@/pages/Discovery/index"));
+const InventoryPage = lazy(() => import("@/pages/inventory"));
+const CustomersPage = lazy(() => import("@/pages/customers"));
 
 // Auth Pages
 const Login = lazy(() => import("@/pages/auth/Login"));
@@ -102,6 +104,17 @@ export const router = createBrowserRouter([
                 ),
             },
             {
+                path: "inventory",
+                element: (
+                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
+                        <ProtectedRoute>
+                            <InventoryPage />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+                errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+            },
+            {
                 path: "chat",
                 element: (
                     <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
@@ -129,6 +142,17 @@ export const router = createBrowserRouter([
                     </Suspense>
                 ),
                 errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
+            },
+            {
+                path: "customers/*",
+                element: (
+                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
+                        <ProtectedRoute>
+                            <CustomersPage />
+                        </ProtectedRoute>
+                    </Suspense>
+                ),
+                // Nested routes handled inside CustomersPage
             },
             {
                 path: "settings",

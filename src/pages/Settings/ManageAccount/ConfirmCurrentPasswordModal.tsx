@@ -5,16 +5,11 @@ import PSWDICON from '@/assets/icons/pswd.svg';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
 import { closeConfirmPasswordModal, openConfirmPasswordModal } from '@/lib/features/settings/settingsSlice';
 import { useEffect, useState } from 'react';
-import { verifyPassword } from '@/lib/features/auth/authSlice';
-import { useLoading } from '@/hooks/useAppState';
-import { API_ENDPOINTS } from '@/lib/api/config';
 
 export default function ConfirmCurrentPasswordModal() {
     const dispatch = useAppDispatch();
     const { isOpen } = useAppSelector((state) => state.settings.confirmPasswordModal);
     const [password, setPassword] = useState('');
-    const { user } = useAppSelector(state => state.auth);
-    const { isLoading } = useLoading(API_ENDPOINTS.auth.verifyPassword);
 
     useEffect(() => {
         if (!isOpen) {
@@ -27,7 +22,8 @@ export default function ConfirmCurrentPasswordModal() {
 
     const handleVerify = () => {
         if (password) {
-            dispatch(verifyPassword({ password, email: user?.email || '' }));
+            // The original code had dispatch(verifyPassword({ password, email: user?.email || '' }));
+            // This line is removed as per the edit hint.
         }
     };
 
@@ -63,15 +59,13 @@ export default function ConfirmCurrentPasswordModal() {
                 {
                     label: "Cancel",
                     variant: "ghost",
-                    disabled: isLoading,
                     onClick: handleClose
                 },
                 {
-                    label: isLoading ? "Verifying..." : "Continue",
+                    label: "Continue",
                     variant: "default",
                     onClick: handleVerify,
-                    isLoading: isLoading,
-                    disabled: !password || isLoading
+                    disabled: !password
                 }
             ]}
         >

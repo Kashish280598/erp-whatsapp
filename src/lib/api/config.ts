@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://whatsapp-erp.vercel.app',
+  baseURL: 'https://whatsapp-erp.vercel.app',
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
@@ -42,18 +42,10 @@ export const APP_CONFIG = {
 
 export const API_ENDPOINTS = {
   auth: {
-    verifyEmailForPasswordLogin: '/api/user-tenant-mappings/by-email/',
     login: '/api/auth/login',
-    validateInvitationToken: '/api/invitations/validate?token=',
-    register: '/api/auth/signup',
-    forgotPasswordRequest: '/api/password-reset/request',
-    validateResetPasswordToken: '/api/password-reset/validate-token',
-    resetPassword: '/api/password-reset/confirm',
+    forgotPasswordRequest: '/api/auth/request-password-reset',
+    resetPassword: '/api/auth/reset-password',
     logout: '/api/auth/logout',
-    refresh: '/api/auth/refresh-token',
-    verifyPassword: '/api/auth/verify-password',
-    changePassword: '/api/auth/change-password',
-    toggleDiscoveryAllSet: '/api/users/show-guide'
   },
   users: {
     all: '/api/users',
