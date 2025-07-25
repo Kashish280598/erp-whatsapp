@@ -67,5 +67,7 @@ export const API_ENDPOINTS = {
     qrImage: '/api/whatsapp/qr',
   },
   orders: '/api/orders',
-  categories: '/api/categories'
+  categories: '/api/categories',
+  stocks: '/api/stocks',
+  products: '/api/products',
 } as const; 
