@@ -19,6 +19,7 @@ import { router } from './routes/routers'
 // reactour
 import { useTheme } from '@/providers/theme-provider'
 import { TourProvider, useTour } from '@reactour/tour'
+import { SocketProvider } from './providers/socket-provider'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
@@ -31,10 +32,15 @@ Sentry.init({
 // Custom Tour Step Components with Close Buttons
 const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
+  const { setCurrentStep } = useTour();
 
-  const handleClose = () => {
+  const handleSkip = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
+  };
+
+  const handleNext = () => {
+    setCurrentStep(1); // Go to the next step
   };
 
   return (
@@ -44,22 +50,36 @@ const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
         Let's take a quick tour to help you get started with your new ERP system.
         We'll show you the key features and how to navigate through the application.
       </div>
-      <button
-        onClick={handleClose}
-        className="w-full mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
-      >
-        Skip Tour
-      </button>
+      <div className="flex w-full max-w-sm mx-auto gap-2">
+        <button
+          onClick={handleSkip}
+          className="flex-1 bg-transparent border-none text-blue-600 cursor-pointer font-medium px-0 py-0 shadow-none"
+          style={{ background: 'none', boxShadow: 'none' }}
+        >
+          Skip Tour
+        </button>
+        <button
+          onClick={handleNext}
+          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
+        >
+          Continue
+        </button>
+      </div>
     </div>
   );
 };
 
 const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
+  const { setCurrentStep } = useTour();
 
-  const handleClose = () => {
+  const handleSkip = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
+  };
+
+  const handleNext = () => {
+    setCurrentStep(2); // Go to the next step
   };
 
   return (
@@ -69,16 +89,17 @@ const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
         This is your command center! Here you'll find an overview of your business metrics,
         recent activities, and quick access to important features.
       </div>
-      <div className="flex gap-2">
+      <div className="flex w-full max-w-sm mx-auto gap-2">
         <button
-          onClick={handleClose}
-          className="flex-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors cursor-pointer"
+          onClick={handleSkip}
+          className="flex-1 bg-transparent border-none text-blue-600 cursor-pointer font-medium px-0 py-0 shadow-none"
+          style={{ background: 'none', boxShadow: 'none' }}
         >
           Skip Tour
         </button>
         <button
-          onClick={() => setIsOpen(false)}
-          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
+          onClick={handleNext}
+          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
         >
           Continue
         </button>
@@ -89,10 +110,15 @@ const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
 
 const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
+  const { setCurrentStep } = useTour();
 
-  const handleClose = () => {
+  const handleSkip = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
+  };
+
+  const handleNext = () => {
+    setCurrentStep(3); // Go to the next step
   };
 
   return (
@@ -102,16 +128,17 @@ const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
         Manage your product inventory here. Add new items, track stock levels,
         monitor sales, and keep your warehouse organized efficiently.
       </div>
-      <div className="flex gap-2">
+      <div className="flex w-full max-w-sm mx-auto gap-2">
         <button
-          onClick={handleClose}
-          className="flex-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors cursor-pointer"
+          onClick={handleSkip}
+          className="flex-1 bg-transparent border-none text-blue-600 cursor-pointer font-medium px-0 py-0 shadow-none"
+          style={{ background: 'none', boxShadow: 'none' }}
         >
           Skip Tour
         </button>
         <button
-          onClick={() => setIsOpen(false)}
-          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
+          onClick={handleNext}
+          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
         >
           Continue
         </button>
@@ -122,10 +149,15 @@ const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
 
 const CustomersStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
   const dispatch = useAppDispatch();
+  const { setCurrentStep } = useTour();
 
-  const handleClose = () => {
+  const handleSkip = () => {
     setIsOpen(false);
     dispatch(setTourCompleted(true));
+  };
+
+  const handleNext = () => {
+    setCurrentStep(4); // Go to the next step
   };
 
   return (
@@ -135,16 +167,17 @@ const CustomersStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
         View and manage your customer database. Track customer information,
         order history, and maintain strong relationships with your clients.
       </div>
-      <div className="flex gap-2">
+      <div className="flex w-full max-w-sm mx-auto gap-2">
         <button
-          onClick={handleClose}
-          className="flex-1 px-3 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-medium transition-colors cursor-pointer"
+          onClick={handleSkip}
+          className="flex-1 bg-transparent border-none text-blue-600 cursor-pointer font-medium px-0 py-0 shadow-none"
+          style={{ background: 'none', boxShadow: 'none' }}
         >
           Skip Tour
         </button>
         <button
-          onClick={() => setIsOpen(false)}
-          className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors cursor-pointer"
+          onClick={handleNext}
+          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
         >
           Continue
         </button>
@@ -225,8 +258,9 @@ const AppTourProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <TourProvider
       steps={tourSteps}
+      badgeContent={({ currentStep, totalSteps }) => `${currentStep + 1}/${totalSteps}`}
       styles={{
-        popover: (base: React.CSSProperties) => ({
+          popover: (base: React.CSSProperties) => ({
           ...base,
           backgroundColor: isDark ? '#23272f' : '#fff',
           color: isDark ? '#fff' : '#23272f',
@@ -244,6 +278,8 @@ const AppTourProvider = ({ children }: { children: React.ReactNode }) => {
           ...base,
           backgroundColor: isDark ? '#565ADD' : '#23272f',
           color: '#fff',
+          left: 'unset',
+          right: 0,
         }),
         controls: (base: React.CSSProperties) => ({
           ...base,
@@ -309,7 +345,9 @@ if (!(window as any)._viteReactRoot) {
         <AppTourProvider>
           <ThemeProvider storageKey="erp-ui-theme" defaultTheme="light">
             <React.Suspense fallback={<Loader />}>
-              <App />
+              <SocketProvider>
+                <App />
+              </SocketProvider>
             </React.Suspense>
             <Toster />
           </ThemeProvider>
