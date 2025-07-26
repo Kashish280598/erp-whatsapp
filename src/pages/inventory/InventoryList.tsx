@@ -6,7 +6,6 @@ import { DataTable } from "@/components/custom/table/data-table";
 import { Badge } from "@/components/ui/badge";
 import { API_CONFIG, API_ENDPOINTS } from '@/lib/api/config';
 import "./InventoryList.css";
-import CategoryDropdown from "@/components/categories/category-dropdown";
 import { Formik, Field } from "formik";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -275,7 +274,7 @@ const InventoryList = () => {
       id: "name",
       accessorKey: "name",
       header: "Product",
-      cell: (({ row }: { row: any }) => <span className="font-semibold text-gray-900 text-[14px]">{row.original.name}</span>) as any,
+      cell: (({ row }: { row: any }) => <span className="font-semibold text-neutral-700 dark:text-neutral-50 text-[14px]">{row.original.name}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -283,7 +282,7 @@ const InventoryList = () => {
       id: "category",
       accessorKey: "category",
       header: "Category",
-      cell: (({ row }: { row: any }) => <span className="text-[13px]">{row.original.category}</span>) as any,
+      cell: (({ row }: { row: any }) => <span className="font-semibold text-neutral-700 dark:text-neutral-50 text-[13px]">{row.original.category}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -291,7 +290,7 @@ const InventoryList = () => {
       id: "unitPrice",
       accessorKey: "unitPrice",
       header: "Unit Price",
-      cell: (({ row }: { row: any }) => <span className="text-[13px]">₹{row.original.unitPrice}</span>) as any,
+      cell: (({ row }: { row: any }) => <span className="font-semibold text-neutral-700 dark:text-neutral-50 text-[13px]">₹{row.original.unitPrice}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -299,7 +298,7 @@ const InventoryList = () => {
       id: "costPrice",
       accessorKey: "costPrice",
       header: "Cost Price",
-      cell: (({ row }: { row: any }) => <span className="text-[13px]">₹{row.original.costPrice}</span>) as any,
+      cell: (({ row }: { row: any }) => <span className="font-semibold text-neutral-700 dark:text-neutral-50 text-[13px]">₹{row.original.costPrice}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -307,7 +306,7 @@ const InventoryList = () => {
       id: "currentStock",
       accessorKey: "currentStock",
       header: "Current Quantity",
-      cell: (({ row }: { row: any }) => <span className="text-[13px]">{row.original.currentStock}</span>) as any,
+      cell: (({ row }: { row: any }) => <span className="font-semibold text-neutral-700 dark:text-neutral-50 text-[13px]">{row.original.currentStock}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -315,7 +314,7 @@ const InventoryList = () => {
       id: "reservedStock",
       accessorKey: "reservedStock",
       header: "Reserved Quantity",
-      cell: (({ row }: { row: any }) => <span className="text-[13px]">{row.original.reservedStock}</span>) as any,
+      cell: (({ row }: { row: any }) => <span className="font-semibold text-neutral-700 dark:text-neutral-50 text-[13px]">{row.original.reservedStock}</span>) as any,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -325,8 +324,15 @@ const InventoryList = () => {
       cell: (({ row }: { row: any }) => {
         // Available = currentStock - reservedStock
         const available = row.original.currentStock - row.original.reservedStock;
+        const isLow = isLowStock(row.original);
         return (
-          <Badge variant={isLowStock(row.original) ? "destructive" : "default"} className="text-[12px] px-2 py-1">
+          <Badge
+            className={
+              isLow
+                ? "bg-error-600 text-white dark:bg-error-600 dark:text-white text-[12px] px-2 py-1"
+                : "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-200 text-[12px] px-2 py-1"
+            }
+          >
             {available}
           </Badge>
         );
@@ -339,7 +345,7 @@ const InventoryList = () => {
       accessorKey: "lowStockThreshold",
       header: "Threshold",
       cell: (({ row }: { row: any }) => (
-        <span className="flex items-center gap-1 text-[13px]">
+        <span className="flex items-center gap-1 font-semibold text-neutral-700 dark:text-neutral-50 text-[13px]">
           {row.original.lowStockThreshold}
           {isLowStock(row.original) && <TrendingDown className="text-red-500 w-4 h-4" />}
         </span>
@@ -347,37 +353,37 @@ const InventoryList = () => {
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
-    {
-      id: "actions",
-      accessorKey: "actions", // Fix: add accessorKey for display-only column
-      header: "Actions",
-            cell: () => (
-        <div className="flex gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
-                <Edit size={16} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Coming soon</p>
-            </TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
-                <Info size={16} />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Coming soon</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      ),
-      enableSorting: false,
-      meta: { headerClassName: "!py-2 !px-2" },
-    },
+    // {
+    //   id: "actions",
+    //   accessorKey: "actions", // Fix: add accessorKey for display-only column
+    //   header: "Actions",
+    //         cell: () => (
+    //     <div className="flex gap-1">
+    //       <Tooltip>
+    //         <TooltipTrigger asChild>
+    //           <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
+    //             <Edit size={16} />
+    //           </Button>
+    //         </TooltipTrigger>
+    //         <TooltipContent>
+    //           <p>Coming soon</p>
+    //         </TooltipContent>
+    //       </Tooltip>
+    //       <Tooltip>
+    //         <TooltipTrigger asChild>
+    //           <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
+    //             <Info size={16} />
+    //           </Button>
+    //         </TooltipTrigger>
+    //         <TooltipContent>
+    //           <p>Coming soon</p>
+    //         </TooltipContent>
+    //       </Tooltip>
+    //     </div>
+    //   ),
+    //   enableSorting: false,
+    //   meta: { headerClassName: "!py-2 !px-2" },
+    // },
   ];
 
   const tableToolbar = {
@@ -418,7 +424,7 @@ const InventoryList = () => {
     <div className="inventory-container" style={{ width: '100%', padding: '1.5rem 0.5rem' }}>
       <div className="inventory-header" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }}>Inventory</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }} className="text-neutral-800 dark:text-primary-400 font-bold">Inventory</h1>
           <div style={{ fontSize: 14, color: '#64748b', fontWeight: 500, marginBottom: 0 }}>
             Manage your products and stock levels.
           </div>

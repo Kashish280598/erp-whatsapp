@@ -124,7 +124,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments, onSubmit, isS
         ))}
       </div>}
 
-      <div className={cn("border rounded-[8px] p-3", editor?.isFocused && "border-[#565ADD]")}>
+      <div className={cn("border rounded-[8px] p-3", editor?.isFocused && "border-[#9A4DEF]")}>
         <EditorContent
           editor={editor}
           className="tiptap-rich-editor h-[100px]" />

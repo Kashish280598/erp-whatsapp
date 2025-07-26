@@ -1,12 +1,15 @@
 // import LoginRightSection from '@/components/auth/LoginRightSection';
 import LoginForm from '@/components/auth/LoginForm';
-import Logo from '@/assets/logo.svg';
+import LogoLight from '@/assets/logo-light.svg';
+import LogoDark from '@/assets/logo-dark.svg';
+import { useTheme } from '@/providers/theme-provider';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { useLoading } from '@/hooks/useAppState';
 import Loader from "@/components/Loader";
 
 const Login = () => {
   const { isLoading: isLoadingForLogin } = useLoading(API_ENDPOINTS.auth.login);
+  const { theme } = useTheme();
   
   return (
     <div className="custom-scrollbar flex flex-col min-h-screen md:flex-row">
@@ -16,8 +19,8 @@ const Login = () => {
           {/* Logo */}
           <div className="flex justify-center">
             <img
-              src={Logo}
-              alt="ERP Logo"
+              src={theme === 'dark' ? LogoDark : LogoLight}
+              alt="Logo"
               className="w-12 h-12 sm:w-14 sm:h-14 lg:w-25 lg:h-25"
             />
           </div>

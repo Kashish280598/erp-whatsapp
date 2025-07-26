@@ -276,7 +276,7 @@ const AppTourProvider = ({ children }: { children: React.ReactNode }) => {
         }),
         badge: (base: React.CSSProperties) => ({
           ...base,
-          backgroundColor: isDark ? '#565ADD' : '#23272f',
+          backgroundColor: isDark ? '#9A4DEF' : '#23272f',
           color: '#fff',
           left: 'unset',
           right: 0,

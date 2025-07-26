@@ -68,23 +68,30 @@
   --color-error-800: #B1241A;
   --color-error-900: #851D13;
 
-  --color-success: #079456;
-  --color-success-100: #E6F9F0;
-  --color-success-200: #CFF2E1;
-  --color-success-300: #E6F4EE;
-  --color-success-400: #6FDA9F;
-  --color-success-500: #3FCD7B;
-  --color-success-600: #079456;
-  --color-success-700: #077D48;
 
-  --color-primary: #565ADD;
-  --color-primary-100: #E1E2F9;
-  --color-primary-200: #F2F3FC;
-  --color-primary-300: #F4F4F6;
-  --color-primary-400: #C8C9F4;
-  --color-primary-500: #6869DC;
-  --color-primary-600: #ADADB9;
-  --color-primary-700: #565ADD;
+  --color-success-50:  #F0FDF4;
+  --color-success-100: #DCFCE7;
+  --color-success-200: #BBF7D0;
+  --color-success-300: #86EFAC;
+  --color-success-400: #4ADE80;
+  --color-success-500: #22C55E;
+  --color-success-600: #16A34A;
+  --color-success-700: #15803D;
+  --color-success-800: #166534;
+  --color-success-900: #14532D;
+  --color-success:    #16A34A;
+
+  --color-primary: #9A4DEF;
+  --color-primary-50: #F6F2FE;
+  --color-primary-100: #ECE4FD;
+  --color-primary-200: #D8C6FA;
+  --color-primary-300: #C7ABF8;
+  --color-primary-400: #B890F5;
+  --color-primary-500: #A973F3;
+  --color-primary-600: #9A4DEF;
+  --color-primary-700: #8A2BE2;
+  --color-primary-800: #5D1A9B;
+  --color-primary-900: #340B5B;
 
   --color-warning: #CF7807;
   --color-warning-100: #FFF4E5;
@@ -110,9 +117,9 @@
   --card-foreground: #070822;
   --popover: oklch(1 0 0);
   --popover-foreground: #070822;
-  --primary: #565ADD;
+  --primary: #9A4DEF;
   --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: #E1E2F9;
+  --secondary: #ECE4FD;
   --secondary-foreground: oklch(0.208 0.042 265.755);
   --muted: oklch(0.968 0.007 247.896);
   --muted-foreground: oklch(0.554 0.046 257.417);
@@ -121,7 +128,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
-  --ring: #565ADD;
+  --ring: #9A4DEF;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -264,7 +271,7 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: #E1E2F9;
+  background: #ECE4FD;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -282,12 +289,12 @@
 }
 
 .custom-scrollbar-1::-webkit-scrollbar-thumb {
-  background: #E1E2F9;
+  background: #ECE4FD;
   border-radius: 10px;
 }
 
 .active-menu {
-  background-color: #E1E2F9;
+  background-color: #ECE4FD;
 }
 
 .active-menu-icon {
@@ -295,7 +302,7 @@
 }
 
 .active-menu svg {
-  color: #565ADD;
+  color: #9A4DEF;
 }
 
 .menu-item svg {
@@ -313,7 +320,7 @@
 }
 
 .active-menu-title {
-  color: #565ADD;
+  color: #9A4DEF;
   font-weight: 600;
 }
 

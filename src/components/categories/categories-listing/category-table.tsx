@@ -65,7 +65,7 @@ const CategoryTable = ({ onFetchCategories, isLoading, categories, totalCount, o
                             <DataTableColumnHeader column={column} title="Name" />
                         ),
                         cell: ({ row }) => (
-                            <span className="text-sm font-medium text-gray-900">{row.original.name}</span>
+                            <span className="text-sm font-medium text-neutral-500 dark:text-neutral-200">{row.original.name}</span>
                         )
                     },
                     {
@@ -78,7 +78,7 @@ const CategoryTable = ({ onFetchCategories, isLoading, categories, totalCount, o
                             <DataTableColumnHeader column={column} title="Added On" />
                         ),
                         cell: ({ row }) => (
-                            <span className="text-sm font-medium text-gray-900">{formatDate(row.original.createdAt, 'MMM d, yyyy')}</span>
+                            <span className="text-sm font-medium text-neutral-500 dark:text-neutral-200">{formatDate(row.original.createdAt, 'MMM d, yyyy')}</span>
                         )
                     },
                     {

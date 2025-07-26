@@ -30,7 +30,7 @@ const TabListContainer: React.FC<TabListContainerProps> = ({ tabs, tabsListClass
                     {tab.showBadge && (
                         <Badge
                             variant="secondary"
-                            className={cn("py-0.5 px-2 ml-2 bg-neutral-200 text-neutral-500 group-data-[state=active]:bg-[#565ADD] group-data-[state=active]:text-white", tab.badgeClassName)}
+                            className={cn("py-0.5 px-2 ml-2 bg-neutral-200 text-neutral-500 group-data-[state=active]:bg-[#9A4DEF] group-data-[state=active]:text-white", tab.badgeClassName)}
                         >
                             {tab.isLoading ? <Loader2  className='!h-3.5 !w-3.5 animate-spin' /> : tab.badgeCount ? tab.badgeCount?.toString().padStart(2, '0') : tab.badgeCount}
                         </Badge>

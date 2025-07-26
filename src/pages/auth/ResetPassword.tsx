@@ -1,4 +1,3 @@
-import logo from "@/assets/logo.svg";
 import PasswordStrengthChecker from "@/components/custom/PasswordStrengthChecker";
 import Loader from "@/components/Loader";
 import { Button } from "@/components/ui/button";
@@ -14,6 +13,9 @@ import { API_ENDPOINTS } from "@/lib/api/config";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useResetPasswordMutation } from '@/lib/api/auth/auth-api';
+import LogoLight from '@/assets/logo-light.svg';
+import LogoDark from '@/assets/logo-dark.svg';
+import { useTheme } from '@/providers/theme-provider';
 
 // Validation Schema
 const ResetPasswordSchema = Yup.object().shape({
@@ -41,6 +43,7 @@ const ResetPassword = () => {
   const { isLoading: isResetPasswordLoading } = useLoading(API_ENDPOINTS.auth.resetPassword);
   const { user } = useAppSelector(state => state.auth);
   const [resetPassword, { isLoading: isResetPasswordApiLoading }] = useResetPasswordMutation();
+  const { theme } = useTheme();
 
   const { isLoading, error, formData } = useAppSelector(
     (state: RootState) => state.auth.resetPassword
@@ -80,10 +83,10 @@ const ResetPassword = () => {
     <div className={`custom-scrollbar h-screen pb-10 flex flex-col items-center bg-linear-270 from-[#FFFFFF] to-primary-200 relative ${isLoading ? "overflow-hidden" : "overflow-auto"}`}>
       {/* Background Shapes */}
       <div className="fixed -top-5 -right-10 w-[296px] h-[296px] rounded-full opacity-10 rotate-[30deg] z-999">
-        <img src={logo} alt="logo" className="w-full h-full object-cover" />
+        <img src={theme === 'dark' ? LogoDark : LogoLight} alt="Logo" className="w-full h-full object-cover" />
       </div>
       <div className="fixed -bottom-15 -left-10 w-[296px] h-[296px] rounded-full opacity-10 -rotate-[30deg] z-999">
-        <img src={logo} alt="logo" className="w-full h-full object-cover" />
+        <img src={theme === 'dark' ? LogoDark : LogoLight} alt="Logo" className="w-full h-full object-cover" />
       </div>
 
       {/* Main Content */}

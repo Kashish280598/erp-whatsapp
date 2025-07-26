@@ -9,8 +9,8 @@ interface FindingChipProps {
 
 const findingTypes = {
     finding: {
-        background: '#E1E2F9',
-        indicator: '#565ADD',
+        background: '#ECE4FD',
+        indicator: '#9A4DEF',
     },
     open: {
         background: '#FDE9CE',

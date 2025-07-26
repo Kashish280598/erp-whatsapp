@@ -233,10 +233,16 @@ export function DataTable<TData, TValue>({
                     key={`${row.id}-${i}`}
                     onClick={() => onRowClick?.(row)}
                     data-state={row.getIsSelected() && "selected"}
-                    className={`${loading ? "opacity-40" : "opacity-100"} transition-all ${i % 2 !== 0 ? "bg-white" : "bg-[#F9FAFF]"} border-0`}
+                    className={`
+                      ${loading ? "opacity-40" : "opacity-100"}
+                      transition-all
+                      ${i % 2 === 0 ? "bg-white dark:bg-[#232A36]" : "bg-[#F9FAFF] dark:bg-[#262D39]"}
+                      hover:bg-neutral-100 dark:hover:bg-[#313846]
+                      border-0
+                    `}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="dark:text-neutral-100">
+                      <TableCell key={cell.id} className="text-neutral-500 dark:text-neutral-200">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()

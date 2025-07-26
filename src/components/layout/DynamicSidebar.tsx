@@ -1,6 +1,6 @@
 import type { SidebarLink } from '@/data/sidebar-links';
 import Settings from './DynamicSidebars/Settings';
-import { Discovery } from './DynamicSidebars/Discovery';
+
 
 interface NavLinkProps extends SidebarLink {
     subLink?: boolean;
@@ -8,8 +8,7 @@ interface NavLinkProps extends SidebarLink {
 }
 
 const dynamicSidebar = {
-    settings: Settings,
-    discover: Discovery
+    settings: Settings
 };
 
 export default function DynamicSidebar(props: NavLinkProps) {

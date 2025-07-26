@@ -88,9 +88,9 @@ export function DataTablePagination<TData>({
       <div className="flex items-center gap-6 ml-auto">
         <div className="flex items-center gap-1">
           <Button
-            variant="link"
-            size="icon"
-            className="h-8 w-25 border-gray-200 cursor-pointer underline-offset-0 no-underline hover:no-underline disabled:bg-white disabled:text-primary disabled:opacity-50"
+            variant="default"
+            size="sm"
+            className="h-8 w-24 rounded-md font-semibold bg-primary text-white dark:bg-primary dark:text-white border-none shadow-none hover:bg-primary/90 dark:hover:bg-primary/90 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:opacity-60"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
@@ -111,10 +111,10 @@ export function DataTablePagination<TData>({
               <Button
                 key={`page-${pageNum}`}
                 variant={currentPage === pageNum ? "default" : "outline"}
-                size="icon"
-                className={`h-8 w-8 ${currentPage === pageNum
-                  ? "bg-[#EEF1FF] text-primary hover:bg-[#EEF1FF] hover:text-primary border-primary"
-                  : "border-gray-200"
+                size="sm"
+                className={`h-8 w-8 rounded-md font-semibold ${currentPage === pageNum
+                  ? "bg-primary text-white dark:bg-primary dark:text-white border-none"
+                  : "border-gray-200 dark:border-gray-700 bg-white dark:bg-[#232A36] text-neutral-700 dark:text-neutral-200"
                   } !shadow-none`}
                 onClick={() => table.setPageIndex(Number(pageNum) - 1)}
               >
@@ -124,9 +124,9 @@ export function DataTablePagination<TData>({
           })}
 
           <Button
-            variant="link"
-            size="icon"
-            className="h-8 w-18 cursor-pointer underline-offset-0 no-underline hover:no-underline disabled:bg-white disabled:text-primary disabled:opacity-50"
+            variant="default"
+            size="sm"
+            className="h-8 w-18 rounded-md font-semibold bg-primary text-white dark:bg-primary dark:text-white border-none shadow-none hover:bg-primary/90 dark:hover:bg-primary/90 disabled:bg-gray-200 dark:disabled:bg-gray-700 disabled:text-gray-400 dark:disabled:text-gray-500 disabled:opacity-60"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
