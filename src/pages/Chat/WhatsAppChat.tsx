@@ -61,7 +61,6 @@ const WhatsAppChat: React.FC = () => {
   const {
     isSocketConnected,
     isSocketAuthenticated,
-    joinWhatsAppConversation,
     fetchContacts,
     contacts: socketContacts,
     messages: socketMessages,
@@ -85,12 +84,30 @@ const WhatsAppChat: React.FC = () => {
     isGroup: false,
   }));
 
+  // Filter users based on search
+  const filteredUsers = users.filter(user =>
+    user.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   // Fetch contacts when component mounts
   useEffect(() => {
     if (isSocketConnected && isSocketAuthenticated) {
+      console.log('🔄 Component mounted, fetching contacts...');
       fetchContacts();
     }
   }, [isSocketConnected, isSocketAuthenticated, fetchContacts]);
+
+  // Debug selected user changes
+  useEffect(() => {
+    console.log('🔄 Selected user changed:', selectedUser);
+    if (selectedUser) {
+      console.log('🔄 Selected user details:', {
+        id: selectedUser.id,
+        name: selectedUser.name,
+        mobileNo: contacts?.find(c => String(c.id) === selectedUser.id)?.mobileNo
+      });
+    }
+  }, [selectedUser, contacts]);
 
   // Handle socket messages response
   useEffect(() => {
@@ -113,12 +130,32 @@ const WhatsAppChat: React.FC = () => {
 
       // Set conversation ID if available
       if (socketMessages.conversationId) {
-        if (isSocketAuthenticated) {
-          joinWhatsAppConversation(socketMessages.conversationId);
-        }
+        // You can store this for future use
+        console.log('Conversation ID:', socketMessages.conversationId);
       }
     }
-  }, [socketMessages, selectedUser, isSocketAuthenticated, joinWhatsAppConversation]);
+  }, [socketMessages, selectedUser]);
+
+  // Auto-select first user when contacts are loaded and no user is selected
+  useEffect(() => {
+    if (contacts && contacts.length > 0 && !selectedUser) {
+      console.log('🔄 Auto-selecting first user from contacts...');
+      const firstUser = contacts[0];
+      const user: User = {
+        id: String(firstUser.id),
+        name: firstUser.name || firstUser.email || 'Unknown',
+        avatar: firstUser.name ? firstUser.name.charAt(0).toUpperCase() : 'U',
+        lastMessage: '',
+        timestamp: '',
+        isOnline: false,
+        isGroup: false,
+      };
+      
+      const mobileNo = firstUser.mobileNo || firstUser.number || '';
+      console.log('🔄 Auto-selecting user:', user.name, 'with mobile:', mobileNo);
+      handleSelectUser(user, mobileNo);
+    }
+  }, [contacts, selectedUser]);
 
   // Socket event listeners for real-time messaging
   useEffect(() => {
@@ -126,61 +163,84 @@ const WhatsAppChat: React.FC = () => {
       const messageData = event.detail;
       console.log('📨 Received new message event:', messageData);
       
-      if (messageData && messageData.message) {
-        const newMessage: Message = {
-          id: messageData.message.id,
-          sender: messageData.message.isOutgoing ? 'me' : 'them',
-          content: messageData.message.content,
-          timestamp: formatTimestamp(messageData.message.createdAt),
-          type: 'text',
-          isOutgoing: messageData.message.isOutgoing,
-          messageType: messageData.message.messageType,
-          createdAt: messageData.message.createdAt
-        };
+      if (messageData) {
+        // Handle both nested and direct message structures
+        const message = messageData.message || messageData;
+        
+        if (message && message.content) {
+          const newMessage: Message = {
+            id: message.id,
+            sender: message.isOutgoing ? 'me' : 'them',
+            content: message.content,
+            timestamp: message.createdAt, // Don't format here, format during rendering
+            type: 'text',
+            isOutgoing: message.isOutgoing,
+            messageType: message.messageType,
+            createdAt: message.createdAt
+          };
 
-        console.log('📝 Formatted new message:', newMessage);
+          console.log('📝 Formatted new message:', newMessage);
 
-        // Add message to the appropriate conversation
-        if (selectedUser) {
-          const contact = contacts?.find(c => String(c.id) === selectedUser.id);
-          const mobileNo = contact?.number || contact?.mobileNo || '';
-          
-          // Simplified relevance check - show all messages for the current conversation
-          const isRelevantMessage = true; // Always show messages for the current conversation
-          
-          console.log('Message relevance check:', {
-            messageMobileNo: messageData.message.mobileNo,
-            contactMobileNo: mobileNo,
-            isOutgoing: messageData.message.isOutgoing,
-            type: messageData.type,
-            isRelevant: isRelevantMessage
-          });
-          
-          if (isRelevantMessage) {
-            setMessages(prev => {
-              const existingMessages = prev[selectedUser.id] || [];
-              
-              // More thorough duplicate check
-              const messageExists = existingMessages.some(msg => 
-                msg.id === newMessage.id || 
-                (msg.content === newMessage.content && 
-                 msg.isOutgoing === newMessage.isOutgoing &&
-                 Math.abs(new Date(msg.createdAt || '').getTime() - new Date(newMessage.createdAt || '').getTime()) < 10000)
-              );
-              
-              if (!messageExists) {
-                console.log('✅ Adding new real-time message to UI:', newMessage.id, newMessage.content, newMessage.timestamp);
-                return {
-                  ...prev,
-                  [selectedUser.id]: [...existingMessages, newMessage]
-                };
-              } else {
-                console.log('⚠️ Real-time message already exists, skipping:', newMessage.id, newMessage.content);
-                return prev;
-              }
+          // Add message to the appropriate conversation
+          if (selectedUser) {
+            const contact = contacts?.find(c => String(c.id) === selectedUser.id);
+            const mobileNo = contact?.number || contact?.mobileNo || '';
+            
+            // Simplified relevance check - show all messages for the current conversation
+            const isRelevantMessage = true; // Always show messages for the current conversation
+            
+            console.log('Message relevance check:', {
+              messageMobileNo: message.mobileNo,
+              contactMobileNo: mobileNo,
+              isOutgoing: message.isOutgoing,
+              type: messageData.type,
+              isRelevant: isRelevantMessage
             });
-          } else {
-            console.log('⚠️ Message not relevant to current conversation:', messageData.message.mobileNo, mobileNo);
+            
+            if (isRelevantMessage) {
+              setMessages(prev => {
+                const existingMessages = prev[selectedUser.id] || [];
+                
+                // Check if this is a real message replacing a temp message
+                const tempMessageIndex = existingMessages.findIndex(msg => 
+                  String(msg.id).startsWith('temp_') && 
+                  msg.content === newMessage.content &&
+                  msg.isOutgoing === newMessage.isOutgoing
+                );
+                
+                if (tempMessageIndex !== -1) {
+                  // Replace temp message with real message
+                  console.log('🔄 Replacing temp message with real message:', newMessage.id);
+                  const updatedMessages = [...existingMessages];
+                  updatedMessages[tempMessageIndex] = newMessage;
+                  return {
+                    ...prev,
+                    [selectedUser.id]: updatedMessages
+                  };
+                }
+                
+                // Check if message already exists (for incoming messages)
+                const messageExists = existingMessages.some(msg => 
+                  msg.id === newMessage.id || 
+                  (msg.content === newMessage.content && 
+                   msg.isOutgoing === newMessage.isOutgoing &&
+                   Math.abs(new Date(msg.createdAt || '').getTime() - new Date(newMessage.createdAt || '').getTime()) < 5000)
+                );
+                
+                if (!messageExists) {
+                  console.log('✅ Adding new real-time message to UI:', newMessage.id, newMessage.content);
+                  return {
+                    ...prev,
+                    [selectedUser.id]: [...existingMessages, newMessage]
+                  };
+                } else {
+                  console.log('⚠️ Real-time message already exists, skipping:', newMessage.id, newMessage.content);
+                  return prev;
+                }
+              });
+            } else {
+              console.log('⚠️ Message not relevant to current conversation:', message.mobileNo, mobileNo);
+            }
           }
         }
       }
@@ -195,7 +255,7 @@ const WhatsAppChat: React.FC = () => {
         setMessages(prev => {
           const existingMessages = prev[selectedUser.id] || [];
           const updatedMessages = existingMessages.map(msg => {
-            if (msg.id.startsWith('temp_') && msg.content === sentData.message.content) {
+            if (String(msg.id).startsWith('temp_') && msg.content === sentData.message.content) {
               return {
                 ...msg,
                 id: sentData.message.id,
@@ -223,7 +283,7 @@ const WhatsAppChat: React.FC = () => {
         setMessages(prev => ({
           ...prev,
           [selectedUser.id]: (prev[selectedUser.id] || []).filter(m => 
-            !(m.id.startsWith('temp_') && m.content === errorData.message.content)
+            !(String(m.id).startsWith('temp_') && m.content === errorData.message.content)
           )
         }));
       }
@@ -244,7 +304,6 @@ const WhatsAppChat: React.FC = () => {
 
   const formatTimestamp = (timestamp: string | undefined) => {
     if (!timestamp) {
-      console.warn('No timestamp provided to formatTimestamp');
       return 'Invalid Date';
     }
     
@@ -270,7 +329,6 @@ const WhatsAppChat: React.FC = () => {
       }
       
       if (isNaN(date.getTime())) {
-        console.warn('Invalid date created from timestamp:', timestamp);
         return 'Invalid Date';
       }
       
@@ -280,10 +338,8 @@ const WhatsAppChat: React.FC = () => {
         hour12: true
       });
       
-      console.log('Timestamp formatting:', { original: timestamp, formatted: formattedTime });
       return formattedTime;
     } catch (error) {
-      console.error('Error formatting timestamp:', timestamp, error);
       return 'Invalid Date';
     }
   };
@@ -296,8 +352,9 @@ const WhatsAppChat: React.FC = () => {
   const handleSendMessage = async () => {
     if (!message.trim() || !selectedUser) return;
 
+    const tempId = `temp_${Date.now()}`;
     const newMessage: Message = {
-      id: `temp_${Date.now()}`,
+      id: tempId,
       content: message.trim(),
       sender: 'me',
       timestamp: new Date().toISOString(),
@@ -307,11 +364,17 @@ const WhatsAppChat: React.FC = () => {
       createdAt: new Date().toISOString()
     };
 
+    console.log('📤 Sending message with temp ID:', tempId, 'Content:', newMessage.content);
+
     // Add message to UI immediately (optimistic update)
-    setMessages(prev => ({
-      ...prev,
-      [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage] as Message[]
-    }));
+    setMessages(prev => {
+      const currentMessages = prev[selectedUser.id] || [];
+      console.log('📝 Adding optimistic message to UI:', tempId);
+      return {
+        ...prev,
+        [selectedUser.id]: [...currentMessages, newMessage]
+      };
+    });
 
     // Clear input
     setMessage('');
@@ -338,23 +401,31 @@ const WhatsAppChat: React.FC = () => {
       });
 
       if (response.data.success) {
-        console.log('Message sent successfully:', response.data);
-        // The real message will be added via socket event
+        console.log('✅ Message sent successfully via API:', response.data);
+        // The real message will be added via socket event, replacing the temp message
       } else {
-        console.error('Failed to send message:', response.data.error);
+        console.error('❌ Failed to send message:', response.data.error);
         // Remove the optimistic message on error
-        setMessages(prev => ({
-          ...prev,
-          [selectedUser.id]: (prev[selectedUser.id] || []).filter(m => m.id !== newMessage.id)
-        }));
+        setMessages(prev => {
+          const currentMessages = prev[selectedUser.id] || [];
+          console.log('❌ Removing failed optimistic message:', tempId);
+          return {
+            ...prev,
+            [selectedUser.id]: currentMessages.filter(m => m.id !== tempId)
+          };
+        });
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('❌ Error sending message:', error);
       // Remove the optimistic message on error
-      setMessages(prev => ({
-        ...prev,
-        [selectedUser.id]: (prev[selectedUser.id] || []).filter(m => m.id !== newMessage.id)
-      }));
+      setMessages(prev => {
+        const currentMessages = prev[selectedUser.id] || [];
+        console.log('❌ Removing failed optimistic message:', tempId);
+        return {
+          ...prev,
+          [selectedUser.id]: currentMessages.filter(m => m.id !== tempId)
+        };
+      });
     }
   };
 
@@ -365,30 +436,26 @@ const WhatsAppChat: React.FC = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => {
-    if (activeFilter === 'unread') return false;
-    if (activeFilter === 'favourites') return false; // Add favorite logic
-    if (activeFilter === 'groups') return user.isGroup;
-    if (search.trim()) {
-      return user.name.toLowerCase().includes(search.trim().toLowerCase());
-    }
-    return true;
-  });
-
   // Ensure currentMessages is always an array and filter out undefined
   const currentMessages = selectedUser ? messages[selectedUser.id] || [] : [];
   // const currentMessages = selectedUser ? (messages[selectedUser.id] || []).filter(Boolean) : [];
+
+  // Debug currentMessages
+  console.log('🔍 Current messages for user:', selectedUser?.id, 'Count:', currentMessages.length);
+  console.log('🔍 All message keys in state:', Object.keys(messages));
+  console.log('🔍 Messages for this user ID:', messages[selectedUser?.id || '']);
+  if (currentMessages.length > 0) {
+    console.log('🔍 First message:', currentMessages[0]);
+    console.log('🔍 Last message:', currentMessages[currentMessages.length - 1]);
+  } else if (selectedUser) {
+    console.log('⚠️ No messages found for selected user:', selectedUser.id);
+    console.log('⚠️ All messages in state:', messages);
+  }
 
   // Update the contact click handler - use REST API to fetch messages
   const handleSelectUser = async (user: User, mobileNo: string) => {
     console.log('handleSelectUser called with:', { user, mobileNo });
     setSelectedUser(user);
-    
-    // Clear existing messages for this user to prevent duplicates
-    setMessages(prev => ({
-      ...prev,
-      [user.id]: []
-    }));
     
     console.log({mobileNo})
 
@@ -410,37 +477,50 @@ const WhatsAppChat: React.FC = () => {
           }
         });
         console.log('API response:', response.data);
-        if (response.data && response.data.success) {
-          // Map backend messages to UI message format if needed
-          const backendMessages = response.data.data;
-          console.log('Backend messages:', backendMessages);
+        if (response.data && response.data.status === 200) {
+          // Get messages from the response - the messages are in data.messages
+          const backendMessages = response.data.data.messages || [];
           
-          // Remove duplicates from backend messages
-          const uniqueMessages = backendMessages.filter((msg: any, index: number, self: any[]) => 
-            index === self.findIndex((m: any) => m.id === msg.id)
-          );
+          console.log('🔍 Backend messages:', backendMessages);
+          console.log('🔍 Backend messages count:', backendMessages.length);
+          console.log('🔍 Response data structure:', response.data.data);
           
-          const formattedMessages = uniqueMessages.map((msg: any) => {
-            // Use the isOutgoing field directly from the backend
-            const isOutgoing = Boolean(msg.isOutgoing);
-            console.log('Message isOutgoing from backend:', msg.isOutgoing, 'Final isOutgoing:', isOutgoing);
+          if (backendMessages.length > 0) {
+            console.log('🔍 Processing messages...');
+            const formattedMessages = backendMessages.map((msg: any) => {
+              const isOutgoing = Boolean(msg.isOutgoing);
+              console.log('🔍 Processing message:', msg.id, 'isOutgoing:', msg.isOutgoing, 'Final isOutgoing:', isOutgoing);
+              
+              return {
+                id: msg.id,
+                sender: isOutgoing ? 'me' : 'them',
+                content: msg.content,
+                timestamp: msg.createdAt, // Don't format here, format during rendering
+                type: msg.messageType || 'text',
+                isOutgoing: isOutgoing,
+                messageType: msg.messageType,
+                createdAt: msg.createdAt
+              };
+            });
             
-            return {
-              id: msg.id,
-              sender: isOutgoing ? 'me' : 'them',
-              content: msg.content,
-              timestamp: formatTimestamp(msg.createdAt),
-              type: msg.messageType || 'text',
-              isOutgoing: isOutgoing,
-              messageType: msg.messageType,
-              createdAt: msg.createdAt
-            };
-          });
-          console.log('Formatted messages:', formattedMessages);
-          setMessages(prev => ({
-            ...prev,
-            [user.id]: formattedMessages
-          }));
+            console.log('🔍 Formatted messages count:', formattedMessages.length);
+            console.log('🔍 First formatted message:', formattedMessages[0]);
+            console.log('🔍 Last formatted message:', formattedMessages[formattedMessages.length - 1]);
+            
+            setMessages(prev => {
+              const newState = {
+                ...prev,
+                [user.id]: formattedMessages
+              };
+              console.log('🔍 Setting messages for user:', user.id, 'Count:', formattedMessages.length);
+              console.log('🔍 New state preview:', newState);
+              return newState;
+            });
+          } else {
+            console.log('❌ No messages found in API response');
+          }
+        } else {
+          console.log('❌ API response not successful:', response.data);
         }
       } catch (error) {
         console.error('Failed to fetch messages:', error);
@@ -460,151 +540,101 @@ const WhatsAppChat: React.FC = () => {
   return (
     <div className="flex h-screen bg-neutral-50 font-sans overflow-hidden">
       {/* Left Panel - User List */}
-      <div className="w-full md:w-1/3 bg-white border-r border-neutral-200 flex flex-col min-h-0 md:block">
-        {/* Mobile: Show user list when no chat is selected, hide when chat is active */}
-        <div className={`${selectedUser ? 'hidden md:block' : 'block'}`}>
-          {/* Header */}
-          <div className="bg-primary text-white p-3 flex items-center justify-between flex-shrink-0">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm">Chat</span>
-            </div>
-            {/* <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="text-white hover:bg-primary-600 h-8 w-8">
-                <IconPlus className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-primary-600 h-8 w-8">
-                <IconCircle className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white hover:bg-primary-600 h-8 w-8">
-                <IconDotsVertical className="h-4 w-4" />
-              </Button>
-            </div> */}
+      <div className="w-full md:w-1/3 bg-white border-r border-neutral-200 flex flex-col min-h-0">
+        {/* Header */}
+        <div className="bg-primary text-white p-3 flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-sm">Chat</span>
           </div>
+        </div>
 
-          {/* Search Bar */}
-          <div className="p-2 bg-neutral-50 flex-shrink-0">
-            <div className="relative">
-              <IconSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-neutral-400 h-3 w-3" />
-              <Input
-                placeholder="Search or start a new chat"
-                className="pl-7 bg-white border-neutral-200 text-xs h-8"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
+        {/* Search Bar - Always visible */}
+        <div className="p-2 bg-neutral-50 flex-shrink-0">
+          <div className="relative">
+            <IconSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-neutral-400 h-3 w-3" />
+            <Input
+              placeholder="Search or start a new chat"
+              className="pl-7 bg-white border-neutral-200 text-xs h-8"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
+        </div>
 
-          {/* Filter Tabs */}
-          <div className="flex border-b border-neutral-200 flex-shrink-0">
-            {[].map((filter) => (
-              <button
-                key={filter}
-                onClick={() => setActiveFilter(filter)}
-                className={`flex-1 py-2 px-3 text-xs font-medium capitalize transition-colors ${
-                  activeFilter === filter
-                    ? 'text-primary border-b-2 border-primary'
-                    : 'text-neutral-400 hover:text-neutral-600'
-                }`}
-              >
-                {filter}
-              </button>
-            ))}
-          </div>
-
-          {/* User List */}
-          <div className="flex-1 overflow-y-auto min-h-0">
-            {filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                onClick={() => {
-                  const contact = contacts?.find(c => String(c.id) === user.id);
-                  console.log({contact})
-                  const mobileNo = contact?.number || contact?.mobileNo || '';
-                  console.log('Selected user:', user, 'Contact:', contact, 'MobileNo:', mobileNo);
-                  handleSelectUser(user, mobileNo);
-                }}
-                className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-neutral-50 transition-colors ${
-                  selectedUser?.id === user.id ? 'bg-primary-50' : ''
-                }`}
-              >
-                <div className="relative">
-                  <Avatar className="w-10 h-10">
-                    <AvatarFallback className="text-xs bg-neutral-200">
-                      {user.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  {user.isOnline && (
-                    <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-white"></div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium text-neutral text-xs truncate">{user.name}</h3>
-                    <span className="text-xs text-neutral-400">{user.timestamp}</span>
-                  </div>
-                  <p className="text-xs text-neutral-400 truncate">{user.lastMessage}</p>
-                </div>
-                {/* {user.unreadCount && user.unreadCount > 0 && (
-                  <Badge className="bg-primary text-white text-xs rounded-full min-w-[16px] h-4 text-[10px]">
-                    {user.unreadCount}
-                  </Badge>
-                )} */}
+        {/* User List */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {filteredUsers.map((user) => (
+            <div
+              key={user.id}
+              onClick={() => {
+                const contact = contacts?.find(c => String(c.id) === user.id);
+                console.log({contact})
+                const mobileNo = contact?.number || contact?.mobileNo || '';
+                console.log('Selected user:', user, 'Contact:', contact, 'MobileNo:', mobileNo);
+                handleSelectUser(user, mobileNo);
+              }}
+              className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-neutral-50 transition-colors ${
+                selectedUser?.id === user.id ? 'bg-primary-50' : ''
+              }`}
+            >
+              <div className="relative">
+                <Avatar className="w-10 h-10">
+                  <AvatarFallback className="text-xs bg-neutral-200">
+                    {user.avatar}
+                  </AvatarFallback>
+                </Avatar>
+                {user.isOnline && (
+                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-white"></div>
+                )}
               </div>
-            ))}
-          </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-medium text-neutral text-xs truncate">{user.name}</h3>
+                  <span className="text-xs text-neutral-400">{user.timestamp}</span>
+                </div>
+                <p className="text-xs text-neutral-400 truncate">{user.lastMessage}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Right Panel - Chat Area */}
-      <div className="flex-1 flex flex-col bg-neutral-50 min-h-0 md:block">
-        {/* Mobile: Show chat when user is selected, hide when no user */}
-        <div className={`${selectedUser ? 'block' : 'hidden md:block'} h-full flex flex-col`}>
-          {selectedUser ? (
-            <>
-              {/* Mobile Status Bar */}
-              <div className="md:hidden bg-success h-1"></div>
-              
-              {/* Chat Header */}
-              <div className="bg-white border-b border-neutral-200 p-3 flex items-center justify-between flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  {/* Mobile back button */}
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="md:hidden h-7 w-7"
-                    onClick={() => setSelectedUser(null)}
-                  >
-                    <IconArrowLeft className="h-4 w-4" />
-                  </Button>
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="text-xs bg-neutral-200">
-                      {selectedUser.avatar}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h2 className="font-medium text-neutral text-sm">{selectedUser.name}</h2>
-                    {selectedUser.isOnline && (
-                      <p className="text-xs text-success">online</p>
-                    )}
-                  </div>
+      <div className="flex-1 flex flex-col bg-neutral-50 min-h-0">
+        {selectedUser ? (
+          <>
+            {/* Chat Header */}
+            <div className="bg-white border-b border-neutral-200 p-3 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="text-xs bg-neutral-200">
+                    {selectedUser.avatar}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="font-medium text-neutral text-sm">{selectedUser.name}</h2>
+                  {selectedUser.isOnline && (
+                    <p className="text-xs text-success">online</p>
+                  )}
                 </div>
-                {/* <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <IconSearch className="h-3 w-3" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                    <IconDotsVertical className="h-3 w-3" />
-                  </Button>
-                </div> */}
               </div>
+            </div>
 
-              {/* Chat Messages */}
-              <div 
-                className="flex-1 overflow-y-auto p-3 min-h-0 bg-white"
-              >
-                {currentMessages.map((msg) => {
+            {/* Chat Messages */}
+            <div 
+              className="flex-1 overflow-y-auto p-3 min-h-0 bg-white"
+              style={{ maxHeight: 'calc(100vh - 200px)' }}
+            >
+              {/* Debug: Rendering messages, count: {currentMessages.length} */}
+              <div className="text-xs text-gray-500 mb-2">Debug: {currentMessages.length} messages loaded</div>
+              {currentMessages.length === 0 ? (
+                <div className="text-center text-neutral-400 text-sm py-8">
+                  No messages yet. Start a conversation!
+                </div>
+              ) : (
+                currentMessages.map((msg, index) => {
                   const isOutgoing = Boolean(msg.isOutgoing);
-                  console.log('Rendering message:', msg.id, 'isOutgoing:', isOutgoing, 'sender:', msg.sender);
+                  console.log(`Rendering message ${index + 1}/${currentMessages.length}:`, msg.id, 'isOutgoing:', isOutgoing);
                   
                   return (
                     <div key={msg.id} className={`mb-4 ${isOutgoing ? 'text-right' : 'text-left'}`}>
@@ -634,66 +664,56 @@ const WhatsAppChat: React.FC = () => {
                       </div>
                     </div>
                   );
-                })}
-                
-                <div ref={messagesEndRef} />
-              </div>
+                })
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
 
-              {/* Message Input - Fixed at bottom */}
-              <div className="bg-white border-t border-neutral-200 p-3 flex-shrink-0 mt-auto">
-                <div className="flex items-center gap-2">
-                  {/* <Button variant="ghost" size="icon" className="text-neutral-400 h-8 w-8">
-                    <IconPaperclip className="h-4 w-4" />
-                  </Button> */}
-                  <div className="flex-1 relative">
-                    <Input
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Type a message"
-                      className="pr-20 text-xs h-8"
-                    />
-                    {/* <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 text-neutral-400 h-6 w-6"
-                    >
-                      <IconMoodSmile className="h-3 w-3" />
-                    </Button> */}
-                  </div>
-                  {message.trim() ? (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-primary h-8 w-8"
-                      onClick={handleSendMessage}
-                    >
-                      <IconSend className="h-4 w-4" />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-neutral-400 h-8 w-8"
-                    >
-                      <IconMicrophone className="h-4 w-4" />
-                    </Button>
-                  )}
+            {/* Message Input - Fixed at bottom */}
+            <div className="bg-white border-t border-neutral-200 p-3 flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type a message"
+                    className="pr-20 text-xs h-8"
+                  />
                 </div>
-              </div>
-            </>
-          ) : (
-            <div className="hidden md:flex flex-1 items-center justify-center">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-lg">💬</span>
-                </div>
-                <h3 className="text-sm font-medium text-neutral mb-1">Select a chat</h3>
-                <p className="text-xs text-neutral-400">Choose a conversation from the list to start messaging</p>
+                {message.trim() ? (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-primary h-8 w-8"
+                    onClick={handleSendMessage}
+                  >
+                    <IconSend className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-neutral-400 h-8 w-8"
+                  >
+                    <IconMicrophone className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-center">
+              <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-lg">💬</span>
+              </div>
+              <h3 className="text-sm font-medium text-neutral mb-1">Select a chat</h3>
+              <p className="text-xs text-neutral-400">Choose a conversation from the list to start messaging</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
