@@ -1,6 +1,7 @@
 export const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  socketURL: import.meta.env.VITE_SOCKET_URL || (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'),
+
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'https://whatsapp-erp-production.up.railway.app' || 'http://localhost:8000',
+  socketURL: import.meta.env.VITE_SOCKET_URL || 'https://whatsapp-erp-production.up.railway.app' || (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'),
   timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 30000,
   retryAttempts: Number(import.meta.env.VITE_API_RETRY_ATTEMPTS) || 3,
   retryDelay: Number(import.meta.env.VITE_API_RETRY_DELAY) || 1000,
@@ -66,7 +67,11 @@ export const API_ENDPOINTS = {
   },
   whatsapp: {
     qrImage: '/api/whatsapp/qr',
+    contacts: '/api/whatsapp/contacts',
+    messages: '/api/whatsapp/messages/between',
   },
   orders: '/api/orders',
-  categories: '/api/categories'
+  categories: '/api/categories',
+  stocks: '/api/stocks',
+  products: '/api/products',
 } as const; 

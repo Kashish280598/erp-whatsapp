@@ -2,6 +2,7 @@ import { Routes, Route, useParams } from "react-router-dom";
 import CustomersList from "./CustomersList";
 import customersData from "./dummy-customers.json";
 import AddCustomer from "./add-customer";
+import CustomerDetails from "./customer-details";
 
 function AddCustomerForm() {
   return <div>Add Customer (coming soon)</div>;
@@ -49,7 +50,7 @@ export default function CustomersPage() {
       <Route path="" element={<CustomersList />} />
       <Route path="add" element={<AddCustomer />} />
       <Route path="edit/:id" element={<AddCustomer mode="edit" />} />
-      <Route path="details/:id" element={<div>Customer Details (coming soon)</div>} />
+      <Route path="details/:id" element={<CustomerDetails />} />
       <Route path="company/:companyName" element={<CustomersCompanyDetail />} />
     </Routes>
   );
