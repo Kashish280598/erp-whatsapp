@@ -59,20 +59,16 @@ export const SocketProvider = ({ children }: any) => {
             console.log('✅ Socket connected:', socketInstance.id)
             setIsConnected(true)
             
-            // Temporarily bypass authentication for testing
-            console.log('🔐 Bypassing socket authentication for testing')
-            setIsAuthenticated(true)
-            
-            // Try to authenticate if token is available, but don't fail if not
+            // Authenticate with token
             const token = getAuthToken()
-            if (user && token) {
-                console.log('🔐 Authenticating socket for user:', user.id)
-                socketInstance.emit('authenticate', {
-                    token,
-                    userId: user.id.toString()
-                })
+            if (token) {
+                console.log('🔐 Authenticating socket with token')
+                // The token is already sent in the handshake, so we don't need to emit authenticate
+                // The backend middleware will handle authentication automatically
+                setIsAuthenticated(true)
             } else {
-                console.log('⚠️ No token available, but continuing without authentication for testing')
+                console.log('⚠️ No token available for socket authentication')
+                setIsAuthenticated(false)
             }
         })
 
@@ -174,9 +170,12 @@ export const SocketProvider = ({ children }: any) => {
     }, [user, getAuthToken])
 
     useEffect(() => {
-        // Temporarily bypass authentication for testing
-        // Connect socket regardless of authentication status
-        console.log('🔌 Connecting socket (authentication bypassed for testing)')
+        // Get authentication token
+        const token = getAuthToken();
+        console.log('🔌 Connecting socket with token:', token ? 'Present' : 'Missing');
+        if (token) {
+            console.log('🔍 Token preview:', token.substring(0, 50) + '...');
+        }
 
         // Don't reconnect if socket is already connected and authenticated
         if (socket && isConnected && isAuthenticated) {
@@ -199,7 +198,14 @@ export const SocketProvider = ({ children }: any) => {
             timeout: 20000,
             transports: ['websocket', 'polling'],
             autoConnect: true,
-            upgrade: true
+            upgrade: true,
+            // Add authentication data
+            auth: {
+                token: token
+            },
+            query: {
+                token: token
+            }
         })
 
         setupSocketListeners(socketInstance)
@@ -212,7 +218,7 @@ export const SocketProvider = ({ children }: any) => {
             setIsConnected(false)
             setIsAuthenticated(false)
         }
-    }, [isAppAuthenticated, setupSocketListeners])
+    }, [isAppAuthenticated, setupSocketListeners, getAuthToken])
 
     // Helper functions
     const sendMessage = useCallback((to: string, message: string, conversationId?: string) => {
