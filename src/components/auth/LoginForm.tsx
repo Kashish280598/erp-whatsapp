@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLoading } from '@/hooks/useAppState';
-import { storeAuthToken, useLoginMutation } from '@/lib/api/auth/auth-api';
+import { storeAuthToken, useLoginMutation, useLazyGetCurrentUserQuery } from '@/lib/api/auth/auth-api';
 import { API_ENDPOINTS } from '@/lib/api/config';
 import { setAuthToken, setCredentials, setLoginType } from '@/lib/features/auth/authSlice';
 import { useAppDispatch, useAppSelector } from '@/lib/store';
@@ -23,10 +23,10 @@ const LoginSchema = Yup.object().shape({
 
 const LoginForm = () => {
   const dispatch = useAppDispatch();
-  // const navigate = useNavigate(); // Remove unused variable
   const { isLoading } = useLoading(API_ENDPOINTS.auth.login);
-  const { email: loginEmail } = useAppSelector((state: any) => state.auth.login.formData); // If RootState is available, use (state: RootState)
+  const { email: loginEmail } = useAppSelector((state: any) => state.auth.login.formData);
   const [login, { isLoading: isLoginLoading }] = useLoginMutation();
+  const [getCurrentUser] = useLazyGetCurrentUserQuery();
 
   const initialValues = {
     email: loginEmail,
@@ -37,10 +37,28 @@ const LoginForm = () => {
     try {
       const result = await login({ email: values.email, password: values.password }).unwrap();
       if (result?.data?.token) {
+        // Store token
         storeAuthToken(result?.data?.token);
-        dispatch(setCredentials({ user: null, isAuthenticated: true }));
         dispatch(setAuthToken(result?.data?.token));
-        // Optionally, fetch user profile here
+        
+        // Fetch user profile
+        try {
+          const userResult = await getCurrentUser(undefined).unwrap();
+          if (userResult?.data?.user) {
+            dispatch(setCredentials({ 
+              user: userResult.data.user, 
+              isAuthenticated: true 
+            }));
+            toast.success('Login successful');
+          } else {
+            throw new Error('Failed to fetch user profile');
+          }
+        } catch (profileError) {
+          console.error('Error fetching user profile:', profileError);
+          // If profile fetch fails, still authenticate but warn
+          dispatch(setCredentials({ user: null, isAuthenticated: true }));
+          toast.warning('Login successful but profile loading failed');
+        }
       }
     } catch (error: any) {
       toast.error(error?.data?.message || 'Login failed');
