@@ -205,7 +205,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                         validationContext={{ isEditMode }}
                         onSubmit={onSubmit}
                         enableReinitialize>
-                        {({ errors, touched, isSubmitting, values, }) => {
+                        {({ errors, touched, isSubmitting, values, handleSubmit }) => {
                             // Calculate total price (not a hook)
                             const totalPrice = values.items.reduce((sum: number, item: any) => {
                                 const product = productsList.find((p: any) => p.id === item.product);
@@ -213,7 +213,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                 return sum + (Number(item.quantity) * Number(product.unitPrice || 0));
                             }, 0);
                             return (
-                                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex-1">
+                                <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex-1">
                                     <div className="bg-gradient-to-r from-green-500 to-blue-600 px-6 py-4">
                                         <h2 className="text-white font-semibold text-lg flex items-center gap-2">
                                             <ShoppingCart className="h-5 w-5" />
@@ -446,7 +446,11 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                                         <Button
                                                                             type="button"
                                                                             variant="destructive"
-                                                                            onClick={() => handleDeleteOrderItem(item)}
+                                                                            onClick={(e) => {
+                                                                                e.preventDefault();
+                                                                                e.stopPropagation();
+                                                                                handleDeleteOrderItem(item);
+                                                                            }}
                                                                             className="h-9 px-3"
                                                                             disabled={orderItems.length === 1 || isDeletingItem}
                                                                         >
@@ -507,7 +511,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                             </Button>
                                         </div>
                                     </div>
-                                </div>
+                                </form>
                             )
                         }}
                     </Formik>
