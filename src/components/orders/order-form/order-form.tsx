@@ -13,6 +13,7 @@ import { AlertCircle, ArrowLeft, CheckCircle, CreditCard, Loader2, Package, Plus
 import { getInitialValues, getPayload, validationSchema, type Order } from "."
 import CustomersDropdown from "./customers-dropdown"
 import ProductsDropdown from "./products-dropdown"
+import UsersDropdown from "./users-dropdown"
 
 const OrderForm: FC<{ order?: Order }> = ({ order }) => {
     const [createOrder] = useCreateOrderMutation()
@@ -319,8 +320,9 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                         <User className="h-5 w-5 text-blue-500" />
                                                         Customer Information
                                                     </h3>
-                                                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                                                    <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                                                         <CustomersDropdown />
+                                                        <UsersDropdown customerId={values.customer} />
                                                     </div>
                                                 </div>
 
