@@ -4,7 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { IconChevronLeft } from '@tabler/icons-react';
 import { CircleCheck } from 'lucide-react';
-import Logo from '@/assets/logo.svg';
+import LogoLight from '@/assets/logo-light.svg';
+import LogoDark from '@/assets/logo-dark.svg';
+import { useTheme } from '@/providers/theme-provider';
 import { useAppSelector, type RootState } from '@/lib/store';
 import { useEffect, useState } from 'react';
 import { setIsForgotPasswordRequestSent } from '@/lib/features/auth/authSlice';
@@ -22,6 +24,7 @@ const ForgotPassword = () => {
     const { isLoading } = useLoading(API_ENDPOINTS.auth.forgotPasswordRequest);
     const { email: loginEmail } = useAppSelector(state => state.auth.login.formData);
     const [forgotPassword, { isLoading: isForgotLoading }] = useForgotPasswordMutation();
+    const { theme } = useTheme();
 
     useEffect(() => {
         setEmail(loginEmail || '');
@@ -52,8 +55,8 @@ const ForgotPassword = () => {
                     {/* Logo */}
                     <div className="flex justify-center">
                         <img
-                            src={Logo}
-                            alt="ERP Logo"
+                            src={theme === 'dark' ? LogoDark : LogoLight}
+                            alt="Logo"
                             className="w-12 h-12 sm:w-14 sm:h-14 lg:w-25 lg:h-25"
                         />
                     </div>

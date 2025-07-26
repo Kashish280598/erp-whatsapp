@@ -51,18 +51,18 @@ export function BasicTableColumnHeader<TData, TValue>({
       >
         <span>{title}</span>
         <div className="cursor-pointer flex items-center flex-col relative h-2.5 w-2.5 mr-0.5">
-          <IconCaretUp size={1} fill={column.getIsSorted() === "asc" ? "#565ADD" : "#C8C8D0"} className={`!h-3 !w-3 absolute -top-[3px] ${column.getIsSorted() === "asc" ? "text-primary" : "text-[#C8C8D0]"}`} />
-          <IconCaretDown size={1} fill={column.getIsSorted() === "desc" ? "#565ADD" : "#C8C8D0"} className={`!h-3 !w-3 absolute top-[1px] ${column.getIsSorted() === "desc" ? "text-primary" : "text-[#C8C8D0]"}`} />
+          <IconCaretUp size={1} fill={column.getIsSorted() === "asc" ? "#9A4DEF" : "#C8C8D0"} className={`!h-3 !w-3 absolute -top-[3px] ${column.getIsSorted() === "asc" ? "text-primary" : "text-[#C8C8D0]"}`} />
+          <IconCaretDown size={1} fill={column.getIsSorted() === "desc" ? "#9A4DEF" : "#C8C8D0"} className={`!h-3 !w-3 absolute top-[1px] ${column.getIsSorted() === "desc" ? "text-primary" : "text-[#C8C8D0]"}`} />
         </div>
       </Button>
       {/* </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="space-y-1">
           <DropdownMenuItem onClick={() => column.toggleSorting(false)} className={`cursor-pointer text-[13px] font-[600] leading-5 text-neutral ${column.getIsSorted() === "asc" ? "!text-primary bg-primary-100 font-[600]" : "text-[#5E5F6E]"} `}>
-            <IconCaretUp className={`mr-2 h-3.5 w-3.5 ${column.getIsSorted() === "asc" ? "text-primary" : "text-[#5E5F6E]"}`} fill={column.getIsSorted() === "asc" ? "#565ADD" : "#5E5F6E"} />
+            <IconCaretUp className={`mr-2 h-3.5 w-3.5 ${column.getIsSorted() === "asc" ? "text-primary" : "text-[#5E5F6E]"}`} fill={column.getIsSorted() === "asc" ? "#9A4DEF" : "#5E5F6E"} />
             Asc
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => column.toggleSorting(true)} className={`cursor-pointer text-[13px] font-[600] leading-5 text-neutral ${column.getIsSorted() === "desc" ? "!text-primary bg-primary-100 font-[600]" : "text-[#5E5F6E]"} `}>
-            <IconCaretDown className={`mr-2 h-3.5 w-3.5 ${column.getIsSorted() === "desc" ? "text-primary" : "text-[#5E5F6E]"}`} fill={column.getIsSorted() === "desc" ? "#565ADD" : "#5E5F6E"} />
+            <IconCaretDown className={`mr-2 h-3.5 w-3.5 ${column.getIsSorted() === "desc" ? "text-primary" : "text-[#5E5F6E]"}`} fill={column.getIsSorted() === "desc" ? "#9A4DEF" : "#5E5F6E"} />
             Desc
           </DropdownMenuItem>
           {column.getIsSorted() && (

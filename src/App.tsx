@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Outlet } from "react-router-dom";
 // import useCheckActiveNav from "./hooks/use-check-active-nav";
 import { NavgationBreadcrumb } from "@/components/custom/NavgationBreadcrumb";
-import { Notifications } from "@/components/custom/Notifications";
+// import { Notifications } from "@/components/custom/Notifications";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -43,7 +43,7 @@ function App() {
               <NavgationBreadcrumb />
               {/* ===== Top Navigation ===== */}
               <div className="ml-auto flex items-center space-x-4">
-                <Notifications />
+                {/* <Notifications /> */}
                 <ThemeSwitch />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild className="cursor-pointer">

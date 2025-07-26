@@ -9,12 +9,10 @@ import AuthRedirect from "./auth-redirect";
 import ProtectedRoute from "./ProtectedRoute";
 
 // Application Pages
-const Components = lazy(() => import("@/pages/dashboard/Components"));
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
 const Settings = lazy(() => import("@/pages/Settings/index"));
 const ManageAccount = lazy(() => import("@/pages/Settings/ManageAccount"));
 const UserManagement = lazy(() => import("@/pages/Settings/UserManagement"));
-const Discovery = lazy(() => import("@/pages/Discovery/index"));
 const InventoryPage = lazy(() => import("@/pages/inventory"));
 const CustomersPage = lazy(() => import("@/pages/customers"));
 
@@ -91,7 +89,7 @@ export const router = createBrowserRouter([
         children: [
             {
                 path: "",
-                element: <Navigate to="/discover" />,
+                element: <Navigate to="/dashboard" />,
             },
             {
                 path: "/redirect",
@@ -123,26 +121,6 @@ export const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
                         <Chat />
-                    </Suspense>
-                ),
-                errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-            },
-            {
-                path: 'discover',
-                element: (
-                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
-                        <Discovery />
-                    </Suspense>
-                ),
-                errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-            },
-            {
-                path: "integrations",
-                element: (
-                    <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
-                        <ProtectedRoute>
-                            <Components />
-                        </ProtectedRoute>
                     </Suspense>
                 ),
                 errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,

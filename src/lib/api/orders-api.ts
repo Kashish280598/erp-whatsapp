@@ -48,6 +48,7 @@ export const ordersApi = createApi({
             }),
             invalidatesTags: ['Order'],
         }),
+
         deleteOrder: builder.mutation({
             query: (id) => ({
                 url: `${API_URL}/${id}`,
@@ -56,9 +57,34 @@ export const ordersApi = createApi({
             invalidatesTags: ['Order'],
         }),
 
+        deleteOrderItem: builder.mutation({
+            query: (id) => ({
+                url: `${API_URL}/items/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Order'],
+        }),
+
         getCustomers: builder.query({
             query: (params) => ({
                 url: CUSTOMER_API_URL,
+                method: 'GET',
+                params: params,
+            }),
+        }),
+
+        getCustomerPOCs: builder.query({
+            query: ({ params, id }) => ({
+                url: `${CUSTOMER_API_URL}/${id}/users`,
+                method: 'GET',
+                params: params,
+            }),
+        }),
+
+
+        getProducts: builder.query({
+            query: (params) => ({
+                url: API_ENDPOINTS.products,
                 method: 'GET',
                 params: params,
             }),
@@ -73,4 +99,7 @@ export const {
     useUpdateOrderMutation,
     useDeleteOrderMutation,
     useLazyGetCustomersQuery,
+    useLazyGetProductsQuery,
+    useDeleteOrderItemMutation,
+    useLazyGetCustomerPOCsQuery,
 } = ordersApi 

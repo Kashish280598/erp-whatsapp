@@ -7,8 +7,10 @@ import { Button } from "../ui/button";
 import { sidebarlinks } from "@/data/sidebar-links";
 import { ScrollArea } from "../ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import LOGO from "@/assets/icons/SSPM_LOGO.svg";
+import LightLogo from "@/assets/logo-light.svg";
+import DarkLogo from "@/assets/logo-dark.svg";
 import { Separator } from "../ui/separator";
+import { useTheme } from '@/providers/theme-provider';
 
 interface SidebarProps extends React.HTMLAttributes<HTMLElement> {
     className?: string;
@@ -18,6 +20,7 @@ export default function Sidebar({
     className,
 }: SidebarProps) {
     const [navOpened, setNavOpened] = useState(false);
+    const { theme } = useTheme();
 
 
     /* Make body not scrollable when navBar is opened */
@@ -56,7 +59,7 @@ export default function Sidebar({
                     >
                         <div className={`block w-auto`}>
                             <Avatar className="w-6 h-6 md:h-8 md:w-8">
-                                <AvatarImage src={LOGO} alt="@erp" />
+                                <AvatarImage src={theme === 'dark' ? DarkLogo : LightLogo} alt="@erp" />
                                 <AvatarFallback className="text-sm uppercase">
                                     SP
                                 </AvatarFallback>

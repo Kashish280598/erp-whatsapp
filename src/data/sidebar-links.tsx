@@ -3,6 +3,7 @@ import CategoryIcon from "@/assets/icons/discover-icon.svg";
 import FindingIcon from "@/assets/icons/finding-icon.svg";
 import CustomersIcon from "@/assets/icons/invite-user.svg";
 import { default as ManageUserIcon, default as UsersIcon } from "@/assets/icons/manage-user.svg";
+import OrdersIcon from "@/assets/icons/document-license.svg";
 import SettingsIcon from "@/assets/icons/settings-icon.svg";
 import ChatIcon from "@/assets/icons/tv-play-icon.svg";
 
@@ -28,12 +29,6 @@ export const sidebarlinks: SidebarLink[] = [
     icon: DashboardIcon,
   },
   {
-    title: "Inventory Manager",
-    label: "",
-    href: "/inventory",
-    icon: FindingIcon,
-  },
-  {
     title: "Customers",
     label: "",
     href: "/customers",
@@ -46,10 +41,22 @@ export const sidebarlinks: SidebarLink[] = [
     icon: ChatIcon,
   },
   {
-    title: "Settings",
+    title: "Orders",
     label: "",
-    href: "/settings",
-    icon: SettingsIcon,
+    href: "/orders",
+    icon: OrdersIcon,
+  },
+  {
+    title: "Inventory Manager",
+    label: "",
+    href: "/inventory",
+    icon: FindingIcon,
+  },
+  {
+    title: "Categories",
+    label: "",
+    href: "/categories",
+    icon: CategoryIcon,
     sidebarIdentifier: "settings",
   },
   {
@@ -60,16 +67,10 @@ export const sidebarlinks: SidebarLink[] = [
     sidebarIdentifier: "settings",
   },
   {
-    title: "Categories",
+    title: "Settings",
     label: "",
-    href: "/categories",
-    icon: CategoryIcon,
+    href: "/settings",
+    icon: SettingsIcon,
     sidebarIdentifier: "settings",
-  },
-  {
-    title: "Orders",
-    label: "",
-    href: "/orders",
-    icon: ManageUserIcon,
   },
 ];

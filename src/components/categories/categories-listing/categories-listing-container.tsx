@@ -44,7 +44,7 @@ const CategoriesListingContainer = () => {
         <div>
             <div className='flex justify-between items-center mb-3'>
                 <div>
-                    <h1 className='text-2xl font-bold'>Categories</h1>
+                    <h1 className='text-2xl font-bold text-neutral-800 dark:text-primary-400'>Categories</h1>
                     <p className='text-sm text-gray-500'>Here are the list of categories in the system.</p>
                 </div>
                 <Dialog

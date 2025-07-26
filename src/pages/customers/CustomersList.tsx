@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
 import { Plus, Info, Edit } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/custom/table/data-table";
-import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
 import { API_CONFIG, API_ENDPOINTS } from '@/lib/api/config';
 
 interface POC {
@@ -166,10 +166,17 @@ const CustomersList = () => {
       header: "Actions",
       cell: ({ row }: { row: any }) => (
         <div className="flex gap-1">
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/edit/${row.original.id}`)}>
-            <Edit size={16} />
-          </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/company/${encodeURIComponent(row.original.companyName)}`)}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7" type="button">
+                <Edit size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Coming soon</p>
+            </TooltipContent>
+          </Tooltip>
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/details/${row.original.id}`)}>
             <Info size={16} />
           </Button>
         </div>
@@ -191,7 +198,7 @@ const CustomersList = () => {
     <div className="inventory-container" style={{ width: '100%', padding: '1.5rem 0.5rem' }}>
       <div className="inventory-header" style={{ marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }}>Customers</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 2 }} className="text-neutral-800 dark:text-primary-400 font-bold">Customers</h1>
           <div style={{ fontSize: 14, color: '#64748b', fontWeight: 500, marginBottom: 0 }}>
             Manage your business customers and their points of contact.
           </div>
@@ -205,25 +212,18 @@ const CustomersList = () => {
           {fetchError}
         </div>
       )}
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-          <span className="loader" style={{ width: 40, height: 40, border: '4px solid #e5e7eb', borderTop: '4px solid #2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
-          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
-        </div>
-      ) : (
-        <DataTable
-          columns={columns}
-          data={customers}
-          tableToolbar={tableToolbar}
-          fetchData={() => {}}
-          totalCount={customers.length}
-          loading={false}
-          tableId="customers-table"
-          className="!text-[13px]"
-          headerClassName="!py-2 !px-2"
-          tableMainContainerClassName="!rounded-lg"
-        />
-      )}
+      <DataTable
+        columns={columns}
+        data={customers}
+        tableToolbar={tableToolbar}
+        fetchData={() => {}}
+        totalCount={customers.length}
+        loading={loading}
+        tableId="customers-table"
+        className="!text-[13px]"
+        headerClassName="!py-2 !px-2"
+        tableMainContainerClassName="!rounded-lg"
+      />
     </div>
   );
 };

@@ -62,7 +62,7 @@ const PasswordStrengthChecker: React.FC<{ password: string, className?: string }
         <div className={cn("w-[480px] p-6 bg-white shadow-lg rounded-xl", className)}>
             <div className="">
                 {/* Progress Bar */}
-                <div className="w-full h-2 bg-[#E1E2F9] rounded overflow-hidden">
+                <div className="w-full h-2 bg-primary-100 rounded overflow-hidden">
                     <div
                         className={`h-full transition-all duration-500 ${strengthColor}`}
                         style={{ width: `${progress}%` }}
