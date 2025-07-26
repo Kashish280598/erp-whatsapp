@@ -460,8 +460,8 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                                         <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                                                                     </div>
                                                                     <div className="text-right mr-4">
-                                                                        <p className="font-medium text-gray-800">₹{item.unitPrice?.toFixed(2)}</p>
-                                                                        <p className="text-sm text-gray-500">Total: ₹{item.totalPrice?.toFixed(2)}</p>
+                                                                        <p className="font-medium text-gray-800">₹{Number(item.unitPrice || 0).toFixed(2)}</p>
+                                                                        <p className="text-sm text-gray-500">Total: ₹{Number(item.totalPrice || 0).toFixed(2)}</p>
                                                                     </div>
                                                                     <div className="w-auto">
                                                                         <Button
@@ -494,7 +494,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                                         <div className="text-right">
                                                             <span className="text-lg font-semibold text-gray-700">Total Amount: </span>
-                                                            <span className="text-2xl font-bold text-blue-700">₹{orderItems.reduce((sum: number, item: any) => sum + (item.totalPrice || 0), 0).toFixed(2)}</span>
+                                                            <span className="text-2xl font-bold text-blue-700">₹{orderItems.reduce((sum: number, item: any) => sum + Number(item.totalPrice || 0), 0).toFixed(2)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -580,8 +580,8 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                         <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                                                     </div>
                                                     <div className="text-right">
-                                                        <p className="font-medium text-gray-800">₹{product?.unitPrice || 0}</p>
-                                                        <p className="text-sm text-gray-600">Total: ₹{(product?.unitPrice || 0) * item.quantity}</p>
+                                                        <p className="font-medium text-gray-800">₹{Number(product?.unitPrice || 0).toFixed(2)}</p>
+                                                        <p className="text-sm text-gray-600">Total: ₹{(Number(product?.unitPrice || 0) * Number(item.quantity)).toFixed(2)}</p>
                                                     </div>
                                                 </div>
                                             );
@@ -650,8 +650,8 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                 <h4 className="font-semibold text-red-800 mb-2">Item to Delete:</h4>
                                 <p className="text-gray-700"><strong>Product:</strong> {itemToDelete.Product?.name}</p>
                                 <p className="text-gray-700"><strong>Quantity:</strong> {itemToDelete.quantity}</p>
-                                <p className="text-gray-700"><strong>Price:</strong> ₹{itemToDelete.unitPrice?.toFixed(2)}</p>
-                                <p className="text-gray-700"><strong>Total:</strong> ₹{itemToDelete.totalPrice?.toFixed(2)}</p>
+                                <p className="text-gray-700"><strong>Price:</strong> ₹{Number(itemToDelete.unitPrice || 0).toFixed(2)}</p>
+                                <p className="text-gray-700"><strong>Total:</strong> ₹{Number(itemToDelete.totalPrice || 0).toFixed(2)}</p>
                             </div>
                         )}
                         <DialogFooter>

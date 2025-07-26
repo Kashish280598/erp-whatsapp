@@ -60,7 +60,7 @@ const ProductsDropdown = ({ value, onChange, error, touched, selectedProductIds 
                             <SelectItem key={product?.id} value={product?.id} disabled={isSelectedElsewhere}>
                                 <div className="flex flex-col">
                                     <span className="text-sm font-medium">{product?.name}</span>
-                                    <span className="text-xs text-gray-500">₹{product?.unitPrice}</span>
+                                    <span className="text-xs text-gray-500">₹{Number(product?.unitPrice || 0).toFixed(2)}</span>
                                     {isSelectedElsewhere && <span className="text-xs text-red-500">Already selected</span>}
                                 </div>
                             </SelectItem>
