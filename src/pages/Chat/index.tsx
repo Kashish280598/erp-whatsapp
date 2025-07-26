@@ -179,7 +179,7 @@ const ChatIntegration = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral">Chat</h1>
+          <h1 className="text-2xl font-bold text-neutral-800 dark:text-primary-400">Chat</h1>
           <p className="text-sm text-neutral-400 mt-1">
             Connect and manage your chat platforms for seamless communication
           </p>

@@ -27,7 +27,7 @@ const getSideDrawerHeaderClass = (type: SideDrawerTypeValue = SideDrawerType.DEF
         case SideDrawerType.ERROR:
             return "bg-error-100 text-error-700";
         case SideDrawerType.INFO:
-            return "bg-[#E1E2F9] text-blue-700";
+            return "bg-[#ECE4FD] text-blue-700";
         default:
             return "bg-[#F4F4F6] text-gray-700";
     }

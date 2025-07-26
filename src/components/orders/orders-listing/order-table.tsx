@@ -48,30 +48,30 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
     const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
+                return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200';
             case 'confirmed':
-                return 'bg-blue-100 text-blue-800';
+                return 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-200';
             case 'shipped':
-                return 'bg-purple-100 text-purple-800';
+                return 'bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-200';
             case 'delivered':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
             case 'cancelled':
-                return 'bg-red-100 text-red-800';
+                return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
         }
     }
 
     const getPaymentStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
             case 'pending':
-                return 'bg-orange-100 text-orange-800';
+                return 'bg-orange-100 text-orange-800 dark:bg-orange-800 dark:text-orange-200';
             case 'paid':
-                return 'bg-green-100 text-green-800';
+                return 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-200';
             case 'failed':
-                return 'bg-red-100 text-red-800';
+                return 'bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-200';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
         }
     }
 
@@ -91,8 +91,8 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                         return (
                             <div className="flex items-center gap-2">
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-semibold text-gray-900">#{row.original.id}</span>
-                                    <span className="text-xs text-gray-500">{row.original.OrderItems?.length || 0} items</span>
+                                    <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-50">#{row.original.id}</span>
+                                    <span className="text-xs text-neutral-400 dark:text-neutral-400">{row.original.OrderItems?.length || 0} items</span>
                                 </div>
                             </div>
                         )
@@ -115,8 +115,8 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-gray-900">{row.original.Customer?.name}</span>
-                                    <span className="text-xs text-gray-500">{row.original.Customer?.gstNo}</span>
+                                    <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-50">{row.original.Customer?.name}</span>
+                                    <span className="text-xs text-neutral-400 dark:text-neutral-400">{row.original.Customer?.gstNo}</span>
                                 </div>
                             </div>
                         )
@@ -139,8 +139,8 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="flex flex-col">
-                                    <span className="text-sm font-medium text-gray-900">{row.original.User?.name}</span>
-                                    <span className="text-xs text-gray-500">{row.original.User?.email}</span>
+                                    <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-50">{row.original.User?.name}</span>
+                                    <span className="text-xs text-neutral-400 dark:text-neutral-400">{row.original.User?.email}</span>
                                 </div>
                             </div>
                         )
@@ -156,8 +156,8 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                     ),
                     cell: ({ row }) => (
                         <div className="flex flex-col">
-                            <span className="text-sm font-semibold text-gray-900">₹{row.original.amount?.toFixed(2)}</span>
-                            <span className="text-xs text-gray-500">{row.original.OrderItems?.length || 0} items</span>
+                            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-200">₹{row.original.amount?.toFixed(2)}</span>
+                            <span className="text-xs text-neutral-400 dark:text-neutral-400">{row.original.OrderItems?.length || 0} items</span>
                         </div>
                     )
                 },
@@ -207,14 +207,14 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
                         const date = new Date(row.original.createdAt);
                         return (
                             <div className="flex flex-col">
-                                <span className="text-sm text-gray-900">
+                                <span className="text-sm text-neutral-500 dark:text-neutral-200">
                                     {date.toLocaleDateString('en-US', {
                                         month: 'short',
                                         day: 'numeric',
                                         year: 'numeric'
                                     })}
                                 </span>
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-neutral-400 dark:text-neutral-400">
                                     {date.toLocaleTimeString('en-US', {
                                         hour: '2-digit',
                                         minute: '2-digit',

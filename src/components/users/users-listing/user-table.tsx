@@ -80,7 +80,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-gray-900">{row.original.name}</span>
+                                        <span className="text-sm font-semibold text-neutral-700 dark:text-neutral-50">{row.original.name}</span>
                                     </div>
                                 </div>
                             )
@@ -95,7 +95,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                         ),
                         cell: ({ row }) => (
                             <div className="flex gap-1.5">
-                                <span className="text-sm text-gray-600">{row.original.email}</span>
+                                <span className="text-sm text-neutral-400 dark:text-neutral-400">{row.original.email}</span>
                             </div>
                         )
                     },
@@ -108,7 +108,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                         ),
                         cell: ({ row }) => (
                             <div className="flex gap-1.5">
-                                <span className="text-sm text-gray-600">{row.original.mobileNo}</span>
+                                <span className="text-sm text-neutral-400 dark:text-neutral-400">{row.original.mobileNo}</span>
                             </div>
                         )
                     },
@@ -123,7 +123,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                             <div className="flex gap-1.5">
                                 <Badge
                                     variant="secondary"
-                                    className="px-2 py-0.5 text-xs capitalize font-medium bg-gray-100 text-gray-600"
+                                    className="px-2 py-0.5 text-xs capitalize font-semibold bg-gray-100 text-neutral-700 dark:text-neutral-50"
                                 >
                                     {row.original.role}
                                 </Badge>
@@ -142,7 +142,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                         cell: ({ row }) => {
                             const date = new Date(row.original.createdAt);
                             return (
-                                <span className="text-sm text-gray-600">
+                                <span className="text-sm text-neutral-400 dark:text-neutral-400">
                                     {date.toLocaleDateString('en-US', {
                                         month: 'short',
                                         day: 'numeric',
