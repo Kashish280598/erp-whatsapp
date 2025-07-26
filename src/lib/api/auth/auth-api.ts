@@ -66,14 +66,14 @@ export const authApi = createApi({
 		}),
 		getWhatsAppContacts: builder.query<WhatsAppContact[], void>({
 			query: () => ({
-				url: '/api/whatsapp/contacts',
+				url: API_ENDPOINTS.whatsapp.contacts,
 				method: 'GET',
 			}),
 			transformResponse: (response: { status: number; message: string; data: WhatsAppContact[] }) => response.data,
 		}),
 		getWhatsAppMessagesBetween: builder.query<any[], { toNumber: string }>({
 			query: ({ toNumber }) => ({
-				url: `/api/whatsapp/messages/between`,
+				url: API_ENDPOINTS.whatsapp.messages,
 				method: 'GET',
 				params: {
 					fromNumber: '919712323801',
