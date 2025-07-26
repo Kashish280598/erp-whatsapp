@@ -59,7 +59,7 @@ export const getPayload = (values: any, isEdit: boolean = false) => {
     }
 
     return {
-        mobileNo: values?.customer,
+        mobileNo: values?.user,
         items: Array.isArray(values?.items) ? values?.items.map((item: any) => ({
             ProductId: item?.product,
             quantity: item?.quantity,

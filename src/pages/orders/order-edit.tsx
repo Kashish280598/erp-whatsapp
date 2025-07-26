@@ -20,13 +20,6 @@ const OrderEdit = () => {
 
     return (
         <div className='pb-5 w-full'>
-            <div className='flex justify-between items-center mb-3'>
-                <div>
-                    <h1 className='text-2xl font-bold'>Edit Order #{id}</h1>
-                    <p className='text-sm text-gray-500'>Edit the order details and status.</p>
-                </div>
-            </div>
-
             {isUninitialized || isFetching ? (
                 <div className="flex justify-center items-center h-64">
                     <Loader />
