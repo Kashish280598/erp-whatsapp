@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useCreateOrderMutation, useUpdateOrderMutation } from "@/lib/api/orders-api"
+import { useCreateOrderMutation, useDeleteOrderItemMutation, useUpdateOrderMutation } from "@/lib/api/orders-api"
 import { useLazyGetUsersQuery } from "@/lib/api/users-api"
 import { AlertCircle, ArrowLeft, CheckCircle, CreditCard, Loader2, Package, Plus, Save, ShoppingCart, Trash2, Truck, User, XCircle } from "lucide-react"
 import { getInitialValues, getPayload, validationSchema, type Order } from "."
@@ -17,6 +17,7 @@ import ProductsDropdown from "./products-dropdown"
 const OrderForm: FC<{ order?: Order }> = ({ order }) => {
     const [createOrder] = useCreateOrderMutation()
     const [updateOrder] = useUpdateOrderMutation()
+    const [deleteOrderItem] = useDeleteOrderItemMutation()
     const navigate = useNavigate()
     const initialValues = useMemo(() => getInitialValues(order), [order])
     const [productsList, setProductsList] = useState<any[]>([]);
@@ -24,6 +25,10 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
     const [showSummaryDialog, setShowSummaryDialog] = useState(false);
     const [pendingValues, setPendingValues] = useState<any>(null);
     const [isCreatingOrder, setIsCreatingOrder] = useState(false);
+    const [orderItems, setOrderItems] = useState<any[]>([]);
+    const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+    const [itemToDelete, setItemToDelete] = useState<any>(null);
+    const [isDeletingItem, setIsDeletingItem] = useState(false);
 
     const isEditMode = !!order;
 
@@ -43,9 +48,48 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
         }
     }, [customersData])
 
+    // Initialize order items for edit mode
+    useEffect(() => {
+        if (isEditMode && order?.OrderItems) {
+            setOrderItems([...order.OrderItems]);
+        }
+    }, [isEditMode, order]);
+
     // Helper to update productsList from dropdown
     const handleProductsLoaded = (products: any[]) => {
         setProductsList(products);
+    };
+
+    // Delete order item in edit mode
+    const handleDeleteOrderItem = (item: any) => {
+        setItemToDelete(item);
+        setShowDeleteDialog(true);
+    };
+
+    const confirmDeleteOrderItem = async () => {
+        if (!itemToDelete) return;
+
+        setIsDeletingItem(true);
+        try {
+            const response = await deleteOrderItem(itemToDelete.id).unwrap();
+
+            if (response?.status === 200 || response?.status === 201) {
+                // Remove from local state
+                setOrderItems(prevItems => prevItems.filter(item => item.id !== itemToDelete.id));
+                setShowDeleteDialog(false);
+                setItemToDelete(null);
+                toast.success(response?.message || 'Order item deleted successfully');
+            }
+        } catch (error: any) {
+            toast.error(error?.data?.message || 'Failed to delete order item');
+        } finally {
+            setIsDeletingItem(false);
+        }
+    };
+
+    const cancelDeleteOrderItem = () => {
+        setShowDeleteDialog(false);
+        setItemToDelete(null);
     };
 
     const onSubmit = async (values: any, { setSubmitting }: FormikHelpers<any>) => {
@@ -53,7 +97,11 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
             // In edit mode, directly submit without showing summary dialog
             setSubmitting(true);
             try {
-                const payload = getPayload(values, isEditMode);
+                // Include the updated order items in the payload
+                const payload = {
+                    ...getPayload(values, isEditMode),
+                    orderItems: orderItems // Add the current order items state
+                };
                 const response = await updateOrder({ id: order!.id, payload }).unwrap();
 
                 if (response?.status === 200 || response?.status === 201) {
@@ -314,7 +362,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                                                                 {...field}
                                                                                                 id={`items.${index}.quantity`}
                                                                                                 type="number"
-                                                                                                label="Quantity"
+                                                                                                // label="Quantity"
                                                                                                 placeholder="Qty"
                                                                                                 min={1}
                                                                                                 error={
@@ -383,23 +431,45 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                         Order Items
                                                     </h3>
                                                     <div className="space-y-3">
-                                                        {order?.OrderItems?.map((item: any) => (
-                                                            <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
-                                                                <div>
-                                                                    <p className="font-medium text-gray-800">{item.Product?.name}</p>
-                                                                    <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                                                        {orderItems.length > 0 ? (
+                                                            orderItems.map((item: any) => (
+                                                                <div key={item.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-200 shadow-sm">
+                                                                    <div className="flex-1">
+                                                                        <p className="font-medium text-gray-800">{item.Product?.name}</p>
+                                                                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                                                                    </div>
+                                                                    <div className="text-right mr-4">
+                                                                        <p className="font-medium text-gray-800">₹{item.unitPrice?.toFixed(2)}</p>
+                                                                        <p className="text-sm text-gray-500">Total: ₹{item.totalPrice?.toFixed(2)}</p>
+                                                                    </div>
+                                                                    <div className="w-auto">
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="destructive"
+                                                                            onClick={() => handleDeleteOrderItem(item)}
+                                                                            className="h-9 px-3"
+                                                                            disabled={orderItems.length === 1 || isDeletingItem}
+                                                                        >
+                                                                            {isDeletingItem && itemToDelete?.id === item.id ? (
+                                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                                            ) : (
+                                                                                <Trash2 className="h-4 w-4" />
+                                                                            )}
+                                                                        </Button>
+                                                                    </div>
                                                                 </div>
-                                                                <div className="text-right">
-                                                                    <p className="font-medium text-gray-800">₹{item.unitPrice?.toFixed(2)}</p>
-                                                                    <p className="text-sm text-gray-500">Total: ₹{item.totalPrice?.toFixed(2)}</p>
-                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div className="text-center py-8 text-gray-500">
+                                                                <Package className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                                                                <p>No items in this order</p>
                                                             </div>
-                                                        ))}
+                                                        )}
                                                     </div>
                                                     <div className="mt-4 pt-4 border-t border-gray-200">
                                                         <div className="text-right">
                                                             <span className="text-lg font-semibold text-gray-700">Total Amount: </span>
-                                                            <span className="text-2xl font-bold text-blue-700">₹{order?.amount?.toFixed(2)}</span>
+                                                            <span className="text-2xl font-bold text-blue-700">₹{orderItems.reduce((sum: number, item: any) => sum + (item.totalPrice || 0), 0).toFixed(2)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -529,6 +599,60 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                     <>
                                         <CheckCircle className="h-4 w-4 mr-2" />
                                         Confirm Order
+                                    </>
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            )}
+
+            {/* Delete Order Item Confirmation Dialog - Only for Edit Mode */}
+            {isEditMode && (
+                <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle className="flex items-center gap-2">
+                                <Trash2 className="h-5 w-5 text-red-500" />
+                                Delete Order Item
+                            </DialogTitle>
+                            <DialogDescription>
+                                Are you sure you want to delete this order item? This action cannot be undone.
+                            </DialogDescription>
+                        </DialogHeader>
+                        {itemToDelete && (
+                            <div className="bg-red-50 rounded-lg p-4 border border-red-100">
+                                <h4 className="font-semibold text-red-800 mb-2">Item to Delete:</h4>
+                                <p className="text-gray-700"><strong>Product:</strong> {itemToDelete.Product?.name}</p>
+                                <p className="text-gray-700"><strong>Quantity:</strong> {itemToDelete.quantity}</p>
+                                <p className="text-gray-700"><strong>Price:</strong> ₹{itemToDelete.unitPrice?.toFixed(2)}</p>
+                                <p className="text-gray-700"><strong>Total:</strong> ₹{itemToDelete.totalPrice?.toFixed(2)}</p>
+                            </div>
+                        )}
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                type="button"
+                                onClick={cancelDeleteOrderItem}
+                                disabled={isDeletingItem}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="destructive"
+                                onClick={confirmDeleteOrderItem}
+                                disabled={isDeletingItem}
+                            >
+                                {isDeletingItem ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete Item
                                     </>
                                 )}
                             </Button>

@@ -48,9 +48,18 @@ export const ordersApi = createApi({
             }),
             invalidatesTags: ['Order'],
         }),
+
         deleteOrder: builder.mutation({
             query: (id) => ({
                 url: `${API_URL}/${id}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: ['Order'],
+        }),
+
+        deleteOrderItem: builder.mutation({
+            query: (id) => ({
+                url: `${API_URL}/items/${id}`,
                 method: 'DELETE',
             }),
             invalidatesTags: ['Order'],
@@ -81,4 +90,5 @@ export const {
     useDeleteOrderMutation,
     useLazyGetCustomersQuery,
     useLazyGetProductsQuery,
+    useDeleteOrderItemMutation,
 } = ordersApi 
