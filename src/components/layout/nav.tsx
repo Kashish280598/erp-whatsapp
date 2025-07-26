@@ -68,7 +68,7 @@ interface NavLinkProps extends SidebarLink {
 }
 
 function NavLinkIcon(props: NavLinkProps) {
-  const { title, icon, href, sidebarIdentifier } = props;
+  const { title, icon: Icon, href, sidebarIdentifier } = props;
   const { checkActiveNav } = useCheckActiveNav();
 
   // Normalize title for data-tour attribute
@@ -94,7 +94,7 @@ function NavLinkIcon(props: NavLinkProps) {
               checkActiveNav(href) && "active-menu"
             )}
           >
-            {icon && <img src={icon} alt={title} className={`w-4 h-4 ${checkActiveNav(href) && "active-menu-icon"}`} />}
+            {typeof Icon === 'function' ? <Icon className={`w-4 h-4 ${checkActiveNav(href) ? "active-menu-icon" : ""}`} /> : null}
             <span className="sr-only">{title}</span>
           </span>
           <span className={`menu-title ${checkActiveNav(href) && 'active-menu-title'}`}>{title}</span>
@@ -111,7 +111,7 @@ function NavLinkIcon(props: NavLinkProps) {
   );
 }
 
-function NavLinkIconDropdown({ icon, sub }: NavLinkProps) {
+function NavLinkIconDropdown({ icon: Icon, sub }: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
 
   /* Open collapsible by default
@@ -126,7 +126,7 @@ function NavLinkIconDropdown({ icon, sub }: NavLinkProps) {
           size="icon"
           className="h-10 w-10"
         >
-          {icon}
+          {typeof Icon === 'function' ? <Icon className="w-4 h-4" /> : null}
         </Button>
       </DropdownMenuTrigger>
       {/* <DropdownMenuContent side="right" align="start" sideOffset={4}>

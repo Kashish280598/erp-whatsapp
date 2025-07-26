@@ -66,7 +66,6 @@ This project uses [Sentry](https://sentry.io/) for error and performance monitor
 2. **Configure DSN**
    - Add your Sentry DSN to your environment variables (e.g., `.env`):
      ```env
-     VITE_SENTRY_DSN=https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848
      ```
    - The DSN is also hardcoded as a fallback in `src/main.tsx` for convenience.
 3. **Initialization**

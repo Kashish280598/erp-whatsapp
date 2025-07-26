@@ -10,9 +10,7 @@ import ProtectedRoute from "./ProtectedRoute";
 
 // Application Pages
 const Dashboard = lazy(() => import("@/pages/dashboard/Dashboard"));
-const Settings = lazy(() => import("@/pages/Settings/index"));
 const ManageAccount = lazy(() => import("@/pages/Settings/ManageAccount"));
-const UserManagement = lazy(() => import("@/pages/Settings/UserManagement"));
 const InventoryPage = lazy(() => import("@/pages/inventory"));
 const CustomersPage = lazy(() => import("@/pages/customers"));
 
@@ -137,31 +135,15 @@ export const router = createBrowserRouter([
                 // Nested routes handled inside CustomersPage
             },
             {
-                path: "settings",
+                path: "profile",
                 element: (
                     <Suspense fallback={<FallbackLoader className="h-[calc(100svh-90px)]" />}>
                         <ProtectedRoute>
-                            <Settings />
+                            <ManageAccount />
                         </ProtectedRoute>
                     </Suspense>
                 ),
                 errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                children: [
-                    {
-                        index: true,
-                        element: <Navigate to="manage-account" />,
-                    },
-                    {
-                        path: "manage-account",
-                        element: <ManageAccount />,
-                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                    },
-                    {
-                        path: "user-management",
-                        element: <UserManagement />,
-                        errorElement: <ErrorElement className="h-[calc(100svh-90px)]" />,
-                    },
-                ],
             },
             {
                 path: "users",

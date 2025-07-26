@@ -1,5 +1,5 @@
+import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { useEffect, useState } from 'react';
 
 interface CircularProgressProps {
     value: number;
@@ -70,7 +70,7 @@ export const CircularProgress = ({
                 >
                     {/* Background circle */}
                     <circle
-                        className="text-[#F4F4F6]"
+                        className="text-muted"
                         strokeWidth={strokeWidth}
                         stroke="currentColor"
                         fill="transparent"
@@ -99,11 +99,10 @@ export const CircularProgress = ({
                 </svg>
             </div>
             <span
-                className="whitespace-nowrap transition-all duration-200"
+                className="whitespace-nowrap transition-all duration-200 text-foreground"
                 style={{
                     fontSize: `${fontSize}px`,
                     fontWeight: 400,
-                    color: typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : 'black'
                 }}
             >
                 {Math.round(animatedValue)}%
