@@ -33,10 +33,6 @@ Sentry.init({
       return null;
     }
     return event;
-  },
-  onFatalError() {
-    // Prevent Sentry from showing error dialogs
-    return;
   }
 });
 
@@ -71,7 +67,7 @@ const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
         </button>
         <button
           onClick={handleNext}
-          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
+          className="flex-1 bg-primary text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-primary-700 transition-colors"
         >
           Continue
         </button>
@@ -110,7 +106,7 @@ const DashboardStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
         </button>
         <button
           onClick={handleNext}
-          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
+          className="flex-1 bg-primary text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
         >
           Continue
         </button>
@@ -149,7 +145,7 @@ const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
         </button>
         <button
           onClick={handleNext}
-          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
+          className="flex-1 bg-primary text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
         >
           Continue
         </button>
@@ -188,7 +184,7 @@ const CustomersStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
         </button>
         <button
           onClick={handleNext}
-          className="flex-1 bg-blue-600 text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
+          className="flex-1 bg-primary text-white rounded-xl py-3 font-medium cursor-pointer hover:bg-blue-700 transition-colors"
         >
           Continue
         </button>
