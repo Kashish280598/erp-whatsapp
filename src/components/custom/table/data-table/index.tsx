@@ -233,7 +233,7 @@ export function DataTable<TData, TValue>({
                     key={`${row.id}-${i}`}
                     onClick={() => onRowClick?.(row)}
                     data-state={row.getIsSelected() && "selected"}
-                    className={`${loading ? "opacity-40" : "opacity-100"} transition-all ${i % 2 !== 0 ? "bg-white" : "bg-[#F9FAFF]"} border-0 hover:bg-primary/10 dark:hover:bg-primary/20 hover:cursor-pointer ${onRowClick ? "cursor-pointer" : ""}`}
+                    className={`${loading ? "opacity-40" : "opacity-100"} transition-all ${i % 2 !== 0 ? "bg-white" : "bg-[#F9FAFF]"} border-0`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id} className="dark:text-neutral-100">

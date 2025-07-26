@@ -1,19 +1,17 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useLazyGetCustomersQuery } from "@/lib/api/orders-api"
+import { useLazyGetUsersQuery } from "@/lib/api/users-api"
 import { Field } from "formik"
 import { useEffect, useMemo } from "react"
 
 const CustomersDropdown = () => {
-    const [getCustomers, { data, isUninitialized, isFetching }] = useLazyGetCustomersQuery()
-
+    const [getCustomers, { data, isUninitialized, isFetching }] = useLazyGetUsersQuery()
     useEffect(() => {
-        const params = { page: 1, limit: 20 }
+        const params = { page: 1, limit: 20, role: 'user' }
         getCustomers(params)
     }, [])
 
-    const customers = useMemo(() => Array.isArray(data?.data?.customers) ? data?.data?.customers : [], [data?.data?.customers])
-
-
+    const customers = useMemo(() => Array.isArray(data?.data?.users) ? data?.data?.users.filter((user: any) => !!user?.mobileNo) : [], [data?.data?.users])
 
     return (
         <Field name="customer">
@@ -26,7 +24,13 @@ const CustomersDropdown = () => {
                         disabled={isUninitialized || isFetching}
                     >
                         <SelectTrigger aria-label="Status" className="w-full text-left">
-                            <SelectValue placeholder={isUninitialized || isFetching ? "Loading..." : "Select status"} />
+                            {(() => {
+                                if (!field.value) {
+                                    return <SelectValue placeholder={isUninitialized || isFetching ? "Loading..." : "Select status"} />;
+                                }
+                                const selected = customers.find((c: any) => c.mobileNo === field.value);
+                                return <span>{selected?.name || "No Name"}</span>;
+                            })()}
                         </SelectTrigger>
                         <SelectContent>
                             {isUninitialized || isFetching ? (
@@ -38,10 +42,10 @@ const CustomersDropdown = () => {
                                 </SelectItem>
                             ) : (
                                 customers?.map((customer: any) => (
-                                    <SelectItem key={customer.id} value={customer.id}>
+                                    <SelectItem key={customer?.mobileNo} value={customer?.mobileNo}>
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-medium">{customer.name}</span>
-                                            <span className="text-xs text-gray-500">{customer.address}</span>
+                                            <span className="text-sm font-medium">{customer?.name || 'No Name'}</span>
+                                            <span className="text-xs text-gray-500">{customer?.email}</span>
                                         </div>
                                     </SelectItem>
                                 ))

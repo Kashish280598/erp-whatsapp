@@ -27,7 +27,7 @@ const axiosBaseQuery = async (config: AxiosRequestConfig) => {
 
 		const response = await axios($config);
 		// Check for API-level error (even if HTTP status is 200)
-		if (response.data && typeof response.data.status !== 'undefined' && response.data.status !== 200) {
+		if (response.data && typeof response.data.status !== 'undefined' && ![200, 201].includes(response.data.status)) {
 			throw {
 				response: {
 					status: response.data.status,

@@ -1,43 +1,114 @@
 import * as yup from 'yup';
 
-
 export const getInitialValues = (order?: Order) => {
+    if (!order) {
+        return {
+            customer: '',
+            status: 'pending',
+            paymentStatus: 'pending',
+            items: [{ product: '', quantity: 1 }],
+        }
+    }
+
+    // Transform the order data structure to form values
     return {
-        name: order?.name || '',
-        customer: order?.customer || '',
-        status: order?.status || '',
-        total: order?.total || '',
-        items: order?.items || [],
+        customer: order.Customer?.id?.toString() || '',
+        status: order.status || 'pending',
+        paymentStatus: order.paymentStatus || 'pending',
+        items: order.OrderItems?.map((item: any) => ({
+            product: item.ProductId?.toString() || '',
+            quantity: item.quantity || 1,
+            unitPrice: item.unitPrice || 0,
+            totalPrice: item.totalPrice || 0,
+        })) || [{ product: '', quantity: 1 }],
     }
 }
 
 export const validationSchema = yup.object({
-    name: yup.string().required('Order name is required'),
-    customer: yup.string().required('Customer is required'),
+    customer: yup.string().when('$isEditMode', {
+        is: false,
+        then: (schema) => schema.required('Customer is required'),
+        otherwise: (schema) => schema.optional(),
+    }),
     status: yup.string().required('Status is required'),
-    total: yup.number().required('Total is required'),
-    items: yup.array().of(yup.string()).required('Items are required'),
+    paymentStatus: yup.string().required('Payment status is required'),
+    items: yup.array().when('$isEditMode', {
+        is: false,
+        then: (schema) => schema.of(
+            yup.object({
+                product: yup.string().required('Product is required').min(1, 'Please select a product'),
+                quantity: yup.number()
+                    .required('Quantity is required')
+                    .min(1, 'Quantity must be at least 1')
+                    .positive('Quantity must be positive'),
+                unitPrice: yup.number().optional(),
+                totalPrice: yup.number().optional(),
+            })
+        ).min(1, 'At least one product is required').required('Items are required'),
+        otherwise: (schema) => schema.optional(),
+    }),
 })
 
-export const getPayload = (values: any) => {
+export const getPayload = (values: any, isEdit: boolean = false) => {
+    if (isEdit) {
+
+        return {
+            status: values.status,
+            paymentStatus: values.paymentStatus,
+        }
+    }
+
     return {
-        name: values?.name,
-        customer: values?.customer,
-        status: values?.status,
-        total: values?.total,
-        items: values?.items,
+        mobileNo: values?.customer,
+        items: Array.isArray(values?.items) ? values?.items.map((item: any) => ({
+            ProductId: item?.product,
+            quantity: item?.quantity,
+
+        })) : [],
     }
 }
 
 export type Order = {
-    id: string;
-    name: string;
-    customer: string;
+    id: number;
+    amount: number;
     status: string;
-    total: number;
-    items: string[];
-    created_at?: string;
-    updated_at?: string;
+    paymentStatus: string;
+    UserId: number;
+    CustomerId: number;
+    createdAt: string;
+    updatedAt: string;
+    User: {
+        id: number;
+        name: string;
+        email: string;
+        mobileNo: string;
+    };
+    Customer: {
+        id: number;
+        name: string;
+        gstNo: string;
+        address: string;
+    };
+    OrderItems: Array<{
+        id: number;
+        OrderId: number;
+        ProductId: number;
+        StockId: number;
+        quantity: number;
+        unitPrice: number;
+        totalPrice: number;
+        createdAt: string;
+        updatedAt: string;
+        Product: {
+            id: number;
+            name: string;
+            unitPrice: number;
+        };
+        Stock: {
+            id: number;
+            buyPrice: number;
+        };
+    }>;
 }
 
 
