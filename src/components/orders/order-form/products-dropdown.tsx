@@ -1,6 +1,6 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLazyGetProductsQuery } from "@/lib/api/orders-api";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 interface ProductsDropdownProps {
     value: string;
@@ -13,6 +13,11 @@ interface ProductsDropdownProps {
 
 const ProductsDropdown = ({ value, onChange, error, touched, selectedProductIds = [], onProductsLoaded }: ProductsDropdownProps) => {
     const [trigger, { data, isFetching, isLoading }] = useLazyGetProductsQuery();
+    const onProductsLoadedRef = useRef(onProductsLoaded);
+
+    useEffect(() => {
+        onProductsLoadedRef.current = onProductsLoaded;
+    }, [onProductsLoaded]);
 
     useEffect(() => {
         const params = { page: 1, limit: 20 }
@@ -23,10 +28,10 @@ const ProductsDropdown = ({ value, onChange, error, touched, selectedProductIds 
     const loading = isFetching || isLoading;
 
     useEffect(() => {
-        if (onProductsLoaded) {
-            onProductsLoaded(products);
+        if (onProductsLoadedRef.current && products.length > 0) {
+            onProductsLoadedRef.current(products);
         }
-    }, [products, onProductsLoaded]);
+    }, [products]);
 
     return (
         <Select
@@ -35,13 +40,12 @@ const ProductsDropdown = ({ value, onChange, error, touched, selectedProductIds 
             disabled={loading}
         >
             <SelectTrigger aria-label="Product" className="w-full text-left">
-                {(() => {
-                    if (!value) {
-                        return <SelectValue placeholder={loading ? "Loading..." : "Select product"} />;
-                    }
-                    const selected = products.find((p: any) => p.id === value);
-                    return <span>{selected?.name || "No Name"}</span>;
-                })()}
+                <SelectValue placeholder={loading ? "Loading..." : "Select product"}>
+                    {value && (() => {
+                        const selected = products.find((p: any) => p.id.toString() === value.toString());
+                        return selected?.name || "Unknown Product";
+                    })()}
+                </SelectValue>
             </SelectTrigger>
             <SelectContent>
                 {loading ? (

@@ -58,7 +58,20 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
 
     // Helper to update productsList from dropdown
     const handleProductsLoaded = (products: any[]) => {
-        setProductsList(products);
+        if (!products || products.length === 0) return;
+
+        setProductsList(prevProducts => {
+            // Merge new products with existing ones, avoiding duplicates
+            const existingIds = new Set(prevProducts.map(p => p.id));
+            const newProducts = products.filter(p => p && p.id.toString() && !existingIds.has(p.id.toString()));
+
+            if (newProducts.length === 0) {
+                return prevProducts; // No new products to add
+            }
+
+            const mergedProducts = [...prevProducts, ...newProducts];
+            return mergedProducts;
+        });
     };
 
     // Delete order item in edit mode
@@ -165,7 +178,13 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
 
     // Get product details for summary
     const getProductDetails = (productId: string) => {
-        return productsList.find((p: any) => p.id === productId);
+        const product = productsList.find((p: any) => p.id && p.id.toString() === productId.toString());
+        if (product) {
+            return product;
+        }
+        // If product not found in local list, try to find it in any of the dropdown data
+        // This is a fallback mechanism
+        return null;
     };
 
 
@@ -209,7 +228,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                         {({ errors, touched, isSubmitting, values, handleSubmit }) => {
                             // Calculate total price (not a hook)
                             const totalPrice = values.items.reduce((sum: number, item: any) => {
-                                const product = productsList.find((p: any) => p.id === item.product);
+                                const product = productsList.find((p: any) => p.id && p.id.toString() === item.product.toString());
                                 if (!product) return sum;
                                 return sum + (Number(item.quantity) * Number(product.unitPrice || 0));
                             }, 0);
@@ -352,7 +371,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                                                                                 }
                                                                                                 touched={!!(touched.items && Array.isArray(touched.items) && touched.items[index]?.product)}
                                                                                                 selectedProductIds={values.items.filter((_: any, i: number) => i !== index).map((item: any) => item.product)}
-                                                                                                onProductsLoaded={index === 0 ? handleProductsLoaded : undefined}
+                                                                                                onProductsLoaded={handleProductsLoaded}
                                                                                             />
                                                                                         )}
                                                                                     </Field>
@@ -544,7 +563,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                         <User className="h-4 w-4" />
                                         Order Details
                                     </h4>
-                                    <p><strong>Customer:</strong> {getCustomerName(pendingValues.customer)}</p>
+                                    <p><strong>Customer:</strong> {getCustomerName(pendingValues.user)}</p>
                                 </div>
                                 <div>
                                     <h4 className="font-semibold mb-3 text-gray-800 flex items-center gap-2">
@@ -573,7 +592,7 @@ const OrderForm: FC<{ order?: Order }> = ({ order }) => {
                                     <div className="flex justify-between items-center text-lg font-bold">
                                         <span className="text-gray-700">Total Amount:</span>
                                         <span className="text-blue-700">₹{pendingValues.items.reduce((sum: number, item: any) => {
-                                            const product = productsList.find((p: any) => p.id === item.product);
+                                            const product = productsList.find((p: any) => p.id && p.id.toString() === item.product.toString());
                                             if (!product) return sum;
                                             return sum + (Number(item.quantity) * Number(product.unitPrice || 0));
                                         }, 0).toFixed(2)}</span>

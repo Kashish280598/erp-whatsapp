@@ -84,7 +84,7 @@ export const ordersApi = createApi({
 
         getProducts: builder.query({
             query: (params) => ({
-                url: '/api/products',
+                url: API_ENDPOINTS.products,
                 method: 'GET',
                 params: params,
             }),
