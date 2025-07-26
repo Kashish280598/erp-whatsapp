@@ -16,7 +16,7 @@ import Loader from '@/components/Loader';
 
 const ChatIntegration = () => {
   const [isEnabled, setIsEnabled] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState('whatsapp');
+
   const [showWhatsAppChat, setShowWhatsAppChat] = useState(false);
   const [showWhatsAppQRModal, setShowWhatsAppQRModal] = useState(false);
 
@@ -93,7 +93,6 @@ const ChatIntegration = () => {
       // Fetch QR code when modal opens
       setTimeout(() => fetchQrCode(true), 100);
     }
-    setSelectedPlatform(platformId);
   };
 
   const handleBackToPlatforms = () => {

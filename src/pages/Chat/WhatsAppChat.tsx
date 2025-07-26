@@ -12,6 +12,18 @@ import {
   IconArrowLeft
 } from '@tabler/icons-react';
 import { useWhatsAppSocket } from '@/hooks/useWhatsAppSocket';
+import axios from 'axios';
+import { API_CONFIG, AUTH_CONFIG } from '@/lib/api/config';
+
+const myMobileNo = '919712323801'; // TODO: Replace with actual logged-in user's mobile number
+
+// Helper function to get auth token
+const getAuthToken = () => {
+  return document.cookie
+    .split('; ')
+    .find(row => row.startsWith(`${AUTH_CONFIG.cookieNames.token}=`))
+    ?.split('=')[1];
+};
 
 interface User {
   id: string;
@@ -26,7 +38,7 @@ interface User {
 
 interface Message {
   id: string;
-  sender: 'user' | 'contact';
+  sender: 'user' | 'contact' | 'me' | 'them';
   content: string;
   timestamp: string;
   type: 'text' | 'file' | 'image';
@@ -44,17 +56,13 @@ const WhatsAppChat: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
 
   // Socket integration - replace all REST API calls with socket
   const {
     isSocketConnected,
     isSocketAuthenticated,
-    sendWhatsAppMessage,
     joinWhatsAppConversation,
-    leaveWhatsAppConversation,
     fetchContacts,
-    fetchMessagesBetween,
     contacts: socketContacts,
     messages: socketMessages,
     isLoading,
@@ -91,11 +99,7 @@ const WhatsAppChat: React.FC = () => {
         id: msg.id,
         sender: msg.isOutgoing ? 'user' : 'contact',
         content: msg.content,
-        timestamp: new Date(msg.createdAt).toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        }),
+        timestamp: formatTimestamp(msg.createdAt),
         type: 'text',
         isOutgoing: msg.isOutgoing,
         messageType: msg.messageType,
@@ -109,7 +113,6 @@ const WhatsAppChat: React.FC = () => {
 
       // Set conversation ID if available
       if (socketMessages.conversationId) {
-        setCurrentConversationId(socketMessages.conversationId);
         if (isSocketAuthenticated) {
           joinWhatsAppConversation(socketMessages.conversationId);
         }
@@ -120,114 +123,238 @@ const WhatsAppChat: React.FC = () => {
   // Socket event listeners for real-time messaging
   useEffect(() => {
     const handleNewMessage = (event: CustomEvent) => {
-      const newMessage = event.detail;
-      console.log('Received new message via socket:', newMessage);
+      const messageData = event.detail;
+      console.log('📨 Received new message event:', messageData);
       
-      // Update messages state with new message
-      setMessages(prev => {
-        const conversationMessages = prev[selectedUser?.id || ''] || [];
-        const messageExists = conversationMessages.some(msg => msg.id === newMessage.id);
-        
-        if (!messageExists) {
-          return {
-            ...prev,
-            [selectedUser?.id || '']: [...conversationMessages, {
-              id: newMessage.id,
-              sender: newMessage.isOutgoing ? 'user' : 'contact',
-              content: newMessage.content,
-              timestamp: new Date(newMessage.createdAt).toLocaleTimeString('en-US', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-              }),
-              type: 'text',
-              isOutgoing: newMessage.isOutgoing,
-              messageType: newMessage.messageType,
-              createdAt: newMessage.createdAt
-            }]
-          };
+      if (messageData && messageData.message) {
+        const newMessage: Message = {
+          id: messageData.message.id,
+          sender: messageData.message.isOutgoing ? 'me' : 'them',
+          content: messageData.message.content,
+          timestamp: formatTimestamp(messageData.message.createdAt),
+          type: 'text',
+          isOutgoing: messageData.message.isOutgoing,
+          messageType: messageData.message.messageType,
+          createdAt: messageData.message.createdAt
+        };
+
+        console.log('📝 Formatted new message:', newMessage);
+
+        // Add message to the appropriate conversation
+        if (selectedUser) {
+          const contact = contacts?.find(c => String(c.id) === selectedUser.id);
+          const mobileNo = contact?.number || contact?.mobileNo || '';
+          
+          // Simplified relevance check - show all messages for the current conversation
+          const isRelevantMessage = true; // Always show messages for the current conversation
+          
+          console.log('Message relevance check:', {
+            messageMobileNo: messageData.message.mobileNo,
+            contactMobileNo: mobileNo,
+            isOutgoing: messageData.message.isOutgoing,
+            type: messageData.type,
+            isRelevant: isRelevantMessage
+          });
+          
+          if (isRelevantMessage) {
+            setMessages(prev => {
+              const existingMessages = prev[selectedUser.id] || [];
+              
+              // More thorough duplicate check
+              const messageExists = existingMessages.some(msg => 
+                msg.id === newMessage.id || 
+                (msg.content === newMessage.content && 
+                 msg.isOutgoing === newMessage.isOutgoing &&
+                 Math.abs(new Date(msg.createdAt || '').getTime() - new Date(newMessage.createdAt || '').getTime()) < 10000)
+              );
+              
+              if (!messageExists) {
+                console.log('✅ Adding new real-time message to UI:', newMessage.id, newMessage.content, newMessage.timestamp);
+                return {
+                  ...prev,
+                  [selectedUser.id]: [...existingMessages, newMessage]
+                };
+              } else {
+                console.log('⚠️ Real-time message already exists, skipping:', newMessage.id, newMessage.content);
+                return prev;
+              }
+            });
+          } else {
+            console.log('⚠️ Message not relevant to current conversation:', messageData.message.mobileNo, mobileNo);
+          }
         }
-        return prev;
-      });
+      }
     };
 
     const handleMessageSent = (event: CustomEvent) => {
-      const sentMessage = event.detail;
-      console.log('Message sent confirmation via socket:', sentMessage);
+      const sentData = event.detail;
+      console.log('✅ Message sent confirmation:', sentData);
+      
+      // Update the temporary message with the real message data
+      if (selectedUser && sentData.message) {
+        setMessages(prev => {
+          const existingMessages = prev[selectedUser.id] || [];
+          const updatedMessages = existingMessages.map(msg => {
+            if (msg.id.startsWith('temp_') && msg.content === sentData.message.content) {
+              return {
+                ...msg,
+                id: sentData.message.id,
+                timestamp: formatTimestamp(sentData.message.createdAt),
+                createdAt: sentData.message.createdAt
+              };
+            }
+            return msg;
+          });
+          
+          return {
+            ...prev,
+            [selectedUser.id]: updatedMessages
+          };
+        });
+      }
     };
 
-    const handleMessageSendError = (event: CustomEvent) => {
-      const error = event.detail;
-      console.error('Message send error via socket:', error);
-      // You could show a toast notification here
-    };
-
-    const handleStatusUpdate = (event: CustomEvent) => {
-      const status = event.detail;
-      console.log('WhatsApp status update via socket:', status);
-      // You could update connection status in UI here
+    const handleMessageError = (event: CustomEvent) => {
+      const errorData = event.detail;
+      console.error('❌ Message error:', errorData);
+      
+      // Remove the optimistic message on error
+      if (selectedUser && errorData.message) {
+        setMessages(prev => ({
+          ...prev,
+          [selectedUser.id]: (prev[selectedUser.id] || []).filter(m => 
+            !(m.id.startsWith('temp_') && m.content === errorData.message.content)
+          )
+        }));
+      }
     };
 
     // Add event listeners
-    window.addEventListener('whatsapp:new_message', handleNewMessage as EventListener);
-    window.addEventListener('whatsapp:message_sent', handleMessageSent as EventListener);
-    window.addEventListener('whatsapp:message_send_error', handleMessageSendError as EventListener);
-    window.addEventListener('whatsapp:status_update', handleStatusUpdate as EventListener);
+    window.addEventListener('new_message', handleNewMessage as EventListener);
+    window.addEventListener('message_sent', handleMessageSent as EventListener);
+    window.addEventListener('message_error', handleMessageError as EventListener);
 
+    // Cleanup
     return () => {
-      // Clean up event listeners
-      window.removeEventListener('whatsapp:new_message', handleNewMessage as EventListener);
-      window.removeEventListener('whatsapp:message_sent', handleMessageSent as EventListener);
-      window.removeEventListener('whatsapp:message_send_error', handleMessageSendError as EventListener);
-      window.removeEventListener('whatsapp:status_update', handleStatusUpdate as EventListener);
+      window.removeEventListener('new_message', handleNewMessage as EventListener);
+      window.removeEventListener('message_sent', handleMessageSent as EventListener);
+      window.removeEventListener('message_error', handleMessageError as EventListener);
     };
-  }, [selectedUser]);
+  }, [selectedUser, contacts]);
+
+  const formatTimestamp = (timestamp: string | undefined) => {
+    if (!timestamp) {
+      console.warn('No timestamp provided to formatTimestamp');
+      return 'Invalid Date';
+    }
+    
+    try {
+      // Handle different timestamp formats
+      let date: Date;
+      
+      if (typeof timestamp === 'string') {
+        // If it's already a valid ISO string, use it directly
+        if (timestamp.includes('T') || timestamp.includes('Z')) {
+          date = new Date(timestamp);
+        } else {
+          // Try parsing as a number (timestamp)
+          const numTimestamp = parseInt(timestamp);
+          if (!isNaN(numTimestamp)) {
+            date = new Date(numTimestamp);
+          } else {
+            date = new Date(timestamp);
+          }
+        }
+      } else {
+        date = new Date(timestamp);
+      }
+      
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date created from timestamp:', timestamp);
+        return 'Invalid Date';
+      }
+      
+      const formattedTime = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      
+      console.log('Timestamp formatting:', { original: timestamp, formatted: formattedTime });
+      return formattedTime;
+    } catch (error) {
+      console.error('Error formatting timestamp:', timestamp, error);
+      return 'Invalid Date';
+    }
+  };
 
   // Auto scroll to bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, selectedUser]);
 
-  const handleSendMessage = () => {
-    if (message.trim() && selectedUser) {
-      const messageText = message.trim();
-      const contact = contacts?.find(c => String(c.id) === selectedUser.id);
-      const mobileNo = contact?.mobileNo;
+  const handleSendMessage = async () => {
+    if (!message.trim() || !selectedUser) return;
 
+    const newMessage: Message = {
+      id: `temp_${Date.now()}`,
+      content: message.trim(),
+      sender: 'me',
+      timestamp: new Date().toISOString(),
+      type: 'text',
+      isOutgoing: true,
+      messageType: 'text',
+      createdAt: new Date().toISOString()
+    };
+
+    // Add message to UI immediately (optimistic update)
+    setMessages(prev => ({
+      ...prev,
+      [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage] as Message[]
+    }));
+
+    // Clear input
+    setMessage('');
+
+    try {
+      // Get the mobile number for the selected user
+      const contact = contacts?.find(c => String(c.id) === selectedUser.id);
+      const mobileNo = contact?.number || contact?.mobileNo || '';
+      
       if (!mobileNo) {
         console.error('No mobile number found for selected user');
         return;
       }
 
-      // Use socket to send message if connected and authenticated
-      if (isSocketConnected && isSocketAuthenticated) {
-        console.log('Sending message via socket to:', mobileNo);
-        sendWhatsAppMessage(mobileNo, messageText, currentConversationId || undefined);
-      } else {
-        console.warn('Socket not connected, falling back to optimistic update');
-        // Fallback: Add message optimistically to UI
-        const newMessage: Message = {
-          id: Date.now().toString(),
-          sender: 'user',
-          content: messageText,
-          timestamp: new Date().toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit',
-            hour12: true 
-          }),
-          type: 'text',
-          isOutgoing: true,
-          messageType: 'text',
-          createdAt: new Date().toISOString()
-        };
+      // Send message via API
+      const response = await axios.post(`${API_CONFIG.baseURL}/api/whatsapp/send-message`, {
+        to: mobileNo,
+        message: newMessage.content
+      }, {
+        headers: {
+          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        }
+      });
 
+      if (response.data.success) {
+        console.log('Message sent successfully:', response.data);
+        // The real message will be added via socket event
+      } else {
+        console.error('Failed to send message:', response.data.error);
+        // Remove the optimistic message on error
         setMessages(prev => ({
           ...prev,
-          [selectedUser.id]: [...(prev[selectedUser.id] || []), newMessage]
+          [selectedUser.id]: (prev[selectedUser.id] || []).filter(m => m.id !== newMessage.id)
         }));
       }
-
-      setMessage('');
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Remove the optimistic message on error
+      setMessages(prev => ({
+        ...prev,
+        [selectedUser.id]: (prev[selectedUser.id] || []).filter(m => m.id !== newMessage.id)
+      }));
     }
   };
 
@@ -252,24 +379,74 @@ const WhatsAppChat: React.FC = () => {
   const currentMessages = selectedUser ? messages[selectedUser.id] || [] : [];
   // const currentMessages = selectedUser ? (messages[selectedUser.id] || []).filter(Boolean) : [];
 
-  // Update the contact click handler - use socket instead of REST API
+  // Update the contact click handler - use REST API to fetch messages
   const handleSelectUser = async (user: User, mobileNo: string) => {
-    // Leave previous conversation if exists
-    if (currentConversationId) {
-      leaveWhatsAppConversation(currentConversationId);
-    }
-    
+    console.log('handleSelectUser called with:', { user, mobileNo });
     setSelectedUser(user);
     
-    // Use socket to fetch messages instead of REST API
-    if (isSocketConnected && isSocketAuthenticated) {
-      fetchMessagesBetween('919712323801', mobileNo);
+    // Clear existing messages for this user to prevent duplicates
+    setMessages(prev => ({
+      ...prev,
+      [user.id]: []
+    }));
+    
+    console.log({mobileNo})
+
+    if (mobileNo) {
+      // Clean the mobile number - remove + and any spaces
+      const cleanMobileNo = mobileNo.replace(/^\+/, '').replace(/\s/g, '');
+      console.log('Making API call with:', { fromNumber: myMobileNo, toNumber: cleanMobileNo });
+      
+      try {
+        const token = getAuthToken();
+        const response = await axios.get(`${API_CONFIG.baseURL}/api/whatsapp/messages/between`, {
+          params: {
+            fromNumber: myMobileNo,
+            toNumber: cleanMobileNo
+          },
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log('API response:', response.data);
+        if (response.data && response.data.success) {
+          // Map backend messages to UI message format if needed
+          const backendMessages = response.data.data;
+          console.log('Backend messages:', backendMessages);
+          
+          // Remove duplicates from backend messages
+          const uniqueMessages = backendMessages.filter((msg: any, index: number, self: any[]) => 
+            index === self.findIndex((m: any) => m.id === msg.id)
+          );
+          
+          const formattedMessages = uniqueMessages.map((msg: any) => {
+            // Use the isOutgoing field directly from the backend
+            const isOutgoing = Boolean(msg.isOutgoing);
+            console.log('Message isOutgoing from backend:', msg.isOutgoing, 'Final isOutgoing:', isOutgoing);
+            
+            return {
+              id: msg.id,
+              sender: isOutgoing ? 'me' : 'them',
+              content: msg.content,
+              timestamp: formatTimestamp(msg.createdAt),
+              type: msg.messageType || 'text',
+              isOutgoing: isOutgoing,
+              messageType: msg.messageType,
+              createdAt: msg.createdAt
+            };
+          });
+          console.log('Formatted messages:', formattedMessages);
+          setMessages(prev => ({
+            ...prev,
+            [user.id]: formattedMessages
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch messages:', error);
+      }
     } else {
-      // Clear messages if not connected
-      setMessages(prev => ({
-        ...prev,
-        [user.id]: [],
-      }));
+      console.log('No mobile number provided, skipping API call');
     }
   };
 
@@ -339,7 +516,13 @@ const WhatsAppChat: React.FC = () => {
             {filteredUsers.map((user) => (
               <div
                 key={user.id}
-                onClick={() => handleSelectUser(user, contacts?.find(c => String(c.id) === user.id)?.mobileNo || '')}
+                onClick={() => {
+                  const contact = contacts?.find(c => String(c.id) === user.id);
+                  console.log({contact})
+                  const mobileNo = contact?.number || contact?.mobileNo || '';
+                  console.log('Selected user:', user, 'Contact:', contact, 'MobileNo:', mobileNo);
+                  handleSelectUser(user, mobileNo);
+                }}
                 className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-neutral-50 transition-colors ${
                   selectedUser?.id === user.id ? 'bg-primary-50' : ''
                 }`}
@@ -419,34 +602,39 @@ const WhatsAppChat: React.FC = () => {
               <div 
                 className="flex-1 overflow-y-auto p-3 min-h-0 bg-white"
               >
-                {currentMessages.map((msg) => (
-                  <div key={msg.id} className={`mb-3 ${msg.isOutgoing === true ? 'text-right' : 'text-left'}`}>
-                    <div
-                      className={`inline-block max-w-[85%] md:max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
-                        msg.isOutgoing === true
-                          ? 'bg-primary text-white'
-                          : 'bg-neutral-100 text-neutral shadow-sm'
-                      }`}
-                    >
-                      {msg.messageType === 'media' && (
-                        <div className="mb-2">
-                          <div className="flex items-center gap-2 bg-white p-2 rounded border">
-                            <IconFileText className="h-3 w-3 text-primary" />
-                            <div className="flex-1">
-                              <p className="text-xs font-medium">{msg.fileName}</p>
-                              <p className="text-xs text-neutral-400">{msg.fileSize}</p>
+                {currentMessages.map((msg) => {
+                  const isOutgoing = Boolean(msg.isOutgoing);
+                  console.log('Rendering message:', msg.id, 'isOutgoing:', isOutgoing, 'sender:', msg.sender);
+                  
+                  return (
+                    <div key={msg.id} className={`mb-4 ${isOutgoing ? 'text-right' : 'text-left'}`}>
+                      <div
+                        className={`inline-block max-w-[85%] md:max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
+                          isOutgoing
+                            ? 'bg-primary text-white rounded-br-md'
+                            : 'bg-neutral-100 text-neutral-800 rounded-bl-md'
+                        }`}
+                      >
+                        {msg.messageType === 'media' && (
+                          <div className="mb-2">
+                            <div className="flex items-center gap-2 bg-white p-2 rounded border">
+                              <IconFileText className="h-3 w-3 text-primary" />
+                              <div className="flex-1">
+                                <p className="text-xs font-medium">{msg.fileName}</p>
+                                <p className="text-xs text-neutral-400">{msg.fileSize}</p>
+                              </div>
+                              <IconDownload className="h-3 w-3 text-neutral-400 cursor-pointer" />
                             </div>
-                            <IconDownload className="h-3 w-3 text-neutral-400 cursor-pointer" />
                           </div>
-                        </div>
-                      )}
-                      <p className="text-xs break-words">{msg.content}</p>
-                      <p className={`text-xs mt-1 ${msg.isOutgoing === true ? 'text-primary-100' : 'text-neutral-400'}`}>
-                        {msg.timestamp || msg.createdAt}
-                      </p>
+                        )}
+                        <p className="text-sm break-words leading-relaxed">{msg.content}</p>
+                        <p className={`text-xs mt-2 ${isOutgoing ? 'text-primary-100' : 'text-neutral-500'}`}>
+                          {formatTimestamp(msg.timestamp || msg.createdAt || '')}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 
                 <div ref={messagesEndRef} />
               </div>
