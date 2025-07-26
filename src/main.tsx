@@ -27,6 +27,17 @@ Sentry.init({
   tracesSampleRate: 1.0, // Adjust for production
   environment: import.meta.env.VITE_APP_ENVIRONMENT || 'development',
   release: import.meta.env.VITE_APP_VERSION || 'unknown',
+  beforeSend(event) {
+    // Don't send events in development mode if Sentry is blocked
+    if (import.meta.env.MODE === 'development') {
+      return null;
+    }
+    return event;
+  },
+  onFatalError() {
+    // Prevent Sentry from showing error dialogs
+    return;
+  }
 });
 
 // Custom Tour Step Components with Close Buttons

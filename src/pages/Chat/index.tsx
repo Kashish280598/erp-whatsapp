@@ -9,8 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { IconMessage, IconSettings, IconCheck, IconArrowLeft } from '@tabler/icons-react';
 import WhatsAppChat from './WhatsAppChat';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useGetWhatsAppQrImageQuery } from '@/lib/api/auth/auth-api';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { useWhatsAppSocket } from '@/hooks/useWhatsAppSocket';
 import Loader from '@/components/Loader';
 
 const ChatIntegration = () => {
@@ -19,38 +20,51 @@ const ChatIntegration = () => {
   const [showWhatsAppChat, setShowWhatsAppChat] = useState(false);
   const [showWhatsAppQRModal, setShowWhatsAppQRModal] = useState(false);
 
-  const { data, isLoading: isQrLoading, isError: isQrError, refetch } = useGetWhatsAppQrImageQuery(undefined, { skip: !showWhatsAppQRModal });
-  console.log(selectedPlatform);
+  const { 
+    qrCodeData, 
+    isLoading: isQrLoading, 
+    lastError: qrError, 
+    fetchQrCode,
+    isSocketConnected,
+    isSocketAuthenticated 
+  } = useWhatsAppSocket();
+  const isQrError = !!qrError;
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Socket state:', { 
+      isSocketConnected, 
+      isSocketAuthenticated, 
+      qrCodeData: qrCodeData ? 'Present' : 'Null',
+      qrError: qrError || 'None'
+    });
+  }, [isSocketConnected, isSocketAuthenticated, qrCodeData, qrError]);
 
   // Auto-open chat if already connected
   useEffect(() => {
     if (
-      data &&
-      typeof data.data === 'object' &&
-      data.data.connected === true &&
-      data.data.connectionState === 'open'
+      qrCodeData &&
+      typeof qrCodeData === 'object' &&
+      (qrCodeData as any).connected === true &&
+      (qrCodeData as any).connectionState === 'open'
     ) {
       setShowWhatsAppChat(true);
       setShowWhatsAppQRModal(false);
     }
-  }, [data]);
+  }, [qrCodeData]);
 
   // Poll for QR code every 20 seconds if not connected
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
-    if (
-      !showWhatsAppChat &&
-      showWhatsAppQRModal &&
-      data && typeof data.data !== 'object'
-    ) {
+    if (showWhatsAppQRModal && !showWhatsAppChat) {
       interval = setInterval(() => {
-        refetch();
+        fetchQrCode();
       }, 20000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [showWhatsAppChat, data, refetch]);
+  }, [showWhatsAppChat, showWhatsAppQRModal, fetchQrCode]);
 
   const chatPlatforms = [
     {
@@ -76,12 +90,11 @@ const ChatIntegration = () => {
   const handleConnect = (platformId: string) => {
     if (platformId === 'whatsapp') {
       setShowWhatsAppQRModal(true);
-      // Optionally refetch QR code every time modal opens
-      setTimeout(() => refetch(), 0);
+      // Fetch QR code when modal opens
+      setTimeout(() => fetchQrCode(true), 100);
     }
     setSelectedPlatform(platformId);
   };
-
 
   const handleBackToPlatforms = () => {
     setShowWhatsAppChat(false);
@@ -115,11 +128,16 @@ const ChatIntegration = () => {
     );
   }
 
-  {console.log('data ::', data)}
   return (
     <>
       <Dialog open={showWhatsAppQRModal} onOpenChange={setShowWhatsAppQRModal}>
         <DialogContent className="max-w-lg w-full p-0 bg-background">
+          <VisuallyHidden>
+            <DialogTitle>WhatsApp QR Code Connection</DialogTitle>
+            <DialogDescription>
+              Scan the QR code with your WhatsApp mobile app to connect your account
+            </DialogDescription>
+          </VisuallyHidden>
           <Card className="border-none shadow-none bg-background">
             <CardContent className="flex flex-col md:flex-row items-center gap-6 p-6">
               <div className="flex-1 min-w-[220px]">
@@ -132,19 +150,24 @@ const ChatIntegration = () => {
                 </ol>
               </div>
               <div className="flex flex-col items-center gap-4">
-                {/* WhatsApp QR code from API */}
+                {/* WhatsApp QR code from Socket */}
                 <div className="bg-white dark:bg-neutral-900 border rounded-lg p-2 flex items-center justify-center min-h-[180px] min-w-[180px] relative">
                   {isQrLoading && <Loader className="w-20 h-20" title="Loading QR..." />}
                   {isQrError && (
-                    <div className="text-red-500 text-sm">Failed to load QR code. <Button variant="link" size="sm" onClick={() => refetch()}>Retry</Button></div>
+                    <div className="text-red-500 text-sm text-center">
+                      Failed to load QR code. 
+                      <Button variant="link" size="sm" onClick={() => fetchQrCode(true)}>
+                        Retry
+                      </Button>
+                    </div>
                   )}
-                  {data && !isQrLoading && !isQrError && (
-                    typeof data.data === 'object' && data.data.connected === true && data.data.connectionState === 'open' ? (
+                  {qrCodeData && !isQrLoading && !isQrError && (
+                    typeof qrCodeData === 'object' && (qrCodeData as any).connected === true && (qrCodeData as any).connectionState === 'open' ? (
                       <div className="text-green-600 text-center font-semibold text-lg">
                         You're already connected!
                       </div>
                     ) : (
-                      <img src={data.data} alt="WhatsApp QR" width={180} height={180} />
+                      <img src={qrCodeData as string} alt="WhatsApp QR" width={180} height={180} />
                     )
                   )}
                 </div>

@@ -11,8 +11,7 @@ import {
   IconSend,
   IconArrowLeft
 } from '@tabler/icons-react';
-import { useGetWhatsAppContactsQuery, useLazyGetWhatsAppMessagesBetweenQuery } from '@/lib/api/auth/auth-api';
-import { useSocket } from '@/providers/socket-provider';
+import { useWhatsAppSocket } from '@/hooks/useWhatsAppSocket';
 
 interface User {
   id: string;
@@ -45,14 +44,27 @@ const WhatsAppChat: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [triggerGetMessages] = useLazyGetWhatsAppMessagesBetweenQuery();
-  
-  // Socket integration
-  const { isConnected, isAuthenticated, sendMessage: socketSendMessage, joinConversation, leaveConversation } = useSocket();
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
 
-  // Fetch WhatsApp contacts from API
-  const { data: contacts, isLoading: isContactsLoading, isError: isContactsError, refetch } = useGetWhatsAppContactsQuery();
+  // Socket integration - replace all REST API calls with socket
+  const {
+    isSocketConnected,
+    isSocketAuthenticated,
+    sendWhatsAppMessage,
+    joinWhatsAppConversation,
+    leaveWhatsAppConversation,
+    fetchContacts,
+    fetchMessagesBetween,
+    contacts: socketContacts,
+    messages: socketMessages,
+    isLoading,
+    lastError
+  } = useWhatsAppSocket();
+
+  // Use socket contacts instead of REST API
+  const contacts = socketContacts;
+  const isContactsLoading = isLoading && socketContacts.length === 0;
+  const isContactsError = !!lastError;
   // Map API contacts to User[] shape for UI
   const users: User[] = (contacts || []).map((c: any) => ({
     id: String(c.id),
@@ -65,71 +77,45 @@ const WhatsAppChat: React.FC = () => {
     isGroup: false,
   }));
 
-  // Initialize messages for each user
+  // Fetch contacts when component mounts
   useEffect(() => {
-    const initialMessages: { [key: string]: Message[] } = {};
-    users.forEach(user => {
-      if (user.id === '1') {
-        initialMessages[user.id] = [
-          {
-            id: '1',
-            sender: 'user',
-            content: 'Thank You.',
-            timestamp: '3:53 PM',
-            type: 'text',
-            isOutgoing: true,
-            messageType: 'text',
-            createdAt: '2023-10-27T15:53:00Z'
-          },
-          {
-            id: '2',
-            sender: 'contact',
-            content: 'Hey',
-            timestamp: '6:34 PM',
-            type: 'text',
-            isOutgoing: false,
-            messageType: 'text',
-            createdAt: '2023-10-27T18:34:00Z'
-          },
-          {
-            id: '3',
-            sender: 'contact',
-            content: 'Hey',
-            timestamp: '6:34 PM',
-            type: 'file',
-            fileName: 'Invoice_BIDU8262',
-            fileSize: '56 kB',
-            isOutgoing: false,
-            messageType: 'file',
-            createdAt: '2023-10-27T18:34:00Z'
-          },
-          {
-            id: '4',
-            sender: 'contact',
-            content: 'Hey',
-            timestamp: '11:48 AM',
-            type: 'text',
-            isOutgoing: false,
-            messageType: 'text',
-            createdAt: '2023-10-27T10:48:00Z'
-          },
-          {
-            id: '5',
-            sender: 'user',
-            content: 'hi',
-            timestamp: '2:21 PM',
-            type: 'text',
-            isOutgoing: true,
-            messageType: 'text',
-            createdAt: '2023-10-27T14:21:00Z'
-          }
-        ];
-      } else {
-        initialMessages[user.id] = [];
+    if (isSocketConnected && isSocketAuthenticated) {
+      fetchContacts();
+    }
+  }, [isSocketConnected, isSocketAuthenticated, fetchContacts]);
+
+  // Handle socket messages response
+  useEffect(() => {
+    if (socketMessages && selectedUser) {
+      const formattedMessages = socketMessages.messages?.map((msg: any) => ({
+        id: msg.id,
+        sender: msg.isOutgoing ? 'user' : 'contact',
+        content: msg.content,
+        timestamp: new Date(msg.createdAt).toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        }),
+        type: 'text',
+        isOutgoing: msg.isOutgoing,
+        messageType: msg.messageType,
+        createdAt: msg.createdAt
+      })) || [];
+
+      setMessages(prev => ({
+        ...prev,
+        [selectedUser.id]: formattedMessages
+      }));
+
+      // Set conversation ID if available
+      if (socketMessages.conversationId) {
+        setCurrentConversationId(socketMessages.conversationId);
+        if (isSocketAuthenticated) {
+          joinWhatsAppConversation(socketMessages.conversationId);
+        }
       }
-    });
-    setMessages(initialMessages);
-  }, []);
+    }
+  }, [socketMessages, selectedUser, isSocketAuthenticated, joinWhatsAppConversation]);
 
   // Socket event listeners for real-time messaging
   useEffect(() => {
@@ -214,9 +200,9 @@ const WhatsAppChat: React.FC = () => {
       }
 
       // Use socket to send message if connected and authenticated
-      if (isConnected && isAuthenticated) {
+      if (isSocketConnected && isSocketAuthenticated) {
         console.log('Sending message via socket to:', mobileNo);
-        socketSendMessage(mobileNo, messageText, currentConversationId || undefined);
+        sendWhatsAppMessage(mobileNo, messageText, currentConversationId || undefined);
       } else {
         console.warn('Socket not connected, falling back to optimistic update');
         // Fallback: Add message optimistically to UI
@@ -266,34 +252,20 @@ const WhatsAppChat: React.FC = () => {
   const currentMessages = selectedUser ? messages[selectedUser.id] || [] : [];
   // const currentMessages = selectedUser ? (messages[selectedUser.id] || []).filter(Boolean) : [];
 
-  // Update the contact click handler
+  // Update the contact click handler - use socket instead of REST API
   const handleSelectUser = async (user: User, mobileNo: string) => {
     // Leave previous conversation if exists
     if (currentConversationId) {
-      leaveConversation(currentConversationId);
+      leaveWhatsAppConversation(currentConversationId);
     }
     
     setSelectedUser(user);
     
-    try {
-      const result: any = await triggerGetMessages({ toNumber: mobileNo }).unwrap();
-      const messagesArray: Message[] = Array.isArray(result.data?.messages) ? result.data.messages : [];
-      
-      // Set messages for this conversation
-      setMessages(prev => ({
-        ...prev,
-        [user.id]: messagesArray,
-      }));
-      
-      // If we got a conversation ID from the result, join the socket room
-      if (result.data?.conversationId) {
-        setCurrentConversationId(result.data.conversationId);
-        if (isAuthenticated) {
-          joinConversation(result.data.conversationId);
-        }
-      }
-      
-    } catch {
+    // Use socket to fetch messages instead of REST API
+    if (isSocketConnected && isSocketAuthenticated) {
+      fetchMessagesBetween('919712323801', mobileNo);
+    } else {
+      // Clear messages if not connected
       setMessages(prev => ({
         ...prev,
         [user.id]: [],
@@ -305,7 +277,7 @@ const WhatsAppChat: React.FC = () => {
     return <div className="flex items-center justify-center h-full">Loading contacts...</div>;
   }
   if (isContactsError) {
-    return <div className="flex items-center justify-center h-full text-red-500">Failed to load contacts. <Button onClick={() => refetch()}>Retry</Button></div>;
+    return <div className="flex items-center justify-center h-full text-red-500">Failed to load contacts. <Button onClick={() => fetchContacts()}>Retry</Button></div>;
   }
 
   return (
