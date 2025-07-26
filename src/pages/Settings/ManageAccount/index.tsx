@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
 import CardOverlayVisual from '@/assets/icons/rounded-visual.svg';
 import ConfirmCurrentPasswordModal from './ConfirmCurrentPasswordModal';
 import SetPasswordModal from './SetPasswordModal';
@@ -15,6 +14,21 @@ export default function ManageAccount() {
     const dispatch = useAppDispatch();
     const { isOpenSuccessModal } = useAppSelector((state) => state.settings.setPasswordModal);
     const user = useAppSelector((state) => state.auth.user);
+    
+    // Add fallback for missing user data
+    if (!user) {
+        return (
+            <div className="h-full pb-10">
+                <div className="flex items-center justify-center h-64">
+                    <div className="text-center">
+                        <div className="text-neutral-500 text-lg mb-2">User data not available</div>
+                        <div className="text-neutral-400 text-sm">Please check if you are logged in and try again.</div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    
     const { firstName, lastName } = parseFullName(user?.name || '');
     const userInitials = `${firstName?.charAt(0)?.toUpperCase()}${lastName?.charAt(0)?.toUpperCase()}`;
 
@@ -38,9 +52,6 @@ export default function ManageAccount() {
 
             <div className="mt-5 px-7">
                 <div className="flex flex-col gap-2 mb-4">
-                    <h1 className="text-[24px] font-[600] leading-7.5 text-neutral dark:text-neutral-100 font-inter">
-                        {user?.name || 'User Name'}
-                    </h1>
                     <Badge variant="secondary" className="bg-neutral-200 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-200 px-4 py-1 rounded-[8px] m-0 border-none shadow-none">
                         {user?.role ? USERS_ENUMS[user?.role] : 'User Role'}
                     </Badge>
@@ -67,19 +78,6 @@ export default function ManageAccount() {
 
                 {/* Form Fields */}
                 <div className="flex flex-col gap-7">
-                    <div className="grid grid-cols-6 gap-2">
-                        <div className="col-span-2 flex items-center">
-                            <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">First Name</label>
-                        </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{firstName || '-'}</div>
-                    </div>
-
-                    <div className="grid grid-cols-6 gap-2">
-                        <div className="col-span-2 flex items-center">
-                            <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Last Name</label>
-                        </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{lastName || '-'}</div>
-                    </div>
 
                     {user?.authMethod === AUTH_METHODS.Password && <div className="grid grid-cols-6 gap-2">
                         <div className="col-span-2 flex items-center">
@@ -94,32 +92,6 @@ export default function ManageAccount() {
                             <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Email</label>
                         </div>
                         <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{user?.email || '-'}</div>
-                    </div>
-
-                    <div className="grid grid-cols-6 gap-2">
-                        <div className="col-span-2 flex items-center">
-                            <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Role</label>
-                        </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">
-                            <Badge variant="secondary" className="bg-[#F4F4F6] text-[13px] leading-5 font-[400] px-2 rounded-[8px] text-neutral dark:bg-neutral-900 dark:text-neutral-200">
-                                {user?.role ? USERS_ENUMS[user?.role] : 'User Role'}
-                            </Badge></div>
-                    </div>
-
-                    {user?.authMethod === AUTH_METHODS.Password && (<div className="grid grid-cols-6 gap-2">
-                        <div className="col-span-2 flex items-center">
-                            <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Multi Factor Authentication</label>
-                        </div>
-                        <div className="col-span-4 flex items-center gap-1 text-[13px] font-[600] leading-5 text-neutral-500 font-inter">
-                            <Switch checked className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-primary-600 !opacity-100" disabled /> Enabled
-                        </div>
-                    </div>)}
-
-                    <div className="grid grid-cols-6 gap-2">
-                        <div className="col-span-2 flex items-center">
-                            <label className="text-[12px] font-[600] leading-4 text-neutral-500 font-inter">Last Activity</label>
-                        </div>
-                        <div className="col-span-4 flex items-center text-[13px] font-[400] leading-5 text-neutral dark:text-neutral-100 font-inter">{user?.lastActivity ? moment(user.lastActivity).format('hh:mm A DD/MM/YYYY') : '-'}</div>
                     </div>
 
                     <div className="grid grid-cols-6 gap-2">

@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
-import { IconMessage, IconSettings, IconCheck, IconArrowLeft } from '@tabler/icons-react';
+import { IconCheck, IconArrowLeft } from '@tabler/icons-react';
 import WhatsAppChat from './WhatsAppChat';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
@@ -15,8 +12,6 @@ import { useWhatsAppSocket } from '@/hooks/useWhatsAppSocket';
 import Loader from '@/components/Loader';
 
 const ChatIntegration = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
-
   const [showWhatsAppChat, setShowWhatsAppChat] = useState(false);
   const [showWhatsAppQRModal, setShowWhatsAppQRModal] = useState(false);
 
@@ -73,17 +68,6 @@ const ChatIntegration = () => {
       description: 'Connect your WhatsApp',
       icon: '💬',
       features: ['Message automation', 'Quick responses', 'File sharing']
-    },
-  ];
-
-  const connectedIntegrations = [
-    {
-      id: 'whatsapp-1',
-      name: 'WhatsApp Business',
-      status: 'connected',
-      lastActivity: '2 minutes ago',
-      messages: 1247,
-      avatar: '📱'
     },
   ];
 
@@ -184,24 +168,10 @@ const ChatIntegration = () => {
             Connect and manage your chat platforms for seamless communication
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Label htmlFor="chat-toggle" className="text-sm font-medium">Enable Chat</Label>
-          <Switch
-            id="chat-toggle"
-            checked={isEnabled}
-            onCheckedChange={setIsEnabled}
-          />
-        </div>
       </div>
 
       <Tabs defaultValue="platforms" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="platforms">Available Platforms</TabsTrigger>
-          <TabsTrigger value="connected">Connected</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="platforms" className="mt-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {chatPlatforms.map((platform) => (
               <Card key={platform.id} className="relative">
                 <CardHeader>
@@ -248,63 +218,6 @@ const ChatIntegration = () => {
               </Card>
             ))}
           </div>
-        </TabsContent>
-
-        <TabsContent value="connected" className="mt-6">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-neutral">Connected Integrations</h3>
-              <Button variant="outline" size="sm">
-                <IconSettings className="h-4 w-4 mr-2" />
-                Manage
-              </Button>
-            </div>
-            
-            <div className="grid gap-4">
-              {connectedIntegrations.map((integration) => (
-                <Card key={integration.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="text-lg">
-                            {integration.avatar}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h4 className="font-medium text-neutral">{integration.name}</h4>
-                          <div className="flex items-center gap-4 text-sm text-neutral-400">
-                            <span className="flex items-center gap-1">
-                              <IconMessage className="h-3 w-3" />
-                              {integration.messages} messages
-                            </span>
-                            <span>Last activity: {integration.lastActivity}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          {integration.status}
-                        </Badge>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => {
-                            if (integration.id === 'whatsapp-1') {
-                              setShowWhatsAppChat(true);
-                            }
-                          }}
-                        >
-                          Open Chat
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
 
       </Tabs>
     </div>

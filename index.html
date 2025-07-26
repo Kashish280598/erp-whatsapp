@@ -31,6 +31,11 @@
       z-index: 9999;
       opacity: 1;
       transition: opacity 0.5s ease-out;
+      background-color: #ffffff;
+    }
+
+    #splash-screen.dark {
+      background-color: #181A20;
     }
 
     #splash-screen.hide {
@@ -43,6 +48,10 @@
       height: auto;
       animation: logoPulse 2s ease-in-out infinite;
       filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
+    }
+
+    #splash-screen.dark .logo {
+      filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
     }
 
     @keyframes logoPulse {
@@ -65,11 +74,45 @@
 <body>
   <div id="root">
     <div id="splash-screen">
-      <img src="/logo-light.svg" alt="ERP Logo" class="logo" />
+      <img id="splash-logo" alt="ERP Logo" class="logo" />
     </div>
   </div>
   <script type="module" src="/src/main.tsx"></script>
   <script>
+    // Theme detection and logo loading
+    function getTheme() {
+      // Check localStorage first
+      const storedTheme = localStorage.getItem('erp-ui-theme');
+      if (storedTheme) return storedTheme;
+      
+      // Check system preference
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+      }
+      
+      return 'light';
+    }
+    
+    function loadLogo() {
+      const theme = getTheme();
+      const logoImg = document.getElementById('splash-logo');
+      const splashScreen = document.getElementById('splash-screen');
+      
+      if (logoImg) {
+        // Use the appropriate logo based on theme
+        if (theme === 'dark') {
+          logoImg.src = '/src/assets/logo-dark.svg';
+          splashScreen.classList.add('dark');
+        } else {
+          logoImg.src = '/src/assets/logo-light.svg';
+          splashScreen.classList.remove('dark');
+        }
+      }
+    }
+    
+    // Load logo immediately
+    loadLogo();
+    
     // Hide splash screen when the app is loaded
     window.addEventListener('load', () => {
       // Give some extra time for the app to hydrate
@@ -77,7 +120,9 @@
       if (splashScreen) {
         splashScreen.classList.add('hide');
         // Remove splash screen from DOM after transition
-        splashScreen.remove();
+        setTimeout(() => {
+          splashScreen.remove();
+        }, 500);
       }
     });
   </script>

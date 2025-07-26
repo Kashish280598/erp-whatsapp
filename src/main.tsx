@@ -21,20 +21,16 @@ import { useTheme } from '@/providers/theme-provider'
 import { TourProvider, useTour } from '@reactour/tour'
 import { SocketProvider } from './providers/socket-provider'
 
-Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
-  integrations: [Sentry.browserTracingIntegration()],
-  tracesSampleRate: 1.0, // Adjust for production
-  environment: import.meta.env.VITE_APP_ENVIRONMENT || 'development',
-  release: import.meta.env.VITE_APP_VERSION || 'unknown',
-  beforeSend(event) {
-    // Don't send events in development mode if Sentry is blocked
-    if (import.meta.env.MODE === 'development') {
-      return null;
-    }
-    return event;
-  }
-});
+// Only initialize Sentry in non-development environments
+if (import.meta.env.MODE !== 'development') {
+  Sentry.init({
+    dsn: import.meta.env.VITE_SENTRY_DSN || 'https://9158b79a18221ba1b846f790b2b4ab4c@o4507089036574720.ingest.us.sentry.io/4509721065422848',
+    integrations: [Sentry.browserTracingIntegration()],
+    tracesSampleRate: 1.0, // Adjust for production
+    environment: import.meta.env.VITE_APP_ENVIRONMENT || 'development',
+    release: import.meta.env.VITE_APP_VERSION || 'unknown',
+  });
+}
 
 // Custom Tour Step Components with Close Buttons
 const WelcomeStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) => {
