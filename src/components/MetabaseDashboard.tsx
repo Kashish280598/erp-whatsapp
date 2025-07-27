@@ -1,147 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { metabaseService } from '@/lib/services/metabaseService';
-import type { MetabaseEmbedOptions } from '@/lib/services/metabaseService';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/providers/theme-provider';
+import metabaseService from '@/lib/services/metabaseService';
 
 interface MetabaseDashboardProps {
-  dashboardId?: number;
-  height?: number | string;
-  width?: number | string;
-  bordered?: boolean;
-  titled?: boolean;
-  theme?: 'light' | 'dark' | 'auto';
-  className?: string;
-  showControls?: boolean;
   title?: string;
+  showControls?: boolean;
+  theme?: 'light' | 'dark' | 'auto';
+  dashboardId?: number;
+  debug?: boolean;
   onLoad?: () => void;
-  onError?: (error: Error) => void;
-  debug?: boolean; // Add debug mode
+  onError?: (error: string) => void;
+  className?: string;
 }
 
 export const MetabaseDashboard: React.FC<MetabaseDashboardProps> = ({
-  dashboardId,
-  bordered = true,
-  titled = true,
-  theme = 'auto',
-  className,
+  title = 'Metabase Dashboard',
   showControls = true,
-  title = 'Analytics Dashboard',
+  theme = 'auto',
+  dashboardId,
+  debug = false,
   onLoad,
   onError,
-  debug = false
+  className
 }) => {
   const [iframeUrl, setIframeUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [error, setError] = useState<string>('');
   const [isEmpty, setIsEmpty] = useState(false);
-  const { theme: currentTheme } = useTheme();
+  const [refreshKey, setRefreshKey] = useState(0);
 
-  // Determine the actual theme to use
-  const getActualTheme = (): 'light' | 'dark' => {
-    if (theme === 'auto') {
-      if (currentTheme === 'system') {
-        // Check system preference
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      }
-      return currentTheme === 'dark' ? 'dark' : 'light';
-    }
-    return theme;
-  };
+  // Determine actual theme based on prop and system preference
+  const actualTheme = theme === 'auto' 
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : theme;
 
-  const actualTheme = getActualTheme();
-
-  // Generate embed URL
-  const generateEmbedUrl = async () => {
-    try {
-      const options: MetabaseEmbedOptions = {
-        bordered,
-        titled,
-        theme: actualTheme
-      };
-
-      // If dashboardId is provided, create a new service instance
-      if (dashboardId) {
-        const customService = new (metabaseService.constructor as any)({
-          ...metabaseService['config'],
-          dashboardId
-        });
-        return await customService.createEmbedUrl(options);
-      }
-
-      return await metabaseService.createEmbedUrl(options);
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error('Failed to generate embed URL');
-      setError(error.message);
-      onError?.(error);
-      return '';
-    }
-  };
-
-  // Refresh the dashboard
-  const handleRefresh = async () => {
+  const loadDashboard = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
-    setRefreshKey(prev => prev + 1);
-  };
+    setError('');
+    setIsEmpty(false);
 
-  // Open dashboard in new tab
-  const handleOpenInNewTab = async () => {
-    const url = await generateEmbedUrl();
-    if (url) {
-      window.open(url, '_blank');
+    try {
+      const url = await metabaseService.createEmbedUrl();
+      setIframeUrl(url);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard';
+      setError(errorMessage);
+      onError?.(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, [onError]);
 
   useEffect(() => {
-    const loadDashboard = async () => {
-      try {
-        const url = await generateEmbedUrl();
-        if (url) {
-          setIframeUrl(url);
-        }
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error('Failed to load dashboard');
-        setError(error.message);
-        onError?.(error);
-      }
-    };
-
     loadDashboard();
-  }, [dashboardId, bordered, titled, actualTheme, refreshKey]);
+  }, [loadDashboard]);
+
+  const handleRefresh = () => {
+    setRefreshKey(prev => prev + 1);
+    loadDashboard();
+  };
+
+  const handleOpenInNewTab = () => {
+    if (iframeUrl) {
+      window.open(iframeUrl, '_blank');
+    }
+  };
 
   const handleIframeLoad = () => {
     setIsLoading(false);
     onLoad?.();
-    
-    // Check if dashboard appears empty after a delay
-    setTimeout(() => {
-      const iframe = document.querySelector('iframe[src*="metabase"]');
-      if (iframe) {
-        try {
-          // Try to detect if the dashboard is empty
-          const iframeDoc = (iframe as HTMLIFrameElement).contentDocument;
-          if (iframeDoc) {
-            const hasContent = iframeDoc.body && iframeDoc.body.children.length > 0;
-            setIsEmpty(!hasContent);
-          }
-        } catch {
-          // Cross-origin restrictions, can't access iframe content
-          console.log('Cannot access iframe content due to CORS restrictions');
-        }
-      }
-    }, 3000); // Wait 3 seconds for dashboard to load
   };
 
   const handleIframeError = () => {
     setIsLoading(false);
-    const error = new Error('Failed to load Metabase dashboard. This may be due to authentication issues or the dashboard not being configured for embedding.');
-    setError(error.message);
-    onError?.(error);
+    setError('Failed to load dashboard content');
+    onError?.('Failed to load dashboard content');
   };
 
   return (
@@ -177,8 +113,8 @@ export const MetabaseDashboard: React.FC<MetabaseDashboardProps> = ({
         <div className="p-4 md:p-6 bg-muted/50 border-b">
           <h4 className="text-sm font-semibold mb-2">Debug Information</h4>
           <div className="text-xs space-y-1">
-            <p><strong>Dashboard ID:</strong> {dashboardId || metabaseService['config'].dashboardId}</p>
-            <p><strong>Site URL:</strong> {metabaseService['config'].siteUrl}</p>
+            <p><strong>Dashboard ID:</strong> {dashboardId || metabaseService.getConfig().dashboardId}</p>
+            <p><strong>Site URL:</strong> {metabaseService.getConfig().siteUrl}</p>
             <p><strong>Theme:</strong> {actualTheme}</p>
             <p><strong>Embed URL:</strong> {iframeUrl}</p>
             <p><strong>Loading:</strong> {isLoading ? 'Yes' : 'No'}</p>
@@ -220,7 +156,7 @@ export const MetabaseDashboard: React.FC<MetabaseDashboardProps> = ({
                     <li>• No data has been added to the database</li>
                     <li>• The dashboard queries are not returning results</li>
                     <li>• Database connection issues</li>
-                    <li>• Wrong dashboard ID (currently using ID: {metabaseService['config'].dashboardId})</li>
+                    <li>• Wrong dashboard ID (currently using ID: {metabaseService.getConfig().dashboardId})</li>
                   </ul>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleRefresh}>
