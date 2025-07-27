@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
-import { Plus, Info, Edit } from "lucide-react";
+import { Plus, Info, Edit, Trash2 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/custom/table/data-table";
@@ -64,27 +64,55 @@ const CustomersList = () => {
   const navigate = useNavigate();
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    // Fetch customers from API
-    const fetchCustomers = async () => {
+    // Fetch all customers from API by getting all pages
+    const fetchAllCustomers = async () => {
       setLoading(true);
       try {
-        const res = await fetch(API_CONFIG.baseURL + API_ENDPOINTS.customers.all, {
-          headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
-          },
-        });
-        if (!res.ok) throw new Error('Failed to fetch customers');
-        const apiData = await res.json();
-        console.log('Fetched customers API response:', apiData);
-        if (!apiData.data || !Array.isArray(apiData.data.customers)) {
-          setFetchError('No customers found or API response format changed.');
-          setCustomers([]);
-        } else {
-          setCustomers(apiData.data.customers);
-          setFetchError(null);
+        let allCustomers: any[] = [];
+        let currentPage = 1;
+        let hasMorePages = true;
+
+        // Fetch all pages
+        while (hasMorePages) {
+          const url = `${API_CONFIG.baseURL + API_ENDPOINTS.customers.all}?page=${currentPage}&limit=10`;
+          console.log(`Fetching customers page ${currentPage}:`, url);
+          
+          const res = await fetch(url, {
+            headers: {
+              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
+            },
+          });
+          
+          if (!res.ok) throw new Error('Failed to fetch customers');
+          const apiData = await res.json();
+          console.log(`Customers page ${currentPage} response:`, apiData);
+          
+          if (!apiData.data || !Array.isArray(apiData.data.customers)) {
+            throw new Error('Invalid API response format');
+          }
+          
+          // Add customers from this page
+          allCustomers = [...allCustomers, ...apiData.data.customers];
+          
+          // Check if there are more pages
+          const totalCount = apiData.data.totalCount || apiData.data.count || 0;
+          const currentPageCount = apiData.data.customers.length;
+          
+          if (allCustomers.length >= totalCount || currentPageCount === 0) {
+            hasMorePages = false;
+          } else {
+            currentPage++;
+          }
         }
+        
+        console.log('All customers fetched:', allCustomers);
+        setCustomers(allCustomers);
+        setFetchError(null);
       } catch (err: any) {
         setFetchError(err.message || 'Failed to fetch customers');
         setCustomers([]);
@@ -93,8 +121,45 @@ const CustomersList = () => {
         setLoading(false);
       }
     };
-    fetchCustomers();
+    fetchAllCustomers();
   }, []);
+
+  // Delete customer function
+  const handleDeleteClick = (customer: any) => {
+    setCustomerToDelete(customer);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!customerToDelete?.id) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`${API_CONFIG.baseURL + API_ENDPOINTS.customers.byId}/${customerToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
+        },
+      });
+
+      if (!res.ok) throw new Error('Failed to delete customer');
+
+      // Remove the customer from the local state
+      setCustomers(prevCustomers => prevCustomers.filter(c => c.id !== customerToDelete.id));
+      setShowDeleteConfirm(false);
+      setCustomerToDelete(null);
+    } catch (err: any) {
+      console.error('Failed to delete customer:', err);
+      setFetchError(err.message || 'Failed to delete customer');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setCustomerToDelete(null);
+  };
 
   const columns = [
     {
@@ -116,7 +181,7 @@ const CustomersList = () => {
       id: "address",
       accessorKey: "address",
       header: "Address",
-      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.address}</span>,
+      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.address || 'N/A'}</span>,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -124,7 +189,7 @@ const CustomersList = () => {
       id: "gst",
       accessorKey: "gst",
       header: "GST / Business ID",
-      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.gstNo}</span>,
+      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.gstNo || 'N/A'}</span>,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -162,7 +227,7 @@ const CustomersList = () => {
     },
     {
       id: "actions",
-      accessorKey: "actions", // Fix: add accessorKey for display-only column
+      accessorKey: "actions",
       header: "Actions",
       cell: ({ row }: { row: any }) => (
         <div className="flex gap-1">
@@ -176,9 +241,32 @@ const CustomersList = () => {
               <p>Coming soon</p>
             </TooltipContent>
           </Tooltip>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/details/${row.original.id}`)}>
-            <Info size={16} />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/details/${row.original.id}`)}>
+                <Info size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Detail</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-7 w-7" 
+                onClick={() => handleDeleteClick(row.original)}
+              >
+                <Trash2 size={16} className="text-red-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete customer</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       ),
       enableSorting: false,
@@ -212,18 +300,62 @@ const CustomersList = () => {
           {fetchError}
         </div>
       )}
-      <DataTable
-        columns={columns}
-        data={customers}
-        tableToolbar={tableToolbar}
-        fetchData={() => {}}
-        totalCount={customers.length}
-        loading={loading}
-        tableId="customers-table"
-        className="!text-[13px]"
-        headerClassName="!py-2 !px-2"
-        tableMainContainerClassName="!rounded-lg"
-      />
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+          <span className="loader" style={{ width: 40, height: 40, border: '4px solid #e5e7eb', borderTop: '4px solid #2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={customers}
+          tableToolbar={tableToolbar}
+          fetchData={() => {}}
+          totalCount={customers.length}
+          loading={false}
+          tableId="customers-table"
+          className="!text-[13px]"
+          headerClassName="!py-2 !px-2"
+          tableMainContainerClassName="!rounded-lg"
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Customer</h3>
+                <p className="text-sm text-gray-500">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete customer <span className="font-semibold">{customerToDelete?.name}</span>?
+              This will permanently remove the customer and all their associated data.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Customer'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
