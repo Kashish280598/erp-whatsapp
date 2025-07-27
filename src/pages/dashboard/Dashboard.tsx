@@ -129,7 +129,6 @@ export default function Dashboard() {
             title="ERP Analytics Dashboard"
             showControls={true}
             theme="auto"
-            dashboardId={34} // Using the exact dashboard ID provided
             debug={false} // Disable debug mode
             onLoad={() => console.log('Metabase dashboard loaded')}
             onError={(error) => console.error('Metabase dashboard error:', error)}

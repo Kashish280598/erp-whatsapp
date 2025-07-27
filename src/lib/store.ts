@@ -54,8 +54,29 @@ export const store = configureStore({
 
 export const persistor = persistStore(store);
 
+// Define the base state types
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+// Type for the persisted app state
+export interface PersistedAppState {
+  tourCompleted: boolean;
+  _persist?: {
+    version: number;
+    rehydrated: boolean;
+  };
+}
+
+// Type for the persisted auth state
+export interface PersistedAuthState {
+  isAuthenticated: boolean;
+  user: any;
+  token: string | null;
+  _persist?: {
+    version: number;
+    rehydrated: boolean;
+  };
+}
 
 // Use throughout your app instead of plain `useDispatch` and `useSelector`
 export const useAppDispatch: () => AppDispatch = useDispatch;

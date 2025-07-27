@@ -28,6 +28,14 @@ interface ImportMetaEnv {
   readonly VITE_SENTRY_DSN: string
   readonly VITE_ANALYTICS_ID: string
   readonly VITE_SOCKET_URL: string
+  
+  // Gleap Configuration
+  readonly VITE_GLEAP_KEY: string
+  
+  // Metabase Configuration
+  readonly VITE_METABASE_SITE_URL: string
+  readonly VITE_METABASE_SECRET_KEY: string
+  readonly VITE_METABASE_DASHBOARD_ID: string
 }
 
 interface ImportMeta {

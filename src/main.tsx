@@ -20,6 +20,12 @@ import { router } from './routes/routers'
 import { useTheme } from '@/providers/theme-provider'
 import { TourProvider, useTour } from '@reactour/tour'
 import { SocketProvider } from './providers/socket-provider'
+// Gleap
+import GleapService from './lib/services/gleapService'
+
+// Initialize Gleap only once
+const gleapService = GleapService.getInstance();
+gleapService.initialize();
 
 // Only initialize Sentry in non-development environments
 if (import.meta.env.MODE !== 'development') {
@@ -254,8 +260,8 @@ const TourController = ({ shouldOpenTour }: { shouldOpenTour: boolean }) => {
 const AppTourProvider = ({ children }: { children: React.ReactNode }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-  const tourCompleted = useAppSelector(state => state.app.tourCompleted);
-  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
+  const tourCompleted = useAppSelector((state: any) => state.app.tourCompleted);
+  const isAuthenticated = useAppSelector((state: any) => state.auth.isAuthenticated);
   const shouldOpenTour = isAuthenticated && !tourCompleted;
 
   return (
@@ -306,7 +312,7 @@ const App = () => {
   useAutoRefreshToken();
   const dispatch = useAppDispatch();
   const { isLoading } = useLoading(API_ENDPOINTS.users.profile);
-  const initializing = useAppSelector(state => state.app.initializing);
+  const initializing = useAppSelector((state: any) => state.app.initializing);
 
   useEffect(() => {
     dispatch(setInitializing(false));

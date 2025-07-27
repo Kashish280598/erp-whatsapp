@@ -5,7 +5,7 @@ This template provides a minimal setup to get React working in Vite with HMR and
 Currently, two official plugins are available:
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
 ## Expanding the ESLint configuration
 
@@ -85,57 +85,133 @@ This project uses [Sentry](https://sentry.io/) for error and performance monitor
 
 # Metabase Integration
 
-This project includes Metabase dashboard integration for analytics and reporting.
+This project integrates Metabase for analytics dashboards.
 
-## Configuration
+## Setup
 
-The Metabase integration uses the following configuration (provided by the Metabase administrator):
+1. **Environment Configuration**
+   - Create a `.env` file in the root directory
+   - Add your Metabase configuration:
+     ```env
+     VITE_METABASE_SITE_URL=your_metabase_site_url
+     VITE_METABASE_SECRET_KEY=your_metabase_secret_key
+     VITE_METABASE_DASHBOARD_ID=your_dashboard_id
+     ```
+   - Replace the placeholder values with your actual Metabase credentials
 
-```javascript
-const METABASE_SITE_URL = "https://soft-limpet.metabaseapp.com";
-const METABASE_SECRET_KEY = "874a79289c7d0f82b65c84da0284a44b9a52038d4b77fcac53ec9ed9ac6feb6e";
-const METABASE_DASHBOARD_ID = 34;
-```
+2. **Usage**
+   - The Metabase dashboard is displayed on the Dashboard page
+   - Uses JWT token generation for secure embedding
+   - Supports both light and dark themes
+
+3. **Features**
+   - **Dark Theme Support**: Automatically adapts to the current theme
+   - **Debug Mode**: Can be enabled for troubleshooting (disabled by default)
+   - **Responsive Design**: Works on all screen sizes
+   - **Error Handling**: Graceful error handling with user-friendly messages
+
+## Security
+
+- **Environment Variables**: All Metabase credentials are stored in environment variables
+- **No Hardcoded Secrets**: No sensitive keys in source code
+- **JWT Token Security**: Uses secure JWT tokens for dashboard embedding
+- **Git Ignore**: `.env` file should be in `.gitignore` to prevent accidental commits
+
+## References
+- [Metabase Embedding Documentation](https://www.metabase.com/docs/latest/embedding/embedding-charts-and-dashboards.html)
+- [JWT Token Generation](https://www.metabase.com/docs/latest/embedding/embedding-charts-and-dashboards.html#securing-embeds-with-jwt-tokens)
+
+# Gleap Feedback Integration
+
+This project integrates [Gleap](https://gleap.io/) for user feedback and bug reporting.
+
+## Setup
+
+1. **Install dependencies**
+   ```bash
+   npm install gleap
+   ```
+
+2. **Environment Configuration**
+   - Create a `.env` file in the root directory
+   - Add your Gleap key:
+     ```env
+     VITE_GLEAP_KEY=your_gleap_key_here
+     ```
+   - Replace `your_gleap_key_here` with your actual Gleap key
+   - **Important**: Never commit your `.env` file to version control
+   - Add `.env` to your `.gitignore` file if not already present
+
+3. **Initialization**
+   - Gleap is initialized once in `src/main.tsx`
+   - Uses singleton pattern to ensure single initialization
 
 ## Usage
 
-The Metabase dashboard is automatically embedded in the Dashboard page. You can also use the `MetabaseDashboard` component in other parts of your application:
-
+### Basic Usage
 ```tsx
-import { MetabaseDashboard } from '@/components/MetabaseDashboard';
+import { useGleap } from '@/hooks/useGleap';
 
-<MetabaseDashboard 
-  title="Custom Analytics"
-  height={600}
-  showControls={true}
-  theme="auto" // Supports 'light', 'dark', or 'auto'
-  onLoad={() => console.log('Dashboard loaded')}
-  onError={(error) => console.error('Error:', error)}
-/>
+const MyComponent = () => {
+  const { isInitialized, showFeedback } = useGleap();
+  
+  return (
+    <button onClick={showFeedback}>
+      Report Issue
+    </button>
+  );
+};
+```
+
+### Feedback Button Component
+```tsx
+import FeedbackButton from '@/components/custom/FeedbackButton';
+
+// Use the pre-built feedback button
+<FeedbackButton size="sm" variant="outline">
+  Feedback
+</FeedbackButton>
 ```
 
 ## Features
 
-- **Secure Embedding**: Uses JWT tokens for secure dashboard embedding
-- **Dark Theme Support**: Automatically adapts to light/dark themes
-- **Customizable**: Configurable height, width, theme, and display options
-- **Error Handling**: Built-in error handling and retry functionality
-- **Loading States**: Shows loading indicators while dashboard loads
-- **Controls**: Refresh and open in new tab functionality
-- **Theme-Aware**: Automatically detects and applies system theme preferences
-- **Debug Mode**: Built-in debugging to troubleshoot embedding issues
+- **Automatic Initialization**: Gleap is initialized when the app starts
+- **User Integration**: Automatically detects user authentication state
+- **Feedback Widget**: Easy-to-use feedback button in the header
+- **Error Handling**: Graceful handling of initialization failures
+- **TypeScript Support**: Full TypeScript support with proper types
 
-## Theme Support
+## Components
 
-The Metabase dashboard supports three theme modes:
-- **`auto`** (default): Automatically follows the system/app theme
-- **`light`**: Forces light theme
-- **`dark`**: Forces dark theme
-
-The dashboard will automatically switch themes when the user changes their system preference or app theme.
+- **`FeedbackButton`**: Pre-built button component for triggering feedback
+- **`useGleap`**: Custom hook for Gleap functionality
+- **`GleapService`**: Service class for Gleap management
 
 ## Security
 
-- Uses JWT tokens with 10-minute expiration
-- Secure embedding with the provided secret key
-- Only loads in non-development environments when Sentry is enabled
+- **Environment Variables**: Gleap key is stored in environment variables
+- **No Hardcoded Secrets**: No sensitive keys in source code
+- **Error Handling**: Graceful fallback if key is missing
+- **Git Ignore**: `.env` file should be in `.gitignore` to prevent accidental commits
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following variables:
+
+```env
+# Gleap Configuration
+VITE_GLEAP_KEY=your_gleap_key_here
+
+# Metabase Configuration
+VITE_METABASE_SITE_URL=your_metabase_site_url
+VITE_METABASE_SECRET_KEY=your_metabase_secret_key
+VITE_METABASE_DASHBOARD_ID=your_dashboard_id
+
+# Other environment variables...
+VITE_API_BASE_URL=https://your-api-url.com
+VITE_SENTRY_DSN=your_sentry_dsn_here
+```
+
+## References
+- [Gleap Documentation](https://docs.gleap.io/)
+- [Gleap React Integration](https://docs.gleap.io/react)
