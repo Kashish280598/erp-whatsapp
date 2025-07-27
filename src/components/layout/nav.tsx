@@ -72,7 +72,7 @@ function NavLinkIcon(props: NavLinkProps) {
   const { checkActiveNav } = useCheckActiveNav();
 
   // Normalize title for data-tour attribute
-  const tourId = ["Dashboard", "Inventory Manager", "Customers", "Chat"].includes(title)
+  const tourId = ["Dashboard", "Inventory", "Customers", "Chat"].includes(title)
     ? `sidebar-${title.toLowerCase().replace(/\s+/g, '-')}`
     : undefined;
 

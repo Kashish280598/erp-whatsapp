@@ -121,7 +121,7 @@ export const sidebarlinks: SidebarLink[] = [
     icon: OrdersIcon,
   },
   {
-    title: "Inventory Manager",
+    title: "Inventory",
     label: "",
     href: "/inventory",
     icon: FindingIcon,
