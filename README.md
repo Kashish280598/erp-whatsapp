@@ -82,3 +82,60 @@ This project uses [Sentry](https://sentry.io/) for error and performance monitor
 ## References
 - [Alchemy Sentry Getting Started Guide](https://alchemy-lx.sentry.io/insights/projects/erp-ai/getting-started/)
 - [Sentry Docs](https://docs.sentry.io/platforms/javascript/guides/react/)
+
+# Metabase Integration
+
+This project includes Metabase dashboard integration for analytics and reporting.
+
+## Configuration
+
+The Metabase integration uses the following configuration (provided by the Metabase administrator):
+
+```javascript
+const METABASE_SITE_URL = "https://soft-limpet.metabaseapp.com";
+const METABASE_SECRET_KEY = "874a79289c7d0f82b65c84da0284a44b9a52038d4b77fcac53ec9ed9ac6feb6e";
+const METABASE_DASHBOARD_ID = 34;
+```
+
+## Usage
+
+The Metabase dashboard is automatically embedded in the Dashboard page. You can also use the `MetabaseDashboard` component in other parts of your application:
+
+```tsx
+import { MetabaseDashboard } from '@/components/MetabaseDashboard';
+
+<MetabaseDashboard 
+  title="Custom Analytics"
+  height={600}
+  showControls={true}
+  theme="auto" // Supports 'light', 'dark', or 'auto'
+  onLoad={() => console.log('Dashboard loaded')}
+  onError={(error) => console.error('Error:', error)}
+/>
+```
+
+## Features
+
+- **Secure Embedding**: Uses JWT tokens for secure dashboard embedding
+- **Dark Theme Support**: Automatically adapts to light/dark themes
+- **Customizable**: Configurable height, width, theme, and display options
+- **Error Handling**: Built-in error handling and retry functionality
+- **Loading States**: Shows loading indicators while dashboard loads
+- **Controls**: Refresh and open in new tab functionality
+- **Theme-Aware**: Automatically detects and applies system theme preferences
+- **Debug Mode**: Built-in debugging to troubleshoot embedding issues
+
+## Theme Support
+
+The Metabase dashboard supports three theme modes:
+- **`auto`** (default): Automatically follows the system/app theme
+- **`light`**: Forces light theme
+- **`dark`**: Forces dark theme
+
+The dashboard will automatically switch themes when the user changes their system preference or app theme.
+
+## Security
+
+- Uses JWT tokens with 10-minute expiration
+- Secure embedding with the provided secret key
+- Only loads in non-development environments when Sentry is enabled

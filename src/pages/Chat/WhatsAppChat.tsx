@@ -626,7 +626,7 @@ const WhatsAppChat: React.FC = () => {
               style={{ maxHeight: 'calc(100vh - 200px)' }}
             >
               {/* Debug: Rendering messages, count: {currentMessages.length} */}
-              <div className="text-xs text-gray-500 mb-2">Debug: {currentMessages.length} messages loaded</div>
+              {/* <div className="text-xs text-gray-500 mb-2">Debug: {currentMessages.length} messages loaded</div> */}
               {currentMessages.length === 0 ? (
                 <div className="text-center text-neutral-400 text-sm py-8">
                   No messages yet. Start a conversation!
