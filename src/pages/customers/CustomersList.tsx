@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../../components/ui/button";
-import { Plus, Info, Edit } from "lucide-react";
+import { Plus, Info, Edit, Trash2 } from "lucide-react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/custom/table/data-table";
@@ -64,6 +64,9 @@ const CustomersList = () => {
   const navigate = useNavigate();
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     // Fetch all customers from API by getting all pages
@@ -77,7 +80,7 @@ const CustomersList = () => {
         // Fetch all pages
         while (hasMorePages) {
           const url = `${API_CONFIG.baseURL + API_ENDPOINTS.customers.all}?page=${currentPage}&limit=10`;
-          console.log(`Fetching page ${currentPage}:`, url);
+          console.log(`Fetching customers page ${currentPage}:`, url);
           
           const res = await fetch(url, {
             headers: {
@@ -87,7 +90,7 @@ const CustomersList = () => {
           
           if (!res.ok) throw new Error('Failed to fetch customers');
           const apiData = await res.json();
-          console.log(`Page ${currentPage} response:`, apiData);
+          console.log(`Customers page ${currentPage} response:`, apiData);
           
           if (!apiData.data || !Array.isArray(apiData.data.customers)) {
             throw new Error('Invalid API response format');
@@ -120,6 +123,43 @@ const CustomersList = () => {
     };
     fetchAllCustomers();
   }, []);
+
+  // Delete customer function
+  const handleDeleteClick = (customer: any) => {
+    setCustomerToDelete(customer);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!customerToDelete?.id) return;
+
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`${API_CONFIG.baseURL + API_ENDPOINTS.customers.byId}/${customerToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
+        },
+      });
+
+      if (!res.ok) throw new Error('Failed to delete customer');
+
+      // Remove the customer from the local state
+      setCustomers(prevCustomers => prevCustomers.filter(c => c.id !== customerToDelete.id));
+      setShowDeleteConfirm(false);
+      setCustomerToDelete(null);
+    } catch (err: any) {
+      console.error('Failed to delete customer:', err);
+      setFetchError(err.message || 'Failed to delete customer');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setCustomerToDelete(null);
+  };
 
   const columns = [
     {
@@ -187,7 +227,7 @@ const CustomersList = () => {
     },
     {
       id: "actions",
-      accessorKey: "actions", // Fix: add accessorKey for display-only column
+      accessorKey: "actions",
       header: "Actions",
       cell: ({ row }: { row: any }) => (
         <div className="flex gap-1">
@@ -201,9 +241,32 @@ const CustomersList = () => {
               <p>Coming soon</p>
             </TooltipContent>
           </Tooltip>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/details/${row.original.id}`)}>
-            <Info size={16} />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(`/customers/details/${row.original.id}`)}>
+                <Info size={16} />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Detail</p>
+            </TooltipContent>
+          </Tooltip>
+          
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-7 w-7" 
+                onClick={() => handleDeleteClick(row.original)}
+              >
+                <Trash2 size={16} className="text-red-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Delete customer</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
       ),
       enableSorting: false,
@@ -255,6 +318,43 @@ const CustomersList = () => {
           headerClassName="!py-2 !px-2"
           tableMainContainerClassName="!rounded-lg"
         />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete Customer</h3>
+                <p className="text-sm text-gray-500">This action cannot be undone.</p>
+              </div>
+            </div>
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete customer <span className="font-semibold">{customerToDelete?.name}</span>?
+              This will permanently remove the customer and all their associated data.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Customer'}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
