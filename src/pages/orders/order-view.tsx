@@ -118,7 +118,7 @@ const OrderView = () => {
                         <IconArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h1 className='text-2xl font-bold'>Order #{order.id}</h1>
+                        <h1 className='text-2xl font-bold text-neutral-800 dark:text-primary-400'>Order #{order.id}</h1>
                         <p className='text-sm text-gray-500'>Order details and information</p>
                     </div>
                 </div>
