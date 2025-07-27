@@ -79,46 +79,74 @@ const InventoryList = () => {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const headers = {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
-      };
-      const res = await fetch(API_CONFIG.baseURL + API_ENDPOINTS.products, {
-        headers,
-      });
-      if (!res.ok) throw new Error('Failed to fetch products');
-      const apiData = await res.json();
-      console.log('Fetched products API response:', apiData);
-      if (!apiData.data || !Array.isArray(apiData.data.products)) {
-        setFetchError('No products found or API response format changed.');
-        setProducts([]);
-      } else {
-        // Map API data to table data structure
-        const mappedProducts = apiData.data.products.map((p: any) => {
-          // Calculate currentStock as sum of all availableQnt in Stocks
-          const currentStock = Array.isArray(p.Stocks)
-            ? p.Stocks.reduce((sum: number, s: any) => sum + (s.availableQnt || 0), 0)
-            : 0;
-          // Calculate reservedStock as sum of all reservedQnt in Stocks
-          const reservedStock = Array.isArray(p.Stocks)
-            ? p.Stocks.reduce((sum: number, s: any) => sum + (s.reservedQnt || 0), 0)
-            : 0;
-          return {
-            id: p.id,
-            name: p.name,
-            category: p.Category?.name || '',
-            unitPrice: p.unitPrice,
-            costPrice: p.costPrice,
-            currentStock,
-            reservedStock,
-            lowStockThreshold: p.lowStockThreshold,
-            history: [],
-            // Optionally, keep original for details
-            _original: p,
-          };
+      let allProducts: any[] = [];
+      let currentPage = 1;
+      let hasMorePages = true;
+
+      // Fetch all pages
+      while (hasMorePages) {
+        const url = `${API_CONFIG.baseURL + API_ENDPOINTS.products}?page=${currentPage}&limit=10`;
+        console.log(`Fetching products page ${currentPage}:`, url);
+        
+        const headers = {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
+        };
+        
+        const res = await fetch(url, {
+          headers,
         });
-        setProducts(mappedProducts);
-        setFetchError(null);
+        
+        if (!res.ok) throw new Error('Failed to fetch products');
+        const apiData = await res.json();
+        console.log(`Products page ${currentPage} response:`, apiData);
+        
+        if (!apiData.data || !Array.isArray(apiData.data.products)) {
+          throw new Error('Invalid API response format');
+        }
+        
+        // Add products from this page
+        allProducts = [...allProducts, ...apiData.data.products];
+        
+        // Check if there are more pages
+        const totalCount = apiData.data.totalCount || apiData.data.count || 0;
+        const currentPageCount = apiData.data.products.length;
+        
+        if (allProducts.length >= totalCount || currentPageCount === 0) {
+          hasMorePages = false;
+        } else {
+          currentPage++;
+        }
       }
+      
+      console.log('All products fetched:', allProducts);
+      
+      // Map API data to table data structure
+      const mappedProducts = allProducts.map((p: any) => {
+        // Calculate currentStock as sum of all availableQnt in Stocks
+        const currentStock = Array.isArray(p.Stocks)
+          ? p.Stocks.reduce((sum: number, s: any) => sum + (s.availableQnt || 0), 0)
+          : 0;
+        // Calculate reservedStock as sum of all reservedQnt in Stocks
+        const reservedStock = Array.isArray(p.Stocks)
+          ? p.Stocks.reduce((sum: number, s: any) => sum + (s.reservedQnt || 0), 0)
+          : 0;
+        return {
+          id: p.id,
+          name: p.name,
+          category: p.Category?.name || '',
+          unitPrice: p.unitPrice,
+          costPrice: p.costPrice,
+          currentStock,
+          reservedStock,
+          lowStockThreshold: p.lowStockThreshold,
+          history: [],
+          // Optionally, keep original for details
+          _original: p,
+        };
+      });
+      
+      setProducts(mappedProducts);
+      setFetchError(null);
     } catch (err: any) {
       setFetchError(err.message || 'Failed to fetch products');
       setProducts([]);

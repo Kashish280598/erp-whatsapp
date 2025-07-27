@@ -66,25 +66,50 @@ const CustomersList = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    // Fetch customers from API
-    const fetchCustomers = async () => {
+    // Fetch all customers from API by getting all pages
+    const fetchAllCustomers = async () => {
       setLoading(true);
       try {
-        const res = await fetch(API_CONFIG.baseURL + API_ENDPOINTS.customers.all, {
-          headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
-          },
-        });
-        if (!res.ok) throw new Error('Failed to fetch customers');
-        const apiData = await res.json();
-        console.log('Fetched customers API response:', apiData);
-        if (!apiData.data || !Array.isArray(apiData.data.customers)) {
-          setFetchError('No customers found or API response format changed.');
-          setCustomers([]);
-        } else {
-          setCustomers(apiData.data.customers);
-          setFetchError(null);
+        let allCustomers: any[] = [];
+        let currentPage = 1;
+        let hasMorePages = true;
+
+        // Fetch all pages
+        while (hasMorePages) {
+          const url = `${API_CONFIG.baseURL + API_ENDPOINTS.customers.all}?page=${currentPage}&limit=10`;
+          console.log(`Fetching page ${currentPage}:`, url);
+          
+          const res = await fetch(url, {
+            headers: {
+              'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
+            },
+          });
+          
+          if (!res.ok) throw new Error('Failed to fetch customers');
+          const apiData = await res.json();
+          console.log(`Page ${currentPage} response:`, apiData);
+          
+          if (!apiData.data || !Array.isArray(apiData.data.customers)) {
+            throw new Error('Invalid API response format');
+          }
+          
+          // Add customers from this page
+          allCustomers = [...allCustomers, ...apiData.data.customers];
+          
+          // Check if there are more pages
+          const totalCount = apiData.data.totalCount || apiData.data.count || 0;
+          const currentPageCount = apiData.data.customers.length;
+          
+          if (allCustomers.length >= totalCount || currentPageCount === 0) {
+            hasMorePages = false;
+          } else {
+            currentPage++;
+          }
         }
+        
+        console.log('All customers fetched:', allCustomers);
+        setCustomers(allCustomers);
+        setFetchError(null);
       } catch (err: any) {
         setFetchError(err.message || 'Failed to fetch customers');
         setCustomers([]);
@@ -93,7 +118,7 @@ const CustomersList = () => {
         setLoading(false);
       }
     };
-    fetchCustomers();
+    fetchAllCustomers();
   }, []);
 
   const columns = [
@@ -116,7 +141,7 @@ const CustomersList = () => {
       id: "address",
       accessorKey: "address",
       header: "Address",
-      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.address}</span>,
+      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.address || 'N/A'}</span>,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -124,7 +149,7 @@ const CustomersList = () => {
       id: "gst",
       accessorKey: "gst",
       header: "GST / Business ID",
-      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.gstNo}</span>,
+      cell: ({ row }: { row: any }) => <span className="text-[13px]">{row.original.gstNo || 'N/A'}</span>,
       enableSorting: true,
       meta: { headerClassName: "!py-2 !px-2" },
     },
@@ -212,18 +237,25 @@ const CustomersList = () => {
           {fetchError}
         </div>
       )}
-      <DataTable
-        columns={columns}
-        data={customers}
-        tableToolbar={tableToolbar}
-        fetchData={() => {}}
-        totalCount={customers.length}
-        loading={loading}
-        tableId="customers-table"
-        className="!text-[13px]"
-        headerClassName="!py-2 !px-2"
-        tableMainContainerClassName="!rounded-lg"
-      />
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
+          <span className="loader" style={{ width: 40, height: 40, border: '4px solid #e5e7eb', borderTop: '4px solid #2563eb', borderRadius: '50%', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+          <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : (
+        <DataTable
+          columns={columns}
+          data={customers}
+          tableToolbar={tableToolbar}
+          fetchData={() => {}}
+          totalCount={customers.length}
+          loading={false}
+          tableId="customers-table"
+          className="!text-[13px]"
+          headerClassName="!py-2 !px-2"
+          tableMainContainerClassName="!rounded-lg"
+        />
+      )}
     </div>
   );
 };
