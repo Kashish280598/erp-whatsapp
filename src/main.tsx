@@ -132,7 +132,7 @@ const InventoryStep = ({ setIsOpen }: { setIsOpen: (open: boolean) => void }) =>
 
   return (
     <div className="space-y-4">
-      <div className="text-lg font-semibold mb-2">📦 Inventory Manager</div>
+      <div className="text-lg font-semibold mb-2">📦 Inventory</div>
       <div className="text-sm leading-relaxed">
         Manage your product inventory here. Add new items, track stock levels,
         monitor sales, and keep your warehouse organized efficiently.
@@ -230,7 +230,7 @@ const tourSteps = [
     content: DashboardStep,
   },
   {
-    selector: '[data-tour="sidebar-inventory-manager"]',
+    selector: '[data-tour="sidebar-inventory"]',
     content: InventoryStep,
   },
   {

@@ -14,7 +14,7 @@ import { parseFullName } from "@/lib/utils";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import { IconLogout2 } from "@tabler/icons-react";
 import { setTourCompleted } from '@/lib/features/app/appSlice';
-import FeedbackButton from "@/components/custom/FeedbackButton";
+// import FeedbackButton from "@/components/custom/FeedbackButton";
 
 function App() {
   const dispatch = useAppDispatch();
@@ -45,9 +45,9 @@ function App() {
               {/* ===== Top Navigation ===== */}
               <div className="ml-auto flex items-center space-x-4">
                 {/* <Notifications /> */}
-                <FeedbackButton size="sm" variant="ghost" className="hidden md:flex">
+                {/* <FeedbackButton size="sm" variant="ghost" className="hidden md:flex">
                   Feedback
-                </FeedbackButton>
+                </FeedbackButton> */}
                 <ThemeSwitch />
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild className="cursor-pointer">
