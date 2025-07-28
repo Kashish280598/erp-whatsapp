@@ -1,4 +1,3 @@
-
 import { useLazyGetOrdersQuery } from "@/lib/api/orders-api"
 import type { TableQueryParams } from "@/types/table.types"
 import { useCallback, useMemo } from "react"
@@ -13,8 +12,9 @@ const OrdersListingContainer = () => {
             const $params = {
                 page: params?.page,
                 limit: params?.limit,
-
             }
+
+
             if (params?.search_text) {
                 Object.assign($params, {
                     search: params?.search_text
@@ -26,15 +26,31 @@ const OrdersListingContainer = () => {
                     sortOrder: params?.sort_order
                 })
             }
+
+            // Handle filters
+            if (params?.filters && params.filters.length > 0) {
+                params.filters.forEach((filter: any) => {
+                    if (filter.id && filter.value && Array.isArray(filter.value)) {
+                        console.log('filter', filter)
+                        Object.assign($params, {
+                            [filter.id]: filter.value.join(',')
+                        })
+                    }
+                })
+            }
             getOrders($params)
         },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [],
+        [getOrders],
     )
 
     return (
         <div>
-            <OrderTable onFetchOrders={onFetchOrders} isLoading={isUninitialized || isFetching} orders={orders} totalCount={data?.data?.totalCount} />
+            <OrderTable
+                onFetchOrders={onFetchOrders}
+                isLoading={isUninitialized || isFetching}
+                orders={orders}
+                totalCount={data?.data?.totalCount}
+            />
         </div>
     )
 }

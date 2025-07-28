@@ -222,9 +222,16 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {loading && table.getRowModel().rows?.length > 0 && (
-              <div className="absolute top-0 left-0 w-full h-full z-10 flex justify-center items-center">
-                <IconLoader className="animate-spin w-7 h-7" />
-              </div>
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="relative h-full"
+                >
+                  <div className="absolute top-0 left-0 w-full h-full z-10 flex justify-center items-center bg-white/80 dark:bg-neutral-900/80">
+                    <IconLoader className="animate-spin w-7 h-7" />
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
             {!loading || table.getRowModel().rows?.length > 0 ? (
               table.getRowModel().rows?.length ? (
