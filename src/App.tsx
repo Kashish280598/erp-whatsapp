@@ -70,7 +70,7 @@ function App() {
             <Separator className="p-[1px] sticky top-0 md:top-[56px] z-10" />
 
             {/* ===== Main ===== */}
-            <Layout.Body className="custom-scrollbar h-[calc(100svh-70px)] md:h-[calc(100svh-58px)] pb-0 flex flex-wrap content-start">
+            <Layout.Body className="custom-scrollbar h-[calc(100svh-70px)] md:h-[calc(100svh-58px)] !overflow-y-auto pb-0 flex flex-wrap content-start">
               <Outlet />
             </Layout.Body>
           </Layout>
