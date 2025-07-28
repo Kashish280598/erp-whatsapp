@@ -86,9 +86,9 @@ const ChatIntegration = () => {
   // If WhatsApp chat is active, show the chat interface
   if (showWhatsAppChat) {
     return (
-      <div className="w-full h-full flex flex-col">
+      <div className="w-full h-full flex flex-col overflow-hidden">
         {/* Header with back button */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center gap-4">
+        <div className="bg-white border-b border-gray-200 p-4 flex items-center gap-4 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
@@ -103,8 +103,8 @@ const ChatIntegration = () => {
           </div>
         </div>
         
-        {/* WhatsApp Chat Interface */}
-        <div className="flex-1">
+        {/* WhatsApp Chat Interface - Takes full remaining height */}
+        <div className="flex-1 min-h-0 overflow-hidden">
           <WhatsAppChat />
         </div>
       </div>
