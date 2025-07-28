@@ -89,14 +89,12 @@ const WhatsAppChat: React.FC = () => {
   // Fetch contacts when component mounts
   useEffect(() => {
     if (isSocketConnected && isSocketAuthenticated) {
-      console.log('🔄 Component mounted, fetching contacts...');
       fetchContacts();
     }
   }, [isSocketConnected, isSocketAuthenticated, fetchContacts]);
 
   // Debug selected user changes
   useEffect(() => {
-    console.log('🔄 Selected user changed:', selectedUser);
     if (selectedUser) {
       console.log('🔄 Selected user details:', {
         id: selectedUser.id,
@@ -136,7 +134,6 @@ const WhatsAppChat: React.FC = () => {
   // Auto-select first user when contacts are loaded and no user is selected
   useEffect(() => {
     if (contacts && contacts.length > 0 && !selectedUser) {
-      console.log('🔄 Auto-selecting first user from contacts...');
       const firstUser = contacts[0];
       const user: User = {
         id: String(firstUser.id),
@@ -149,7 +146,6 @@ const WhatsAppChat: React.FC = () => {
       };
       
       const mobileNo = firstUser.mobileNo || firstUser.number || '';
-      console.log('🔄 Auto-selecting user:', user.name, 'with mobile:', mobileNo);
       handleSelectUser(user, mobileNo);
     }
   }, [contacts, selectedUser]);
@@ -158,7 +154,6 @@ const WhatsAppChat: React.FC = () => {
   useEffect(() => {
     const handleNewMessage = (event: CustomEvent) => {
       const messageData = event.detail;
-      console.log('📨 Received new message event:', messageData);
       
       if (messageData) {
         // Handle both nested and direct message structures
@@ -175,8 +170,6 @@ const WhatsAppChat: React.FC = () => {
             messageType: message.messageType,
             createdAt: message.createdAt
           };
-
-          console.log('📝 Formatted new message:', newMessage);
 
           // Add message to the appropriate conversation
           if (selectedUser) {
@@ -207,7 +200,6 @@ const WhatsAppChat: React.FC = () => {
                 
                 if (tempMessageIndex !== -1) {
                   // Replace temp message with real message
-                  console.log('🔄 Replacing temp message with real message:', newMessage.id);
                   const updatedMessages = [...existingMessages];
                   updatedMessages[tempMessageIndex] = newMessage;
                   return {
@@ -225,13 +217,11 @@ const WhatsAppChat: React.FC = () => {
                 );
                 
                 if (!messageExists) {
-                  console.log('✅ Adding new real-time message to UI:', newMessage.id, newMessage.content);
                   return {
                     ...prev,
                     [selectedUser.id]: [...existingMessages, newMessage]
                   };
                 } else {
-                  console.log('⚠️ Real-time message already exists, skipping:', newMessage.id, newMessage.content);
                   return prev;
                 }
               });
@@ -245,7 +235,6 @@ const WhatsAppChat: React.FC = () => {
 
     const handleMessageSent = (event: CustomEvent) => {
       const sentData = event.detail;
-      console.log('✅ Message sent confirmation:', sentData);
       
       // Update the temporary message with the real message data
       if (selectedUser && sentData.message) {
@@ -364,12 +353,9 @@ const WhatsAppChat: React.FC = () => {
       createdAt: new Date().toISOString()
     };
 
-    console.log('📤 Sending message with temp ID:', tempId, 'Content:', newMessage.content);
-
     // Add message to UI immediately (optimistic update)
     setMessages(prev => {
       const currentMessages = prev[selectedUser.id] || [];
-      console.log('📝 Adding optimistic message to UI:', tempId);
       return {
         ...prev,
         [selectedUser.id]: [...currentMessages, newMessage]
@@ -408,7 +394,6 @@ const WhatsAppChat: React.FC = () => {
         // Remove the optimistic message on error
         setMessages(prev => {
           const currentMessages = prev[selectedUser.id] || [];
-          console.log('❌ Removing failed optimistic message:', tempId);
           return {
             ...prev,
             [selectedUser.id]: currentMessages.filter(m => m.id !== tempId)
@@ -419,8 +404,7 @@ const WhatsAppChat: React.FC = () => {
       console.error('❌ Error sending message:', error);
       // Remove the optimistic message on error
       setMessages(prev => {
-        const currentMessages = prev[selectedUser.id] || [];
-        console.log('❌ Removing failed optimistic message:', tempId);
+        const currentMessages = prev[selectedUser.id] || [];;
         return {
           ...prev,
           [selectedUser.id]: currentMessages.filter(m => m.id !== tempId)
@@ -441,9 +425,6 @@ const WhatsAppChat: React.FC = () => {
   // const currentMessages = selectedUser ? (messages[selectedUser.id] || []).filter(Boolean) : [];
 
   // Debug currentMessages
-  console.log('🔍 Current messages for user:', selectedUser?.id, 'Count:', currentMessages.length);
-  console.log('🔍 All message keys in state:', Object.keys(messages));
-  console.log('🔍 Messages for this user ID:', messages[selectedUser?.id || '']);
   if (currentMessages.length > 0) {
     console.log('🔍 First message:', currentMessages[0]);
     console.log('🔍 Last message:', currentMessages[currentMessages.length - 1]);
@@ -456,13 +437,9 @@ const WhatsAppChat: React.FC = () => {
   const handleSelectUser = async (user: User, mobileNo: string) => {
     console.log('handleSelectUser called with:', { user, mobileNo });
     setSelectedUser(user);
-    
-    console.log({mobileNo})
 
     if (mobileNo) {
-      // Clean the mobile number - remove + and any spaces
       const cleanMobileNo = mobileNo.replace(/^\+/, '').replace(/\s/g, '');
-      console.log('Making API call with:', { fromNumber: myMobileNo, toNumber: cleanMobileNo });
       
       try {
         const token = getAuthToken();
@@ -476,26 +453,20 @@ const WhatsAppChat: React.FC = () => {
             'Content-Type': 'application/json'
           }
         });
-        console.log('API response:', response.data);
+
         if (response.data && response.data.status === 200) {
           // Get messages from the response - the messages are in data.messages
           const backendMessages = response.data.data.messages || [];
           
-          console.log('🔍 Backend messages:', backendMessages);
-          console.log('🔍 Backend messages count:', backendMessages.length);
-          console.log('🔍 Response data structure:', response.data.data);
-          
           if (backendMessages.length > 0) {
-            console.log('🔍 Processing messages...');
             const formattedMessages = backendMessages.map((msg: any) => {
               const isOutgoing = Boolean(msg.isOutgoing);
-              console.log('🔍 Processing message:', msg.id, 'isOutgoing:', msg.isOutgoing, 'Final isOutgoing:', isOutgoing);
               
               return {
                 id: msg.id,
                 sender: isOutgoing ? 'me' : 'them',
                 content: msg.content,
-                timestamp: msg.createdAt, // Don't format here, format during rendering
+                timestamp: msg.createdAt,
                 type: msg.messageType || 'text',
                 isOutgoing: isOutgoing,
                 messageType: msg.messageType,
@@ -503,17 +474,12 @@ const WhatsAppChat: React.FC = () => {
               };
             });
             
-            console.log('🔍 Formatted messages count:', formattedMessages.length);
-            console.log('🔍 First formatted message:', formattedMessages[0]);
-            console.log('🔍 Last formatted message:', formattedMessages[formattedMessages.length - 1]);
             
             setMessages(prev => {
               const newState = {
                 ...prev,
                 [user.id]: formattedMessages
               };
-              console.log('🔍 Setting messages for user:', user.id, 'Count:', formattedMessages.length);
-              console.log('🔍 New state preview:', newState);
               return newState;
             });
           } else {
@@ -568,9 +534,7 @@ const WhatsAppChat: React.FC = () => {
               key={user.id}
               onClick={() => {
                 const contact = contacts?.find(c => String(c.id) === user.id);
-                console.log({contact})
                 const mobileNo = contact?.number || contact?.mobileNo || '';
-                console.log('Selected user:', user, 'Contact:', contact, 'MobileNo:', mobileNo);
                 handleSelectUser(user, mobileNo);
               }}
               className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-neutral-50 transition-colors ${
@@ -636,7 +600,7 @@ const WhatsAppChat: React.FC = () => {
                 ) : (
                   currentMessages.map((msg, index) => {
                     const isOutgoing = Boolean(msg.isOutgoing);
-                    console.log(`Rendering message ${index + 1}/${currentMessages.length}:`, msg.id, 'isOutgoing:', isOutgoing);
+                    console .log(`Rendering message ${index + 1}/${currentMessages.length}:`, msg.id, 'isOutgoing:', isOutgoing);
                     
                     return (
                       <div key={msg.id} className={`mb-4 ${isOutgoing ? 'text-right' : 'text-left'}`}>

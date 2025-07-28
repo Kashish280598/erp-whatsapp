@@ -129,6 +129,7 @@ export const useWhatsAppSocket = () => {
       sendMessage(to, message, conversationId);
       return true;
     } catch (error) {
+      console.error('Failed to send message:', error);
       setLastError('Failed to send message');
       return false;
     }
@@ -185,7 +186,6 @@ export const useWhatsAppSocket = () => {
 
   // Fetch QR code via socket
   const fetchQrCode = useCallback((forceNew = false) => {
-    console.log('fetchQrCode called:', { isConnected, isAuthenticated, forceNew })
     if (isConnected) {
       setIsLoading(true)
       setLastError(null)

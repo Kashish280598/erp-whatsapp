@@ -110,7 +110,6 @@ const CustomersList = () => {
           }
         }
         
-        console.log('All customers fetched:', allCustomers);
         setCustomers(allCustomers);
         setFetchError(null);
       } catch (err: any) {
