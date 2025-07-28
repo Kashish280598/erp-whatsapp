@@ -5,11 +5,9 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 // import { Badge } from '@/components/ui/badge';
 import { 
   IconSearch, 
-  IconMicrophone, 
   IconDownload,
   IconFileText,
   IconSend,
-  IconArrowLeft
 } from '@tabler/icons-react';
 import { useWhatsAppSocket } from '@/hooks/useWhatsAppSocket';
 import axios from 'axios';
@@ -53,7 +51,6 @@ const WhatsAppChat: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [search, setSearch] = useState('');
   const [message, setMessage] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -332,14 +329,17 @@ const WhatsAppChat: React.FC = () => {
         return 'Invalid Date';
       }
       
-      const formattedTime = date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
+      // Format as "DD-MM HH:MM AM/PM"
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const hours = date.getHours();
+      const minutes = date.getMinutes().toString().padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const displayHours = hours % 12 || 12;
       
-      return formattedTime;
-    } catch (error) {
+      return `${day}-${month} ${displayHours}:${minutes} ${ampm}`;
+    } catch (error: any) {
+      console.error('Error formatting timestamp:', error);
       return 'Invalid Date';
     }
   };
@@ -538,13 +538,13 @@ const WhatsAppChat: React.FC = () => {
   }
 
   return (
-    <div className="flex h-screen bg-neutral-50 font-sans overflow-hidden">
+    <div className="flex h-full bg-neutral-50 font-sans overflow-hidden">
       {/* Left Panel - User List */}
       <div className="w-full md:w-1/3 bg-white border-r border-neutral-200 flex flex-col min-h-0">
         {/* Header */}
         <div className="bg-primary text-white p-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm">Chat</span>
+            <span className="font-semibold text-sm">WhatsApp</span>
           </div>
         </div>
 
@@ -573,23 +573,23 @@ const WhatsAppChat: React.FC = () => {
                 console.log('Selected user:', user, 'Contact:', contact, 'MobileNo:', mobileNo);
                 handleSelectUser(user, mobileNo);
               }}
-              className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-neutral-50 transition-colors ${
-                selectedUser?.id === user.id ? 'bg-primary-50' : ''
+              className={`flex items-center gap-3 p-3 cursor-pointer hover:bg-neutral-50 transition-colors ${
+                selectedUser?.id === user.id ? 'bg-neutral-100' : ''
               }`}
             >
-              <div className="relative">
-                <Avatar className="w-10 h-10">
-                  <AvatarFallback className="text-xs bg-neutral-200">
+              <div className="relative flex-shrink-0">
+                <Avatar className="w-12 h-12">
+                  <AvatarFallback className="text-sm bg-neutral-200">
                     {user.avatar}
                   </AvatarFallback>
                 </Avatar>
                 {user.isOnline && (
-                  <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-white"></div>
+                  <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-white"></div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-neutral text-xs truncate">{user.name}</h3>
+                  <h3 className="font-medium text-neutral text-sm truncate">{user.name}</h3>
                   <span className="text-xs text-neutral-400">{user.timestamp}</span>
                 </div>
                 <p className="text-xs text-neutral-400 truncate">{user.lastMessage}</p>
@@ -605,9 +605,9 @@ const WhatsAppChat: React.FC = () => {
           <>
             {/* Chat Header */}
             <div className="bg-white border-b border-neutral-200 p-3 flex items-center justify-between flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="text-xs bg-neutral-200">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-10 h-10">
+                  <AvatarFallback className="text-sm bg-neutral-200">
                     {selectedUser.avatar}
                   </AvatarFallback>
                 </Avatar>
@@ -620,54 +620,57 @@ const WhatsAppChat: React.FC = () => {
               </div>
             </div>
 
-            {/* Chat Messages */}
+            {/* Chat Messages - Scrollable */}
             <div 
-              className="flex-1 overflow-y-auto p-3 min-h-0 bg-white"
-              style={{ maxHeight: 'calc(100vh - 200px)' }}
+              className="flex-1 overflow-y-auto min-h-0 bg-white"
+              style={{ 
+                backgroundImage: 'radial-gradient(circle at 25% 25%, #f0f0f0 1px, transparent 1px), radial-gradient(circle at 75% 75%, #f0f0f0 1px, transparent 1px)',
+                backgroundSize: '20px 20px'
+              }}
             >
-              {/* Debug: Rendering messages, count: {currentMessages.length} */}
-              {/* <div className="text-xs text-gray-500 mb-2">Debug: {currentMessages.length} messages loaded</div> */}
-              {currentMessages.length === 0 ? (
-                <div className="text-center text-neutral-400 text-sm py-8">
-                  No messages yet. Start a conversation!
-                </div>
-              ) : (
-                currentMessages.map((msg, index) => {
-                  const isOutgoing = Boolean(msg.isOutgoing);
-                  console.log(`Rendering message ${index + 1}/${currentMessages.length}:`, msg.id, 'isOutgoing:', isOutgoing);
-                  
-                  return (
-                    <div key={msg.id} className={`mb-4 ${isOutgoing ? 'text-right' : 'text-left'}`}>
-                      <div
-                        className={`inline-block max-w-[85%] md:max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
-                          isOutgoing
-                            ? 'bg-primary text-white rounded-br-md'
-                            : 'bg-neutral-100 text-neutral-800 rounded-bl-md'
-                        }`}
-                      >
-                        {msg.messageType === 'media' && (
-                          <div className="mb-2">
-                            <div className="flex items-center gap-2 bg-white p-2 rounded border">
-                              <IconFileText className="h-3 w-3 text-primary" />
-                              <div className="flex-1">
-                                <p className="text-xs font-medium">{msg.fileName}</p>
-                                <p className="text-xs text-neutral-400">{msg.fileSize}</p>
+              <div className="p-4 pb-2">
+                {currentMessages.length === 0 ? (
+                  <div className="text-center text-neutral-400 text-sm py-8">
+                    No messages yet. Start a conversation!
+                  </div>
+                ) : (
+                  currentMessages.map((msg, index) => {
+                    const isOutgoing = Boolean(msg.isOutgoing);
+                    console.log(`Rendering message ${index + 1}/${currentMessages.length}:`, msg.id, 'isOutgoing:', isOutgoing);
+                    
+                    return (
+                      <div key={msg.id} className={`mb-4 ${isOutgoing ? 'text-right' : 'text-left'}`}>
+                        <div
+                          className={`inline-block max-w-[85%] md:max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-sm ${
+                            isOutgoing
+                              ? 'bg-primary text-white rounded-br-md'
+                              : 'bg-white text-neutral-800 rounded-bl-md border border-neutral-200'
+                          }`}
+                        >
+                          {msg.messageType === 'media' && (
+                            <div className="mb-2">
+                              <div className="flex items-center gap-2 bg-white p-2 rounded border">
+                                <IconFileText className="h-3 w-3 text-primary" />
+                                <div className="flex-1">
+                                  <p className="text-xs font-medium">{msg.fileName}</p>
+                                  <p className="text-xs text-neutral-400">{msg.fileSize}</p>
+                                </div>
+                                <IconDownload className="h-3 w-3 text-neutral-400 cursor-pointer" />
                               </div>
-                              <IconDownload className="h-3 w-3 text-neutral-400 cursor-pointer" />
                             </div>
-                          </div>
-                        )}
-                        <p className="text-sm break-words leading-relaxed">{msg.content}</p>
-                        <p className={`text-xs mt-2 ${isOutgoing ? 'text-primary-100' : 'text-neutral-500'}`}>
-                          {formatTimestamp(msg.timestamp || msg.createdAt || '')}
-                        </p>
+                          )}
+                          <p className={`text-sm break-words leading-relaxed ${isOutgoing ? 'text-white' : 'text-neutral-800'}`}>{msg.content}</p>
+                          <p className={`text-xs mt-2 opacity-70 ${isOutgoing ? 'text-white' : ''}`}>
+                            {formatTimestamp(msg.timestamp || msg.createdAt || '')}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
-              
-              <div ref={messagesEndRef} />
+                    );
+                  })
+                )}
+                
+                <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Message Input - Fixed at bottom */}
@@ -679,7 +682,7 @@ const WhatsAppChat: React.FC = () => {
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message"
-                    className="pr-20 text-xs h-8"
+                    className="pr-20 text-sm h-10 rounded-full"
                   />
                 </div>
                 {message.trim() ? (
@@ -688,17 +691,12 @@ const WhatsAppChat: React.FC = () => {
                     size="icon"
                     className="text-primary h-8 w-8"
                     onClick={handleSendMessage}
+                    disabled={!message.trim()}
                   >
                     <IconSend className="h-4 w-4" />
                   </Button>
                 ) : (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-neutral-400 h-8 w-8"
-                  >
-                    <IconMicrophone className="h-4 w-4" />
-                  </Button>
+                  null
                 )}
               </div>
             </div>
@@ -706,11 +704,11 @@ const WhatsAppChat: React.FC = () => {
         ) : (
           <div className="flex flex-1 items-center justify-center">
             <div className="text-center">
-              <div className="w-12 h-12 bg-neutral-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-lg">💬</span>
+              <div className="w-16 h-16 bg-neutral-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💬</span>
               </div>
-              <h3 className="text-sm font-medium text-neutral mb-1">Select a chat</h3>
-              <p className="text-xs text-neutral-400">Choose a conversation from the list to start messaging</p>
+              <h3 className="text-lg font-medium text-neutral mb-2">Select a chat</h3>
+              <p className="text-sm text-neutral-400">Choose a conversation from the list to start messaging</p>
             </div>
           </div>
         )}
