@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { Button } from "../../components/ui/button";
-import { Plus, Edit, Info, TrendingDown } from "lucide-react";
+import { Plus, TrendingDown } from "lucide-react";
 import { DataTable } from "@/components/custom/table/data-table";
 import { Badge } from "@/components/ui/badge";
 import { API_CONFIG, API_ENDPOINTS } from '@/lib/api/config';
 import "./InventoryList.css";
 import { Formik, Field } from "formik";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Product {
   id: string;
@@ -86,7 +85,6 @@ const InventoryList = () => {
       // Fetch all pages
       while (hasMorePages) {
         const url = `${API_CONFIG.baseURL + API_ENDPOINTS.products}?page=${currentPage}&limit=10`;
-        console.log(`Fetching products page ${currentPage}:`, url);
         
         const headers = {
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImlhdCI6MTc1MzQyODAyNCwiZXhwIjoxNzU0MDMyODI0fQ.UEVhtXDNxoffAT9lqfgPoJNvujfzYcc_UP1qoOZGwsM',
@@ -98,7 +96,6 @@ const InventoryList = () => {
         
         if (!res.ok) throw new Error('Failed to fetch products');
         const apiData = await res.json();
-        console.log(`Products page ${currentPage} response:`, apiData);
         
         if (!apiData.data || !Array.isArray(apiData.data.products)) {
           throw new Error('Invalid API response format');
@@ -117,8 +114,6 @@ const InventoryList = () => {
           currentPage++;
         }
       }
-      
-      console.log('All products fetched:', allProducts);
       
       // Map API data to table data structure
       const mappedProducts = allProducts.map((p: any) => {
@@ -171,12 +166,7 @@ const InventoryList = () => {
     setAvailableQnt(0);
     setBuyPrice(0);
   };
-  const openEditModal = (product: Product) => {
-    setForm(product);
-    setFormErrors({});
-    setIsEdit(true);
-    setShowAddEditModal(true);
-  };
+  
   const closeAddEditModal = () => {
     setShowAddEditModal(false);
     setAddStep(1);
@@ -184,11 +174,7 @@ const InventoryList = () => {
     setAvailableQnt(0);
     setBuyPrice(0);
   };
-  // Details Modal logic
-  const openDetailModal = (product: Product) => {
-    setDetailProduct(product);
-    setShowDetailModal(true);
-  };
+
   const closeDetailModal = () => {
     setShowDetailModal(false);
     setDetailProduct(null);

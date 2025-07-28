@@ -48,23 +48,17 @@ export const SocketProvider = ({ children }: any) => {
     const appAuthToken = useSelector((state: RootState) => state.auth.token)
     const isAppAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
 
-    // Get token from Redux store or cookies as fallback
     const getAuthToken = useCallback(() => {
         return appAuthToken || Cookies.get('erp_token') || localStorage.getItem('auth_token')
     }, [appAuthToken])
 
-    // Socket event handlers setup
     const setupSocketListeners = useCallback((socketInstance: Socket) => {
         socketInstance.on('connect', () => {
             console.log('✅ Socket connected:', socketInstance.id)
             setIsConnected(true)
             
-            // Authenticate with token
             const token = getAuthToken()
             if (token) {
-                console.log('🔐 Authenticating socket with token')
-                // The token is already sent in the handshake, so we don't need to emit authenticate
-                // The backend middleware will handle authentication automatically
                 setIsAuthenticated(true)
             } else {
                 console.log('⚠️ No token available for socket authentication')
@@ -90,25 +84,17 @@ export const SocketProvider = ({ children }: any) => {
 
         socketInstance.on('error', (error) => {
             console.error('❌ Socket error:', error)
-            // Don't treat all socket errors as auth errors
             if (error?.message?.includes('authenticated') || error?.message?.includes('auth')) {
                 setIsAuthenticated(false)
             }
         })
 
-        // Real-time message events
-        socketInstance.on('new_message', (data) => {
-            console.log('📨 New message received via socket:', data)
-            
-            // Dispatch custom event for components to listen to
+        socketInstance.on('new_message', (data) => {            
             const event = new CustomEvent('new_message', { detail: data })
             window.dispatchEvent(event)
         })
 
-        socketInstance.on('message_sent', (data) => {
-            console.log('✅ Message sent confirmation via socket:', data)
-            
-            // Dispatch custom event for components to listen to
+        socketInstance.on('message_sent', (data) => {            
             const event = new CustomEvent('message_sent', { detail: data })
             window.dispatchEvent(event)
         })
@@ -116,14 +102,11 @@ export const SocketProvider = ({ children }: any) => {
         socketInstance.on('message_error', (data) => {
             console.error('❌ Message error via socket:', data)
             
-            // Dispatch custom event for components to listen to
             const event = new CustomEvent('message_error', { detail: data })
             window.dispatchEvent(event)
         })
 
-        // WhatsApp specific events
         socketInstance.on('message_sent_success', (result) => {
-            console.log('Message sent successfully:', result)
             window.dispatchEvent(new CustomEvent('whatsapp:message_sent_success', { detail: result }))
         })
 
@@ -133,12 +116,10 @@ export const SocketProvider = ({ children }: any) => {
         })
 
         socketInstance.on('whatsapp_status_update', (status) => {
-            console.log('WhatsApp status update:', status)
             window.dispatchEvent(new CustomEvent('whatsapp:status_update', { detail: status }))
         })
 
         socketInstance.on('connection_status', (status) => {
-            console.log('Connection status:', status)
             window.dispatchEvent(new CustomEvent('whatsapp:connection_status', { detail: status }))
         })
 
@@ -150,40 +131,30 @@ export const SocketProvider = ({ children }: any) => {
             console.log('Left conversation:', data)
         })
 
-        // Handle contacts response
         socketInstance.on('contacts_response', (response) => {
-            console.log('Contacts response:', response)
             window.dispatchEvent(new CustomEvent('whatsapp:contacts_response', { detail: response }))
         })
 
-        // Handle messages between response
         socketInstance.on('messages_between_response', (response) => {
-            console.log('Messages between response:', response)
             window.dispatchEvent(new CustomEvent('whatsapp:messages_between_response', { detail: response }))
         })
 
-        // Handle QR code response
         socketInstance.on('qr_code_response', (response) => {
-            console.log('QR code response:', response)
             window.dispatchEvent(new CustomEvent('whatsapp:qr_code_response', { detail: response }))
         })
     }, [user, getAuthToken])
 
     useEffect(() => {
-        // Get authentication token
         const token = getAuthToken();
-        console.log('🔌 Connecting socket with token:', token ? 'Present' : 'Missing');
         if (token) {
             console.log('🔍 Token preview:', token.substring(0, 50) + '...');
         }
 
-        // Don't reconnect if socket is already connected and authenticated
         if (socket && isConnected && isAuthenticated) {
             console.log('Socket already connected and authenticated, skipping reconnect')
             return
         }
 
-        // Determine socket URL based on environment
         const socketUrl = API_CONFIG.socketURL
         
         console.log('Connecting to socket:', socketUrl)
@@ -199,7 +170,6 @@ export const SocketProvider = ({ children }: any) => {
             transports: ['websocket', 'polling'],
             autoConnect: true,
             upgrade: true,
-            // Add authentication data
             auth: {
                 token: token
             },
@@ -212,7 +182,6 @@ export const SocketProvider = ({ children }: any) => {
         setSocket(socketInstance)
 
         return () => {
-            console.log('Cleaning up socket connection')
             socketInstance.disconnect()
             setSocket(null)
             setIsConnected(false)
@@ -220,7 +189,6 @@ export const SocketProvider = ({ children }: any) => {
         }
     }, [isAppAuthenticated, setupSocketListeners, getAuthToken])
 
-    // Helper functions
     const sendMessage = useCallback((to: string, message: string, conversationId?: string) => {
         if (socket && isConnected) {
             socket.emit('send_message', {
@@ -273,7 +241,6 @@ export const SocketProvider = ({ children }: any) => {
     }, [socket, isConnected])
 
     const getQrCode = useCallback((forceNew = false) => {
-        console.log(socket, isConnected, ">>>>>>>>/////////")
         if (socket && isConnected) {
             socket.emit('get_qr_code', { forceNew })
         } else {

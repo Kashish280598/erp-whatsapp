@@ -248,7 +248,6 @@ const TourController = ({ shouldOpenTour }: { shouldOpenTour: boolean }) => {
   const { setIsOpen } = useTour();
   useEffect(() => {
     if (shouldOpenTour) {
-      console.log('Opening tour! shouldOpenTour:', shouldOpenTour);
       setIsOpen(true);
     } else {
       console.log('Tour not opening. shouldOpenTour:', shouldOpenTour);

@@ -38,7 +38,6 @@ export function useAutoRefreshToken() {
                                     user: userResult.data.user, 
                                     isAuthenticated: true 
                                 }));
-                                console.log('User profile loaded successfully');
                             } else {
                                 throw new Error('No user data in response');
                             }
