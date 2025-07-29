@@ -3,17 +3,206 @@ import { DataTableColumnHeader } from "@/components/custom/table/data-table/data
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useDeleteUserMutation } from "@/lib/api/users-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
-import { IconEye, IconPencil, IconTrash } from "@tabler/icons-react";
+import { IconCalendar, IconCheck, IconEye, IconMail, IconPencil, IconPhone, IconShield, IconTrash, IconUser } from "@tabler/icons-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// User Details Dialog Component
+const UserDetailsDialog = ({ user, isOpen, onClose }: { user: any, isOpen: boolean, onClose: () => void }) => {
+    if (!user) return null;
+
+    const getRoleColor = (role: string) => {
+        switch (role?.toLowerCase()) {
+            case 'admin':
+                return 'bg-red-100 text-red-700 border-red-200';
+            case 'super-admin':
+                return 'bg-purple-100 text-purple-700 border-purple-200';
+            case 'customer':
+                return 'bg-blue-100 text-blue-700 border-blue-200';
+            default:
+                return 'bg-gray-100 text-gray-700 border-gray-200';
+        }
+    };
+
+    const getStatusColor = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case 'active':
+                return 'bg-green-100 text-green-700 border-green-200';
+            case 'inactive':
+                return 'bg-gray-100 text-gray-700 border-gray-200';
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            default:
+                return 'bg-gray-100 text-gray-700 border-gray-200';
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+            <DialogContent className="max-w-4xl p-0 overflow-hidden">
+                {/* Header with gradient background */}
+                <div className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-4 text-white">
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <Avatar className="h-12 w-12 rounded-full border-3 border-white/20 shadow-lg">
+                                <AvatarFallback className="rounded-full bg-white/20 text-white text-lg font-bold">
+                                    {user?.name?.charAt(0)?.toUpperCase()}
+                                </AvatarFallback>
+                            </Avatar>
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
+                                <IconCheck className="h-2.5 w-2.5 text-white" />
+                            </div>
+                        </div>
+                        <div className="flex-1">
+                            <DialogTitle className="text-lg font-bold text-white mb-1">
+                                {user.name}
+                            </DialogTitle>
+                            <p className="text-blue-100 text-sm">
+                                {user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
+                            </p>
+                        </div>
+                        {/* <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={onClose}
+                            className="h-8 w-8 text-white hover:bg-white/20 rounded-full"
+                        >
+                            <IconX className="h-4 w-4" />
+                        </Button> */}
+                    </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-4">
+                    <div className="grid grid-cols-1 gap-4">
+                        {/* Contact Information */}
+                        <div className="space-y-3">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                Contact Information
+                            </h3>
+
+                            {user?.email && (
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                        <IconMail className="h-4 w-4 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-xs text-gray-500 mb-1">Email</div>
+                                        <div className="text-sm font-medium text-gray-900 truncate">{user.email}</div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {user?.mobileNo && (
+                                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                                        <IconPhone className="h-4 w-4 text-green-600" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="text-xs text-gray-500 mb-1">Phone</div>
+                                        <div className="text-sm font-medium text-gray-900">{user.mobileNo}</div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Account Information */}
+                        <div className="space-y-3">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                Account Information
+                            </h3>
+
+                            {user?.role && (
+                                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <IconShield className="h-4 w-4 text-gray-500" />
+                                        <div className="text-xs text-gray-500">Role</div>
+                                    </div>
+                                    <Badge className={`${getRoleColor(user.role)} border`}>
+                                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                                    </Badge>
+                                </div>
+                            )}
+
+                            {user?.status && (
+                                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <IconUser className="h-4 w-4 text-gray-500" />
+                                        <div className="text-xs text-gray-500">Status</div>
+                                    </div>
+                                    <Badge className={`${getStatusColor(user.status)} border`}>
+                                        {user.status.charAt(0).toUpperCase() + user.status.slice(1)}
+                                    </Badge>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Account Details */}
+                        <div className="space-y-3">
+                            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                Account Details
+                            </h3>
+
+                            {user?.createdAt && (
+                                <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <IconCalendar className="h-4 w-4 text-gray-500" />
+                                        <div className="text-xs text-gray-500">Member Since</div>
+                                    </div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                        {new Date(user.createdAt).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric'
+                                        })}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                        {new Date(user.createdAt).toLocaleTimeString('en-US', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                    <div className="flex justify-end gap-3">
+                        <Button variant="outline" onClick={onClose} className="px-4 py-2">
+                            Close
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                onClose();
+                                // Navigate to edit page
+                                window.location.href = `/users/${user.id}/edit`;
+                            }}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                        >
+                            <IconPencil className="h-4 w-4 mr-2" />
+                            Edit User
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+};
 
 const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUsers: (params: TableQueryParams) => void, isLoading: boolean, users: any[], totalCount: number }) => {
     const navigate = useNavigate()
     const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation()
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [userToDelete, setUserToDelete] = useState<any>(null);
+    const [showUserDetails, setShowUserDetails] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<any>(null);
 
     const tableToolbar: TableToolbar = {
         enableSearch: true,
@@ -56,6 +245,15 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
         setUserToDelete(null);
     };
 
+    const handleViewUser = (user: any) => {
+        setSelectedUser(user);
+        setShowUserDetails(true);
+    };
+
+    const handleCloseUserDetails = () => {
+        setShowUserDetails(false);
+        setSelectedUser(null);
+    };
 
     return (
         <>
@@ -160,7 +358,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                         accessorKey: 'actions',
                         cell: ({ row }) => (
                             <div className="flex gap-2">
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}`)}>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewUser(row?.original)}>
                                     <IconEye className="h-4 w-4 text-gray-500" />
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigate(`/users/${row?.original?.id}/edit`)}>
@@ -186,6 +384,13 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
                 totalCount={totalCount}
                 loading={isLoading}
                 tableId="dashboard-integrations"
+            />
+
+            {/* User Details Dialog */}
+            <UserDetailsDialog
+                user={selectedUser}
+                isOpen={showUserDetails}
+                onClose={handleCloseUserDetails}
             />
 
             {/* Delete Confirmation Dialog */}
