@@ -1,5 +1,5 @@
-import { DataTable } from "@/components/custom/table/data-table";
 import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
+import { ServerSidePaginationTable } from "@/components/custom/table/data-table/server-side-pagination-table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -210,10 +210,11 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
         searchPlaceholder: 'Search by Name...',
         filterOptions: [
             {
-                field: 'roles',
-                title: 'Roles',
+                field: 'role',
+                title: 'Role',
                 options: [
                     { label: 'Admin', value: 'admin' },
+                    { label: 'User', value: 'user' },
                     { label: 'Customer', value: 'customer' },
                 ],
             },
@@ -257,7 +258,7 @@ const UserTable = ({ onFetchUsers, isLoading, users, totalCount }: { onFetchUser
 
     return (
         <>
-            <DataTable
+            <ServerSidePaginationTable
                 data={users}
                 columns={[
                     {

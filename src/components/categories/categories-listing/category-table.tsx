@@ -1,5 +1,5 @@
-import { DataTable } from "@/components/custom/table/data-table";
 import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
+import { ServerSidePaginationTable } from "@/components/custom/table/data-table/server-side-pagination-table";
 import { Button } from "@/components/ui/button";
 import { useDeleteCategoryMutation } from "@/lib/api/categories-api";
 import type { TableQueryParams, TableToolbar } from "@/types/table.types";
@@ -52,7 +52,7 @@ const CategoryTable = ({ onFetchCategories, isLoading, categories, totalCount, o
 
     return (
         <>
-            <DataTable
+            <ServerSidePaginationTable
                 data={categories}
                 columns={[
                     {

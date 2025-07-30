@@ -14,7 +14,6 @@ const OrdersListingContainer = () => {
                 limit: params?.limit,
             }
 
-
             if (params?.search_text) {
                 Object.assign($params, {
                     search: params?.search_text
@@ -31,7 +30,6 @@ const OrdersListingContainer = () => {
             if (params?.filters && params.filters.length > 0) {
                 params.filters.forEach((filter: any) => {
                     if (filter.id && filter.value && Array.isArray(filter.value)) {
-                        console.log('filter', filter)
                         Object.assign($params, {
                             [filter.id]: filter.value.join(',')
                         })

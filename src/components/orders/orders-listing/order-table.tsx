@@ -1,5 +1,5 @@
-import { DataTable } from "@/components/custom/table/data-table";
 import { DataTableColumnHeader } from "@/components/custom/table/data-table/data-table-column-header";
+import { ServerSidePaginationTable } from "@/components/custom/table/data-table/server-side-pagination-table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ const OrderTable = ({ onFetchOrders, isLoading, orders, totalCount }: { onFetchO
     }
 
     return (
-        <DataTable
+        <ServerSidePaginationTable
             data={orders}
             columns={[
                 {
