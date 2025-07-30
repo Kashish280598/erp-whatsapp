@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react"
 import UserTable from "./user-table"
 
 const UsersListingContainer = () => {
-    const [getCategories, { data, isUninitialized, isFetching }] = useLazyGetUsersQuery()
+    const [getUsers, { data, isUninitialized, isFetching }] = useLazyGetUsersQuery()
     const users = useMemo(() => Array.isArray(data?.data?.users) ? data?.data?.users : [], [data?.data?.users])
 
     const onFetchUsers = useCallback(
@@ -25,7 +25,21 @@ const UsersListingContainer = () => {
                     sortOrder: params?.sort_order
                 })
             }
-            getCategories($params)
+
+            console.log(params)
+
+            // Handle filters
+            if (params?.filters && params.filters.length > 0) {
+                params.filters.forEach((filter: any) => {
+                    if (filter.id && filter.value && Array.isArray(filter.value)) {
+                        Object.assign($params, {
+                            [filter.id]: filter.value.join(',')
+                        })
+                    }
+                })
+            }
+
+            getUsers($params)
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [],
